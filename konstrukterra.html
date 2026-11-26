@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Двойной аудит: Карты + ИИ · Конструктерра (Ростов-на-Дону)</title>
+  <meta property="og:title" content="Аудит Карты + ИИ: Конструктерра (Ростов-на-Дону, Левенцовка)">
+  <meta property="og:description" content="Яндекс Карты (62/100) + Видимость в ИИ (56/100) + техрентген centerdetey.ru, готовый Schema.org для Тильды и QR для отзывов.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .dual-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+    .score-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+    .score-card.maps { border-top: 4px solid #FFCC00; }
+    .score-card.ai { border-top: 4px solid #4F46E5; }
+    .mini-hero { display: flex; align-items: center; gap: 18px; margin: 12px 0; }
+    .big-ring { width: 88px; height: 88px; position: relative; flex-shrink: 0; }
+    .big-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .big-ring .num { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 24px; font-weight: 800; }
+    .sec-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .qr-inline { display: grid; grid-template-columns: 1fr 220px; gap: 18px; align-items: center; }
+    .qr-box { background: #FFFDF2; border: 2px solid #111827; border-radius: 14px; padding: 14px; text-align: center; }
+    .qr-box svg { display: block; margin: 8px auto; width: 170px; height: 170px; }
+    @media (max-width: 760px) { .dual-scores, .qr-inline { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="./">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="#FFFFFF" stroke-width="1.8" stroke-dasharray="3 3"/>
+            <circle cx="12" cy="12" r="5" stroke="#FFFFFF" stroke-width="1.8"/>
+            <circle cx="12" cy="12" r="2.2" fill="#FFFFFF"/>
+            <path d="M12 12L18.5 5.5" stroke="#A5F3FC" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span>
+          <span class="brand-name">КартаЧек + НейроЧек</span>
+          <span class="brand-sub">Полный аудит точки · 26.11.2026</span>
+        </span>
+      </a>
+      <div class="topbar-right no-print">
+        <button type="button" class="btn btn-outline btn-sm" onclick="window.print()">PDF</button>
+        <a class="btn btn-outline btn-sm" href="https://sooqka77.github.io/kartachek/#share=eyJuYW1lIjoi0JrQvtC90YHRgtGA0YPQutGC0LXRgNGA0LAiLCJuaWNoZSI6ImtpZHMiLCJjaXR5Ijoi0KDQvtGB0YLQvtCyLdC90LAt0JTQvtC90YMiLCJkaXN0cmljdCI6ItCb0LXQstC10L3RhtC-0LLQutCwLCDRg9C7LiDQotC60LDRh9GR0LLQsCwgOdGBMiIsInlhbmRleFVybCI6Imh0dHBzOi8veWFuZGV4LnJ1L21hcHMvb3JnL2tvbnN0cnVrdGVycmEvMTAzNzA1MzAwMDI5LyIsImdpc1VybCI6IiIsInNpdGVVcmwiOiJodHRwczovL2NlbnRlcmRldGV5LnJ1LyIsInRnQ29udGFjdCI6Imh0dHBzOi8vd2EubWUvNzk2MDQ3MDEwMjIiLCJyYXRpbmciOjUsInJldmlld3NDb3VudCI6NTYsInJlY2VudFJldmlld3MzMGQiOjAsInJlcGx5UmF0ZSI6MTAwLCJwaG90b3NDb3VudCI6ODAsInZlcmlmaWVkIjp0cnVlLCJydWJyaWNNYXRjaGVzTGVhZGVycyI6ZmFsc2UsInNlcnZpY2VzVXBkYXRlZCI6dHJ1ZSwiaGFzT25saW5lQm9va2luZyI6ZmFsc2UsImhhc05ld3NTdG9yaWVzIjp0cnVlLCJoYXNDb21wZXRpdG9yQWRzIjp0cnVlLCJoYXNEdXBsaWNhdGVzIjpmYWxzZSwiaGFzT3duZXJBY2Nlc3MiOnRydWUsImhhczJnaXNTeW5jZWQiOnRydWUsImhhc090aGVyRGlycyI6ZmFsc2UsImxlYWRlclJhdGluZyI6NSwibGVhZGVyUmV2aWV3cyI6MTIwLCJhdmdDaGVjayI6NzYwMCwibHR2TW9udGhzIjo4LCJtb250aGx5RGVtYW5kIjo5MDB9" target="_blank" rel="noopener">В КартаЧек ↗</a>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-open-neiro">В НейроЧек →</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-wrap">
+    <div class="wrap hero">
+      <span class="eyebrow">Ростов-на-Дону · Левенцовка, ул. Ткачёва, 9, стр. 2 · centerdetey.ru</span>
+      <h1>Конструктерра: <span class="hl">Карты + ИИ-видимость</span></h1>
+      <p class="hero-lead">Сняли живые данные карточки Яндекс Карт (<code>ID 103705300029</code>), проверили 2ГИС, прогнали 4 реальных родительских запроса в ИИ по Ростову и Левенцовке и сделали технический рентген лендинга <code>centerdetey.ru</code>.</p>
+      <div class="sec-nav no-print">
+        <a class="demo-btn primary-start" href="#part-maps">1. Аудит Яндекс Карт и 2ГИС (62/100)</a>
+        <a class="demo-btn" href="#part-ai">2. Аудит видимости в ИИ (56/100)</a>
+        <a class="demo-btn" href="#part-ready">3. Готовый код для Тильды + QR отзывов</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <section class="dual-scores">
+      <div class="score-card maps">
+        <span class="eyebrow">Сервис 1 · КартаЧек (Яндекс Карты + 2ГИС)</span>
+        <div class="mini-hero">
+          <div class="big-ring">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#E5E7EB" stroke-width="10"/><circle cx="50" cy="50" r="42" fill="none" stroke="#D97706" stroke-width="10" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="100.3"/></svg>
+            <span class="num">62</span>
+          </div>
+          <div>
+            <h2 style="font-size:17px;">Сильная база, но карточка «замолчала»</h2>
+            <p class="hint" style="margin-top:4px;">5.0 · 56 отзывов · 80 фото · 100% ответов. Но <b>0 новых отзывов с 25 сентября</b>, нет онлайн-записи и крутится реклама конкурентов.</p>
+          </div>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:0;">
+          <div class="kpi-box"><span class="k">Рейтинг / Отзывы</span><span class="v" style="font-size:16px;">5.0 · 56</span></div>
+          <div class="kpi-box" style="background:#FEE2E2;color:#DC2626;"><span class="k" style="color:#991B1B;">За 60 дней</span><span class="v" style="font-size:16px;">0 новых</span></div>
+          <div class="kpi-box"><span class="k">Ответы</span><span class="v" style="font-size:16px;">100%</span></div>
+        </div>
+      </div>
+
+      <div class="score-card ai">
+        <span class="eyebrow">Сервис 2 · НейроЧек (Алиса / ИИ-поиск + сайт)</span>
+        <div class="mini-hero">
+          <div class="big-ring">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#E5E7EB" stroke-width="10"/><circle cx="50" cy="50" r="42" fill="none" stroke="#4F46E5" stroke-width="10" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="116.1"/></svg>
+            <span class="num">56</span>
+          </div>
+          <div>
+            <h2 style="font-size:17px;">#1 в узком запросе, 0% в массовом по району</h2>
+            <p class="hint" style="margin-top:4px;">По «архитектура и 3D» вы #1, по Ростову #5, а по массовому «робототехника/кружки Левенцовка» — <b>вас нет</b>, выше сосед на ул. Ткачёва, 16/1.</p>
+          </div>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:0;">
+          <div class="kpi-box accent"><span class="k">Узкий запрос</span><span class="v" style="font-size:16px;">#1</span></div>
+          <div class="kpi-box" style="background:#FEE2E2;color:#DC2626;"><span class="k" style="color:#991B1B;">Левенцовка</span><span class="v" style="font-size:16px;">Нет в топ-5</span></div>
+          <div class="kpi-box"><span class="k">Schema.org</span><span class="v" style="font-size:16px;">0</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="part-maps">
+      <span class="eyebrow">Часть 1 · КартаЧек · Яндекс Карты (ID 103705300029) + 2ГИС</span>
+      <h2 style="font-size:20px;margin-bottom:10px;">Что уже сильно и 6 конкретных дыр на картах</h2>
+
+      <div class="findings-list">
+        <div class="finding green">
+          <span class="f-tag green">Сильная база</span>
+          <div>
+            <h4>Отличный фундамент: 5.0 (64 оценки, 56 отзывов), 80 фото, видео и 100% ответов!</h4>
+            <p class="f-why">Есть «синяя галочка», заполнены курсы с ценами (Архитектура / Инженерия / 3D — 7 600 ₽, мастер-классы от 1 000 ₽), новости, даже крутая акция с промокодом «Я.Карты −10%». Это уровень выше 80% кружков в РФ — теперь нужно убрать 6 утечек.</p>
+          </div>
+        </div>
+
+        <div class="finding red">
+          <span class="f-tag red">Критично №1</span>
+          <div>
+            <h4>Пауза по отзывам 2 месяца: последние отзывы — от 25 сентября 2026</h4>
+            <p class="f-why">За октябрь и ноябрь — <b>0 новых текстовых отзывов</b>. Алгоритмы Яндекса дают максимальный вес свежим отзывам за последние 30 дней: без регулярного пульса карточка 5.0 постепенно уступает более активным соседям по Левенцовке.</p>
+            <div class="f-fix"><b>Что сделать:</b> запустить ритм 6–8 живых отзывов в месяц (2 в неделю). Готовый QR-помощник прямо на вашу карточку <code>103705300029</code> — в блоке ниже, можно печатать сегодня.</div>
+          </div>
+        </div>
+
+        <div class="finding red">
+          <span class="f-tag red">Критично №2</span>
+          <div>
+            <h4>Нет кнопки «Онлайн-запись» прямо в карточке</h4>
+            <p class="f-why">В 2026 году ~17% заявок из карт приходят через запись без звонка (мамы смотрят карточки вечером и не любят звонить). Сейчас в карточке только телефон и переход на сайт.</p>
+            <div class="f-fix"><b>Что сделать:</b> подключить кнопку действия «Записаться на пробное» в Яндекс Бизнесе (ссылка на WhatsApp <code>wa.me/79604701022</code> с готовым текстом или форму записи на <code>centerdetey.ru</code>).</div>
+          </div>
+        </div>
+
+        <div class="finding red">
+          <span class="f-tag red">Критично №3</span>
+          <div>
+            <h4>На вашей карточке крутится блок конкурентов («Ещё может подойти»)</h4>
+            <p class="f-why">Человек уже нашёл именно Конструктерру, пролистал вниз — и Яндекс показал ему рекламу соседних кружков.</p>
+            <div class="f-fix"><b>Что сделать:</b> после возобновления потока свежих отзывов и подключения онлайн-записи протестировать приоритетное размещение (отключает блок конкурентов на карточке).</div>
+          </div>
+        </div>
+
+        <div class="finding yellow">
+          <span class="f-tag yellow">Улучшить №4</span>
+          <div>
+            <h4>Рубрика и витрина услуг: «1 ₽» на акциях и нет позиции «Пробное занятие»</h4>
+            <p class="f-why">Основная рубрика сейчас «Дополнительное образование», а «Центр развития ребёнка» — вторая (у лидеров выдачи в родительских запросах обычно наоборот, плюс стоит добавить доп. рубрику «Клуб для детей и подростков»). У двух акций в прайсе стоит цена «1 ₽», а главной входной позиции «Пробное занятие» отдельной карточкой нет.</p>
+            <div class="f-fix"><b>Что сделать:</b> вынести первой позицией «Пробное инженерное занятие (60 мин)», убрать «1 ₽» из акций и протестировать смену основной рубрики (замер позиций через 3 недели).</div>
+          </div>
+        </div>
+
+        <div class="finding yellow">
+          <span class="f-tag yellow">Улучшить №5</span>
+          <div>
+            <h4>Ссылка на сайт <code>centerdetey.ru</code> и все товары стоят без UTM-меток</h4>
+            <p class="f-why">Вы уже делаете правильный учёт через промокод «Я.Карты», но в Яндекс Метрике сейчас не видно, сколько переходов и заявок на сайте приходит с карточки и из каких именно услуг.</p>
+            <div class="f-fix"><b>Что сделать:</b> заменить ссылки в карточке на <code>https://centerdetey.ru/?utm_source=yandex_maps&amp;utm_medium=geo&amp;utm_campaign=card</code> (и отдельную метку <code>utm_source=2gis</code> в 2ГИС).</div>
+          </div>
+        </div>
+
+        <div class="finding yellow">
+          <span class="f-tag yellow">Улучшить №6</span>
+          <div>
+            <h4>На сайте <code>centerdetey.ru</code> нет ссылки на 2ГИС (только на Яндекс)</h4>
+            <p class="f-why">Ведение и перелинковка 3 площадок (Яндекс + 2ГИС + Zoon) по статистике даёт до ×1,5 больше локального трафика и помогает получить статус «Хорошее место».</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="part-ai">
+      <span class="eyebrow">Часть 2 · НейроЧек · Видимость в ИИ и рентген centerdetey.ru</span>
+      <h2 style="font-size:20px;margin-bottom:10px;">Как Конструктерру видят нейросети прямо сейчас</h2>
+
+      <div class="split-2" style="margin-bottom:16px;">
+        <div>
+          <h3 style="font-size:15.5px;margin-bottom:8px;">Результаты живых запросов (26.11.2026)</h3>
+          <div class="rank-list">
+            <div class="rank-row"><span>«Кружок архитектуры / 3D / инженерии, Левенцовка»</span><span class="gap-pill ok">✓ #1 место</span></div>
+            <div class="rank-row"><span>«Лучшие инженерные кружки, Ростов-на-Дону 2026»</span><span class="gap-pill" style="background:#FEF3C7;color:#B45309;">#5 место</span></div>
+            <div class="rank-row"><span>«Робототехника и кружки Левенцовка / Западный»</span><span class="gap-pill miss">✕ Нет в топ-5</span></div>
+            <div class="rank-row"><span>Прямой бренд-чек «Конструктерра Ростов отзывы»</span><span class="gap-pill ok">✓ Знает, позитив</span></div>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:15.5px;margin-bottom:8px;">Кто обходит вас в ИИ прямо в Левенцовке</h3>
+          <div class="rank-list">
+            <div class="rank-row"><span><b>Генри-Робототехника</b> (ул. Жданова, 2/7)</span><span class="mono">2gis · yandex · zoon</span></div>
+            <div class="rank-row"><span><b>Кибертрон</b> (ул. Ткачёва, 16/1 — ваш сосед!)</span><span class="mono">2gis · zoon</span></div>
+            <div class="rank-row"><span><b>Роботрек</b> (ул. Жданова, 13)</span><span class="mono">zoon.ru</span></div>
+            <div class="rank-row"><span><b>Технодром</b> (ЗЖМ / пр. Коммунистический)</span><span class="mono">kudarostov · 2gis</span></div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-size:16px;margin-bottom:10px;">Технический рентген лендинга <code>centerdetey.ru</code> (Tilda)</h3>
+      <div class="findings-list">
+        <div class="finding red">
+          <span class="f-tag red">Дыра ИИ №1</span>
+          <div>
+            <h4>Ноль микроразметки <code>Schema.org</code> на <code>centerdetey.ru</code></h4>
+            <p class="f-why">В HTML лендинга нет ни <code>EducationalOrganization</code> / <code>LocalBusiness</code>, ни свойства <code>sameAs</code>, связывающего сайт с Яндекс Картами <code>103705300029</code>, <code>vk.ru/constructerra_rnd</code> и федеральной сетью <code>constructerra.com</code>.</p>
+            <div class="f-fix"><b>Что сделать:</b> вставить готовый JSON-LD код из блока ниже в Тильду (Настройки сайта → Ещё → HTML-код внутрь <code>&lt;head&gt;</code>) — займёт 2 минуты.</div>
+          </div>
+        </div>
+
+        <div class="finding red">
+          <span class="f-tag red">Дыра ИИ №2</span>
+          <div>
+            <h4>Раздвоение бренда и локации: в <code>&lt;title&gt;</code> нет «Конструктерра» и нет «Левенцовка»</h4>
+            <p class="f-why">Текущий <code>&lt;title&gt;</code>: <i>«Детский инженерный и развивающий центр в Ростове-на-Дону»</i> — без названия бренда и без микрорайона! А федеральный сайт <code>constructerra.com</code> в <code>description</code> вообще пишет «в Казани». Из-за этого нейросети слабее склеивают лендинг <code>centerdetey.ru</code> с запросами по Левенцовке и Западному.</p>
+            <div class="f-fix"><b>Что сделать:</b> обновить <code>&lt;title&gt;</code> на: <i>«Конструктерра — детский инженерный центр в Левенцовке (Ростов-на-Дону): инженерия, архитектура, 3D, робототехника 5–16 лет»</i>.</div>
+          </div>
+        </div>
+
+        <div class="finding red">
+          <span class="f-tag red">Дыра ИИ №3</span>
+          <div>
+            <h4>На сайте нет блока FAQ (<code>FAQPage</code>) и нет <code>/llms.txt</code> (404)</h4>
+            <p class="f-why">ИИ-модели обожают прямые ответы «Вопрос родителя → ответ с возрастом, ценой 7 600 ₽, адресом ул. Ткачёва, 9с2 и пробным уроком». Сейчас такого структурированного блока на лендинге нет.</p>
+          </div>
+        </div>
+
+        <div class="finding yellow">
+          <span class="f-tag yellow">Дыра ИИ №4</span>
+          <div>
+            <h4>Тяжёлая страница Тильды (1,09 МБ HTML) + пробелы на <code>zoon.ru</code> и <code>kudarostov.ru</code></h4>
+            <p class="f-why">Страница отдаётся долго (быстрые боты ловят таймаут + DDoS-Guard). А по массовым запросам Ростова и Левенцовки ИИ опирается на <code>zoon.ru</code>, <code>kudarostov.ru</code>, <code>gdeprof.ru</code> и <code>2gis.ru</code> — на <code>zoon.ru</code> и <code>kudarostov.ru</code> конкуренты («Кибертрон», «Технодром», «Роботрек») прописаны подробнее.</p>
+            <div class="f-fix"><b>Что сделать:</b> обновить профили на <code>zoon.ru</code> и <code>kudarostov.ru</code> (указать «Левенцовка, ул. Ткачёва, 9с2, инженерия, 3D, робототехника и конструирование») + добавить в отзывы родителей упоминания «Левенцовка / Западный» и «лучше обычной робототехники — дети работают на реальных станках и 3D-принтерах».</div>
+          </div>
+        </div>
+
+        <div class="finding green">
+          <span class="f-tag green">Отлично</span>
+          <div>
+            <h4>Статьи на <code>vc.ru</code> уже вывели вас на #1 по архитектуре и 3D!</h4>
+            <p class="f-why">ИИ активно цитирует ваши публикации на <code>vc.ru</code> — именно они дают #1 по узкому запросу. Продолжайте этот приём, но теперь с темой «Куда отдать ребёнка на инженерию и робототехнику в Левенцовке / Ростове-на-Дону».</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card pro-card" id="part-ready">
+      <div class="pro-banner">
+        <div class="pro-banner-left">
+          <span class="pill pill-pro">PRO · ПОДАРОК НА ТЕСТ</span>
+          <h2>Готовые инструменты — можно внедрить за 15 минут</h2>
+        </div>
+      </div>
+
+      <h3 style="font-size:17px;margin-bottom:8px;">1. Готовый QR-помощник отзывов для ресепшена (сразу на вашу карточку Яндекс Карт!)</h3>
+      <div class="qr-inline" style="margin-bottom:22px;">
+        <div>
+          <p class="hint" style="margin-bottom:10px;">Чтобы перезапустить поток свежих отзывов (после паузы с 25 сентября): родитель сканирует QR → нажимает 2–3 тега → получает живой черновик → в 1 клик переходит прямо на форму отзыва <code>yandex.ru/maps/org/103705300029</code>. Если есть замечание — мягкая кнопка написать в ваш WhatsApp <code>+7 960 470-10-22</code>.</p>
+          <div class="btn-row" style="margin-top:8px;">
+            <a class="btn btn-primary btn-sm" href="https://sooqka77.github.io/kartachek/?review=eyJuIjoi0JrQvtC90YHRgtGA0YPQutGC0LXRgNGA0LAiLCJrIjoia2lkcyIsInkiOiIxMDM3MDUzMDAwMjkiLCJnIjoiIiwiYyI6Imh0dHBzOi8vd2EubWUvNzk2MDQ3MDEwMjIifQ" target="_blank" rel="noopener">Открыть как родитель (тест) ↗</a>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-copy-rh">Копировать ссылку для чата</button>
+          </div>
+        </div>
+        <div class="qr-box">
+          <span class="mono" style="font-size:10.5px;font-weight:700;">КОНСТРУКТЕРРА · РОСТОВ</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 65" width="184" height="184" shape-rendering="crispEdges" role="img" aria-label="QR-код"><rect width="100%" height="100%" fill="#FFFFFF"/><path d="M4,4h1v1h-1zM5,4h1v1h-1zM6,4h1v1h-1zM7,4h1v1h-1zM8,4h1v1h-1zM9,4h1v1h-1zM10,4h1v1h-1zM14,4h1v1h-1zM15,4h1v1h-1zM17,4h1v1h-1zM20,4h1v1h-1zM21,4h1v1h-1zM22,4h1v1h-1zM23,4h1v1h-1zM25,4h1v1h-1zM26,4h1v1h-1zM27,4h1v1h-1zM28,4h1v1h-1zM29,4h1v1h-1zM31,4h1v1h-1zM33,4h1v1h-1zM34,4h1v1h-1zM39,4h1v1h-1zM40,4h1v1h-1zM45,4h1v1h-1zM46,4h1v1h-1zM47,4h1v1h-1zM49,4h1v1h-1zM50,4h1v1h-1zM51,4h1v1h-1zM54,4h1v1h-1zM55,4h1v1h-1zM56,4h1v1h-1zM57,4h1v1h-1zM58,4h1v1h-1zM59,4h1v1h-1zM60,4h1v1h-1zM4,5h1v1h-1zM10,5h1v1h-1zM17,5h1v1h-1zM18,5h1v1h-1zM19,5h1v1h-1zM21,5h1v1h-1zM22,5h1v1h-1zM23,5h1v1h-1zM25,5h1v1h-1zM27,5h1v1h-1zM28,5h1v1h-1zM31,5h1v1h-1zM35,5h1v1h-1zM37,5h1v1h-1zM41,5h1v1h-1zM43,5h1v1h-1zM45,5h1v1h-1zM51,5h1v1h-1zM54,5h1v1h-1zM60,5h1v1h-1zM4,6h1v1h-1zM6,6h1v1h-1zM7,6h1v1h-1zM8,6h1v1h-1zM10,6h1v1h-1zM12,6h1v1h-1zM13,6h1v1h-1zM17,6h1v1h-1zM18,6h1v1h-1zM19,6h1v1h-1zM20,6h1v1h-1zM21,6h1v1h-1zM22,6h1v1h-1zM23,6h1v1h-1zM24,6h1v1h-1zM25,6h1v1h-1zM26,6h1v1h-1zM27,6h1v1h-1zM30,6h1v1h-1zM31,6h1v1h-1zM32,6h1v1h-1zM33,6h1v1h-1zM34,6h1v1h-1zM38,6h1v1h-1zM40,6h1v1h-1zM41,6h1v1h-1zM44,6h1v1h-1zM45,6h1v1h-1zM47,6h1v1h-1zM48,6h1v1h-1zM49,6h1v1h-1zM50,6h1v1h-1zM51,6h1v1h-1zM54,6h1v1h-1zM56,6h1v1h-1zM57,6h1v1h-1zM58,6h1v1h-1zM60,6h1v1h-1zM4,7h1v1h-1zM6,7h1v1h-1zM7,7h1v1h-1zM8,7h1v1h-1zM10,7h1v1h-1zM12,7h1v1h-1zM13,7h1v1h-1zM18,7h1v1h-1zM19,7h1v1h-1zM21,7h1v1h-1zM28,7h1v1h-1zM30,7h1v1h-1zM33,7h1v1h-1zM34,7h1v1h-1zM35,7h1v1h-1zM36,7h1v1h-1zM38,7h1v1h-1zM39,7h1v1h-1zM40,7h1v1h-1zM43,7h1v1h-1zM46,7h1v1h-1zM51,7h1v1h-1zM54,7h1v1h-1zM56,7h1v1h-1zM57,7h1v1h-1zM58,7h1v1h-1zM60,7h1v1h-1zM4,8h1v1h-1zM6,8h1v1h-1zM7,8h1v1h-1zM8,8h1v1h-1zM10,8h1v1h-1zM12,8h1v1h-1zM14,8h1v1h-1zM15,8h1v1h-1zM19,8h1v1h-1zM20,8h1v1h-1zM21,8h1v1h-1zM23,8h1v1h-1zM24,8h1v1h-1zM25,8h1v1h-1zM27,8h1v1h-1zM28,8h1v1h-1zM30,8h1v1h-1zM31,8h1v1h-1zM32,8h1v1h-1zM33,8h1v1h-1zM34,8h1v1h-1zM36,8h1v1h-1zM39,8h1v1h-1zM41,8h1v1h-1zM43,8h1v1h-1zM45,8h1v1h-1zM46,8h1v1h-1zM47,8h1v1h-1zM51,8h1v1h-1zM54,8h1v1h-1zM56,8h1v1h-1zM57,8h1v1h-1zM58,8h1v1h-1zM60,8h1v1h-1zM4,9h1v1h-1zM10,9h1v1h-1zM12,9h1v1h-1zM13,9h1v1h-1zM17,9h1v1h-1zM19,9h1v1h-1zM20,9h1v1h-1zM21,9h1v1h-1zM24,9h1v1h-1zM26,9h1v1h-1zM29,9h1v1h-1zM30,9h1v1h-1zM34,9h1v1h-1zM35,9h1v1h-1zM36,9h1v1h-1zM37,9h1v1h-1zM38,9h1v1h-1zM39,9h1v1h-1zM40,9h1v1h-1zM42,9h1v1h-1zM43,9h1v1h-1zM44,9h1v1h-1zM49,9h1v1h-1zM50,9h1v1h-1zM54,9h1v1h-1zM60,9h1v1h-1zM4,10h1v1h-1zM5,10h1v1h-1zM6,10h1v1h-1zM7,10h1v1h-1zM8,10h1v1h-1zM9,10h1v1h-1zM10,10h1v1h-1zM12,10h1v1h-1zM14,10h1v1h-1zM16,10h1v1h-1zM18,10h1v1h-1zM20,10h1v1h-1zM22,10h1v1h-1zM24,10h1v1h-1zM26,10h1v1h-1zM28,10h1v1h-1zM30,10h1v1h-1zM32,10h1v1h-1zM34,10h1v1h-1zM36,10h1v1h-1zM38,10h1v1h-1zM40,10h1v1h-1zM42,10h1v1h-1zM44,10h1v1h-1zM46,10h1v1h-1zM48,10h1v1h-1zM50,10h1v1h-1zM52,10h1v1h-1zM54,10h1v1h-1zM55,10h1v1h-1zM56,10h1v1h-1zM57,10h1v1h-1zM58,10h1v1h-1zM59,10h1v1h-1zM60,10h1v1h-1zM12,11h1v1h-1zM17,11h1v1h-1zM18,11h1v1h-1zM22,11h1v1h-1zM24,11h1v1h-1zM25,11h1v1h-1zM26,11h1v1h-1zM27,11h1v1h-1zM30,11h1v1h-1zM34,11h1v1h-1zM37,11h1v1h-1zM42,11h1v1h-1zM43,11h1v1h-1zM47,11h1v1h-1zM49,11h1v1h-1zM4,12h1v1h-1zM6,12h1v1h-1zM7,12h1v1h-1zM8,12h1v1h-1zM9,12h1v1h-1zM10,12h1v1h-1zM14,12h1v1h-1zM16,12h1v1h-1zM22,12h1v1h-1zM24,12h1v1h-1zM26,12h1v1h-1zM27,12h1v1h-1zM30,12h1v1h-1zM31,12h1v1h-1zM32,12h1v1h-1zM33,12h1v1h-1zM34,12h1v1h-1zM35,12h1v1h-1zM39,12h1v1h-1zM40,12h1v1h-1zM41,12h1v1h-1zM45,12h1v1h-1zM46,12h1v1h-1zM50,12h1v1h-1zM52,12h1v1h-1zM54,12h1v1h-1zM55,12h1v1h-1zM56,12h1v1h-1zM57,12h1v1h-1zM58,12h1v1h-1zM4,13h1v1h-1zM5,13h1v1h-1zM6,13h1v1h-1zM7,13h1v1h-1zM9,13h1v1h-1zM12,13h1v1h-1zM13,13h1v1h-1zM16,13h1v1h-1zM18,13h1v1h-1zM19,13h1v1h-1zM22,13h1v1h-1zM25,13h1v1h-1zM27,13h1v1h-1zM28,13h1v1h-1zM29,13h1v1h-1zM33,13h1v1h-1zM34,13h1v1h-1zM36,13h1v1h-1zM37,13h1v1h-1zM39,13h1v1h-1zM40,13h1v1h-1zM41,13h1v1h-1zM44,13h1v1h-1zM45,13h1v1h-1zM46,13h1v1h-1zM47,13h1v1h-1zM51,13h1v1h-1zM52,13h1v1h-1zM53,13h1v1h-1zM55,13h1v1h-1zM56,13h1v1h-1zM58,13h1v1h-1zM59,13h1v1h-1zM60,13h1v1h-1zM4,14h1v1h-1zM5,14h1v1h-1zM8,14h1v1h-1zM10,14h1v1h-1zM11,14h1v1h-1zM12,14h1v1h-1zM13,14h1v1h-1zM17,14h1v1h-1zM18,14h1v1h-1zM24,14h1v1h-1zM25,14h1v1h-1zM27,14h1v1h-1zM28,14h1v1h-1zM29,14h1v1h-1zM33,14h1v1h-1zM43,14h1v1h-1zM46,14h1v1h-1zM49,14h1v1h-1zM50,14h1v1h-1zM51,14h1v1h-1zM52,14h1v1h-1zM56,14h1v1h-1zM58,14h1v1h-1zM59,14h1v1h-1zM4,15h1v1h-1zM5,15h1v1h-1zM8,15h1v1h-1zM9,15h1v1h-1zM15,15h1v1h-1zM16,15h1v1h-1zM18,15h1v1h-1zM21,15h1v1h-1zM22,15h1v1h-1zM23,15h1v1h-1zM27,15h1v1h-1zM28,15h1v1h-1zM29,15h1v1h-1zM31,15h1v1h-1zM34,15h1v1h-1zM35,15h1v1h-1zM36,15h1v1h-1zM38,15h1v1h-1zM40,15h1v1h-1zM42,15h1v1h-1zM45,15h1v1h-1zM47,15h1v1h-1zM48,15h1v1h-1zM50,15h1v1h-1zM53,15h1v1h-1zM55,15h1v1h-1zM57,15h1v1h-1zM58,15h1v1h-1zM59,15h1v1h-1zM4,16h1v1h-1zM5,16h1v1h-1zM6,16h1v1h-1zM7,16h1v1h-1zM10,16h1v1h-1zM12,16h1v1h-1zM13,16h1v1h-1zM14,16h1v1h-1zM16,16h1v1h-1zM17,16h1v1h-1zM21,16h1v1h-1zM23,16h1v1h-1zM24,16h1v1h-1zM25,16h1v1h-1zM27,16h1v1h-1zM28,16h1v1h-1zM29,16h1v1h-1zM30,16h1v1h-1zM32,16h1v1h-1zM33,16h1v1h-1zM38,16h1v1h-1zM39,16h1v1h-1zM41,16h1v1h-1zM47,16h1v1h-1zM50,16h1v1h-1zM53,16h1v1h-1zM58,16h1v1h-1zM59,16h1v1h-1zM5,17h1v1h-1zM6,17h1v1h-1zM7,17h1v1h-1zM11,17h1v1h-1zM14,17h1v1h-1zM15,17h1v1h-1zM16,17h1v1h-1zM17,17h1v1h-1zM18,17h1v1h-1zM19,17h1v1h-1zM21,17h1v1h-1zM23,17h1v1h-1zM24,17h1v1h-1zM28,17h1v1h-1zM31,17h1v1h-1zM32,17h1v1h-1zM33,17h1v1h-1zM34,17h1v1h-1zM35,17h1v1h-1zM37,17h1v1h-1zM41,17h1v1h-1zM43,17h1v1h-1zM45,17h1v1h-1zM47,17h1v1h-1zM51,17h1v1h-1zM52,17h1v1h-1zM53,17h1v1h-1zM55,17h1v1h-1zM60,17h1v1h-1zM4,18h1v1h-1zM5,18h1v1h-1zM7,18h1v1h-1zM8,18h1v1h-1zM10,18h1v1h-1zM12,18h1v1h-1zM13,18h1v1h-1zM14,18h1v1h-1zM15,18h1v1h-1zM19,18h1v1h-1zM20,18h1v1h-1zM24,18h1v1h-1zM25,18h1v1h-1zM27,18h1v1h-1zM28,18h1v1h-1zM29,18h1v1h-1zM32,18h1v1h-1zM34,18h1v1h-1zM35,18h1v1h-1zM36,18h1v1h-1zM37,18h1v1h-1zM38,18h1v1h-1zM39,18h1v1h-1zM42,18h1v1h-1zM43,18h1v1h-1zM46,18h1v1h-1zM48,18h1v1h-1zM49,18h1v1h-1zM50,18h1v1h-1zM51,18h1v1h-1zM52,18h1v1h-1zM53,18h1v1h-1zM54,18h1v1h-1zM56,18h1v1h-1zM57,18h1v1h-1zM58,18h1v1h-1zM59,18h1v1h-1zM5,19h1v1h-1zM9,19h1v1h-1zM12,19h1v1h-1zM13,19h1v1h-1zM14,19h1v1h-1zM16,19h1v1h-1zM18,19h1v1h-1zM28,19h1v1h-1zM33,19h1v1h-1zM34,19h1v1h-1zM35,19h1v1h-1zM36,19h1v1h-1zM37,19h1v1h-1zM40,19h1v1h-1zM44,19h1v1h-1zM45,19h1v1h-1zM46,19h1v1h-1zM48,19h1v1h-1zM49,19h1v1h-1zM50,19h1v1h-1zM55,19h1v1h-1zM57,19h1v1h-1zM58,19h1v1h-1zM59,19h1v1h-1zM60,19h1v1h-1zM5,20h1v1h-1zM9,20h1v1h-1zM10,20h1v1h-1zM12,20h1v1h-1zM14,20h1v1h-1zM16,20h1v1h-1zM19,20h1v1h-1zM20,20h1v1h-1zM21,20h1v1h-1zM22,20h1v1h-1zM24,20h1v1h-1zM26,20h1v1h-1zM27,20h1v1h-1zM29,20h1v1h-1zM33,20h1v1h-1zM34,20h1v1h-1zM35,20h1v1h-1zM39,20h1v1h-1zM40,20h1v1h-1zM45,20h1v1h-1zM47,20h1v1h-1zM49,20h1v1h-1zM50,20h1v1h-1zM53,20h1v1h-1zM54,20h1v1h-1zM58,20h1v1h-1zM59,20h1v1h-1zM5,21h1v1h-1zM8,21h1v1h-1zM9,21h1v1h-1zM13,21h1v1h-1zM14,21h1v1h-1zM20,21h1v1h-1zM22,21h1v1h-1zM23,21h1v1h-1zM24,21h1v1h-1zM25,21h1v1h-1zM28,21h1v1h-1zM30,21h1v1h-1zM32,21h1v1h-1zM33,21h1v1h-1zM34,21h1v1h-1zM35,21h1v1h-1zM37,21h1v1h-1zM41,21h1v1h-1zM46,21h1v1h-1zM48,21h1v1h-1zM51,21h1v1h-1zM52,21h1v1h-1zM58,21h1v1h-1zM59,21h1v1h-1zM4,22h1v1h-1zM5,22h1v1h-1zM7,22h1v1h-1zM10,22h1v1h-1zM11,22h1v1h-1zM15,22h1v1h-1zM16,22h1v1h-1zM18,22h1v1h-1zM19,22h1v1h-1zM20,22h1v1h-1zM21,22h1v1h-1zM22,22h1v1h-1zM25,22h1v1h-1zM26,22h1v1h-1zM27,22h1v1h-1zM29,22h1v1h-1zM30,22h1v1h-1zM33,22h1v1h-1zM38,22h1v1h-1zM42,22h1v1h-1zM43,22h1v1h-1zM44,22h1v1h-1zM45,22h1v1h-1zM49,22h1v1h-1zM50,22h1v1h-1zM53,22h1v1h-1zM54,22h1v1h-1zM55,22h1v1h-1zM56,22h1v1h-1zM57,22h1v1h-1zM58,22h1v1h-1zM59,22h1v1h-1zM7,23h1v1h-1zM11,23h1v1h-1zM14,23h1v1h-1zM15,23h1v1h-1zM18,23h1v1h-1zM21,23h1v1h-1zM22,23h1v1h-1zM26,23h1v1h-1zM32,23h1v1h-1zM34,23h1v1h-1zM35,23h1v1h-1zM36,23h1v1h-1zM37,23h1v1h-1zM38,23h1v1h-1zM41,23h1v1h-1zM42,23h1v1h-1zM43,23h1v1h-1zM45,23h1v1h-1zM46,23h1v1h-1zM47,23h1v1h-1zM49,23h1v1h-1zM50,23h1v1h-1zM54,23h1v1h-1zM56,23h1v1h-1zM58,23h1v1h-1zM4,24h1v1h-1zM6,24h1v1h-1zM7,24h1v1h-1zM8,24h1v1h-1zM9,24h1v1h-1zM10,24h1v1h-1zM13,24h1v1h-1zM17,24h1v1h-1zM18,24h1v1h-1zM19,24h1v1h-1zM20,24h1v1h-1zM22,24h1v1h-1zM24,24h1v1h-1zM28,24h1v1h-1zM30,24h1v1h-1zM33,24h1v1h-1zM34,24h1v1h-1zM35,24h1v1h-1zM39,24h1v1h-1zM40,24h1v1h-1zM42,24h1v1h-1zM44,24h1v1h-1zM47,24h1v1h-1zM51,24h1v1h-1zM54,24h1v1h-1zM57,24h1v1h-1zM59,24h1v1h-1zM5,25h1v1h-1zM6,25h1v1h-1zM7,25h1v1h-1zM8,25h1v1h-1zM9,25h1v1h-1zM12,25h1v1h-1zM13,25h1v1h-1zM15,25h1v1h-1zM16,25h1v1h-1zM18,25h1v1h-1zM20,25h1v1h-1zM22,25h1v1h-1zM27,25h1v1h-1zM28,25h1v1h-1zM29,25h1v1h-1zM30,25h1v1h-1zM34,25h1v1h-1zM36,25h1v1h-1zM39,25h1v1h-1zM41,25h1v1h-1zM42,25h1v1h-1zM43,25h1v1h-1zM44,25h1v1h-1zM45,25h1v1h-1zM46,25h1v1h-1zM48,25h1v1h-1zM51,25h1v1h-1zM52,25h1v1h-1zM53,25h1v1h-1zM55,25h1v1h-1zM60,25h1v1h-1zM4,26h1v1h-1zM7,26h1v1h-1zM8,26h1v1h-1zM10,26h1v1h-1zM13,26h1v1h-1zM14,26h1v1h-1zM15,26h1v1h-1zM19,26h1v1h-1zM21,26h1v1h-1zM23,26h1v1h-1zM24,26h1v1h-1zM26,26h1v1h-1zM27,26h1v1h-1zM33,26h1v1h-1zM34,26h1v1h-1zM38,26h1v1h-1zM39,26h1v1h-1zM44,26h1v1h-1zM45,26h1v1h-1zM49,26h1v1h-1zM50,26h1v1h-1zM51,26h1v1h-1zM53,26h1v1h-1zM54,26h1v1h-1zM55,26h1v1h-1zM58,26h1v1h-1zM59,26h1v1h-1zM4,27h1v1h-1zM5,27h1v1h-1zM8,27h1v1h-1zM11,27h1v1h-1zM13,27h1v1h-1zM14,27h1v1h-1zM15,27h1v1h-1zM18,27h1v1h-1zM19,27h1v1h-1zM20,27h1v1h-1zM22,27h1v1h-1zM24,27h1v1h-1zM25,27h1v1h-1zM27,27h1v1h-1zM28,27h1v1h-1zM29,27h1v1h-1zM32,27h1v1h-1zM34,27h1v1h-1zM35,27h1v1h-1zM37,27h1v1h-1zM38,27h1v1h-1zM40,27h1v1h-1zM42,27h1v1h-1zM43,27h1v1h-1zM44,27h1v1h-1zM48,27h1v1h-1zM49,27h1v1h-1zM50,27h1v1h-1zM51,27h1v1h-1zM55,27h1v1h-1zM57,27h1v1h-1zM58,27h1v1h-1zM59,27h1v1h-1zM60,27h1v1h-1zM4,28h1v1h-1zM6,28h1v1h-1zM7,28h1v1h-1zM10,28h1v1h-1zM12,28h1v1h-1zM13,28h1v1h-1zM15,28h1v1h-1zM16,28h1v1h-1zM18,28h1v1h-1zM22,28h1v1h-1zM23,28h1v1h-1zM24,28h1v1h-1zM25,28h1v1h-1zM26,28h1v1h-1zM28,28h1v1h-1zM29,28h1v1h-1zM31,28h1v1h-1zM33,28h1v1h-1zM34,28h1v1h-1zM39,28h1v1h-1zM40,28h1v1h-1zM45,28h1v1h-1zM47,28h1v1h-1zM52,28h1v1h-1zM53,28h1v1h-1zM54,28h1v1h-1zM57,28h1v1h-1zM60,28h1v1h-1zM11,29h1v1h-1zM16,29h1v1h-1zM17,29h1v1h-1zM19,29h1v1h-1zM22,29h1v1h-1zM25,29h1v1h-1zM26,29h1v1h-1zM27,29h1v1h-1zM28,29h1v1h-1zM29,29h1v1h-1zM30,29h1v1h-1zM32,29h1v1h-1zM33,29h1v1h-1zM34,29h1v1h-1zM35,29h1v1h-1zM37,29h1v1h-1zM40,29h1v1h-1zM41,29h1v1h-1zM45,29h1v1h-1zM46,29h1v1h-1zM47,29h1v1h-1zM48,29h1v1h-1zM51,29h1v1h-1zM52,29h1v1h-1zM53,29h1v1h-1zM55,29h1v1h-1zM57,29h1v1h-1zM58,29h1v1h-1zM59,29h1v1h-1zM60,29h1v1h-1zM4,30h1v1h-1zM6,30h1v1h-1zM7,30h1v1h-1zM8,30h1v1h-1zM9,30h1v1h-1zM10,30h1v1h-1zM11,30h1v1h-1zM12,30h1v1h-1zM14,30h1v1h-1zM16,30h1v1h-1zM17,30h1v1h-1zM20,30h1v1h-1zM22,30h1v1h-1zM23,30h1v1h-1zM24,30h1v1h-1zM25,30h1v1h-1zM26,30h1v1h-1zM27,30h1v1h-1zM30,30h1v1h-1zM31,30h1v1h-1zM32,30h1v1h-1zM33,30h1v1h-1zM34,30h1v1h-1zM38,30h1v1h-1zM39,30h1v1h-1zM40,30h1v1h-1zM41,30h1v1h-1zM42,30h1v1h-1zM44,30h1v1h-1zM48,30h1v1h-1zM49,30h1v1h-1zM50,30h1v1h-1zM52,30h1v1h-1zM53,30h1v1h-1zM54,30h1v1h-1zM55,30h1v1h-1zM56,30h1v1h-1zM57,30h1v1h-1zM4,31h1v1h-1zM8,31h1v1h-1zM12,31h1v1h-1zM14,31h1v1h-1zM15,31h1v1h-1zM18,31h1v1h-1zM19,31h1v1h-1zM20,31h1v1h-1zM23,31h1v1h-1zM24,31h1v1h-1zM26,31h1v1h-1zM27,31h1v1h-1zM28,31h1v1h-1zM29,31h1v1h-1zM30,31h1v1h-1zM34,31h1v1h-1zM35,31h1v1h-1zM36,31h1v1h-1zM38,31h1v1h-1zM42,31h1v1h-1zM44,31h1v1h-1zM50,31h1v1h-1zM51,31h1v1h-1zM52,31h1v1h-1zM56,31h1v1h-1zM58,31h1v1h-1zM59,31h1v1h-1zM5,32h1v1h-1zM6,32h1v1h-1zM7,32h1v1h-1zM8,32h1v1h-1zM10,32h1v1h-1zM12,32h1v1h-1zM13,32h1v1h-1zM17,32h1v1h-1zM19,32h1v1h-1zM22,32h1v1h-1zM23,32h1v1h-1zM24,32h1v1h-1zM25,32h1v1h-1zM30,32h1v1h-1zM32,32h1v1h-1zM34,32h1v1h-1zM37,32h1v1h-1zM38,32h1v1h-1zM39,32h1v1h-1zM40,32h1v1h-1zM45,32h1v1h-1zM46,32h1v1h-1zM47,32h1v1h-1zM48,32h1v1h-1zM50,32h1v1h-1zM52,32h1v1h-1zM54,32h1v1h-1zM56,32h1v1h-1zM57,32h1v1h-1zM4,33h1v1h-1zM6,33h1v1h-1zM8,33h1v1h-1zM12,33h1v1h-1zM14,33h1v1h-1zM15,33h1v1h-1zM16,33h1v1h-1zM18,33h1v1h-1zM20,33h1v1h-1zM21,33h1v1h-1zM22,33h1v1h-1zM25,33h1v1h-1zM27,33h1v1h-1zM28,33h1v1h-1zM29,33h1v1h-1zM30,33h1v1h-1zM34,33h1v1h-1zM38,33h1v1h-1zM41,33h1v1h-1zM46,33h1v1h-1zM48,33h1v1h-1zM51,33h1v1h-1zM52,33h1v1h-1zM56,33h1v1h-1zM57,33h1v1h-1zM60,33h1v1h-1zM5,34h1v1h-1zM7,34h1v1h-1zM8,34h1v1h-1zM9,34h1v1h-1zM10,34h1v1h-1zM11,34h1v1h-1zM12,34h1v1h-1zM13,34h1v1h-1zM14,34h1v1h-1zM15,34h1v1h-1zM17,34h1v1h-1zM19,34h1v1h-1zM21,34h1v1h-1zM30,34h1v1h-1zM31,34h1v1h-1zM32,34h1v1h-1zM33,34h1v1h-1zM34,34h1v1h-1zM35,34h1v1h-1zM37,34h1v1h-1zM39,34h1v1h-1zM41,34h1v1h-1zM43,34h1v1h-1zM44,34h1v1h-1zM45,34h1v1h-1zM47,34h1v1h-1zM48,34h1v1h-1zM49,34h1v1h-1zM50,34h1v1h-1zM52,34h1v1h-1zM53,34h1v1h-1zM54,34h1v1h-1zM55,34h1v1h-1zM56,34h1v1h-1zM58,34h1v1h-1zM59,34h1v1h-1zM4,35h1v1h-1zM9,35h1v1h-1zM12,35h1v1h-1zM13,35h1v1h-1zM14,35h1v1h-1zM19,35h1v1h-1zM20,35h1v1h-1zM24,35h1v1h-1zM26,35h1v1h-1zM28,35h1v1h-1zM31,35h1v1h-1zM38,35h1v1h-1zM39,35h1v1h-1zM40,35h1v1h-1zM41,35h1v1h-1zM42,35h1v1h-1zM44,35h1v1h-1zM46,35h1v1h-1zM47,35h1v1h-1zM49,35h1v1h-1zM50,35h1v1h-1zM51,35h1v1h-1zM57,35h1v1h-1zM58,35h1v1h-1zM59,35h1v1h-1zM4,36h1v1h-1zM8,36h1v1h-1zM9,36h1v1h-1zM10,36h1v1h-1zM12,36h1v1h-1zM13,36h1v1h-1zM14,36h1v1h-1zM15,36h1v1h-1zM16,36h1v1h-1zM18,36h1v1h-1zM20,36h1v1h-1zM21,36h1v1h-1zM22,36h1v1h-1zM24,36h1v1h-1zM25,36h1v1h-1zM26,36h1v1h-1zM28,36h1v1h-1zM29,36h1v1h-1zM30,36h1v1h-1zM31,36h1v1h-1zM32,36h1v1h-1zM33,36h1v1h-1zM34,36h1v1h-1zM35,36h1v1h-1zM38,36h1v1h-1zM40,36h1v1h-1zM42,36h1v1h-1zM43,36h1v1h-1zM45,36h1v1h-1zM46,36h1v1h-1zM47,36h1v1h-1zM54,36h1v1h-1zM55,36h1v1h-1zM56,36h1v1h-1zM58,36h1v1h-1zM60,36h1v1h-1zM5,37h1v1h-1zM8,37h1v1h-1zM9,37h1v1h-1zM11,37h1v1h-1zM13,37h1v1h-1zM15,37h1v1h-1zM17,37h1v1h-1zM19,37h1v1h-1zM21,37h1v1h-1zM22,37h1v1h-1zM25,37h1v1h-1zM26,37h1v1h-1zM27,37h1v1h-1zM34,37h1v1h-1zM39,37h1v1h-1zM40,37h1v1h-1zM41,37h1v1h-1zM46,37h1v1h-1zM47,37h1v1h-1zM49,37h1v1h-1zM51,37h1v1h-1zM53,37h1v1h-1zM57,37h1v1h-1zM59,37h1v1h-1zM60,37h1v1h-1zM4,38h1v1h-1zM5,38h1v1h-1zM9,38h1v1h-1zM10,38h1v1h-1zM12,38h1v1h-1zM13,38h1v1h-1zM14,38h1v1h-1zM15,38h1v1h-1zM16,38h1v1h-1zM18,38h1v1h-1zM19,38h1v1h-1zM20,38h1v1h-1zM21,38h1v1h-1zM23,38h1v1h-1zM26,38h1v1h-1zM30,38h1v1h-1zM31,38h1v1h-1zM33,38h1v1h-1zM34,38h1v1h-1zM35,38h1v1h-1zM37,38h1v1h-1zM38,38h1v1h-1zM40,38h1v1h-1zM42,38h1v1h-1zM43,38h1v1h-1zM44,38h1v1h-1zM45,38h1v1h-1zM46,38h1v1h-1zM48,38h1v1h-1zM50,38h1v1h-1zM51,38h1v1h-1zM52,38h1v1h-1zM53,38h1v1h-1zM55,38h1v1h-1zM56,38h1v1h-1zM58,38h1v1h-1zM60,38h1v1h-1zM4,39h1v1h-1zM9,39h1v1h-1zM11,39h1v1h-1zM16,39h1v1h-1zM18,39h1v1h-1zM20,39h1v1h-1zM24,39h1v1h-1zM25,39h1v1h-1zM26,39h1v1h-1zM27,39h1v1h-1zM29,39h1v1h-1zM31,39h1v1h-1zM32,39h1v1h-1zM34,39h1v1h-1zM35,39h1v1h-1zM37,39h1v1h-1zM39,39h1v1h-1zM41,39h1v1h-1zM43,39h1v1h-1zM44,39h1v1h-1zM45,39h1v1h-1zM46,39h1v1h-1zM47,39h1v1h-1zM48,39h1v1h-1zM50,39h1v1h-1zM54,39h1v1h-1zM55,39h1v1h-1zM56,39h1v1h-1zM57,39h1v1h-1zM58,39h1v1h-1zM7,40h1v1h-1zM8,40h1v1h-1zM9,40h1v1h-1zM10,40h1v1h-1zM13,40h1v1h-1zM14,40h1v1h-1zM20,40h1v1h-1zM21,40h1v1h-1zM22,40h1v1h-1zM23,40h1v1h-1zM25,40h1v1h-1zM26,40h1v1h-1zM29,40h1v1h-1zM30,40h1v1h-1zM33,40h1v1h-1zM35,40h1v1h-1zM37,40h1v1h-1zM39,40h1v1h-1zM40,40h1v1h-1zM45,40h1v1h-1zM50,40h1v1h-1zM52,40h1v1h-1zM53,40h1v1h-1zM55,40h1v1h-1zM58,40h1v1h-1zM8,41h1v1h-1zM9,41h1v1h-1zM12,41h1v1h-1zM14,41h1v1h-1zM15,41h1v1h-1zM16,41h1v1h-1zM17,41h1v1h-1zM18,41h1v1h-1zM21,41h1v1h-1zM24,41h1v1h-1zM25,41h1v1h-1zM26,41h1v1h-1zM27,41h1v1h-1zM28,41h1v1h-1zM29,41h1v1h-1zM31,41h1v1h-1zM33,41h1v1h-1zM34,41h1v1h-1zM41,41h1v1h-1zM44,41h1v1h-1zM46,41h1v1h-1zM47,41h1v1h-1zM51,41h1v1h-1zM52,41h1v1h-1zM53,41h1v1h-1zM54,41h1v1h-1zM58,41h1v1h-1zM6,42h1v1h-1zM9,42h1v1h-1zM10,42h1v1h-1zM11,42h1v1h-1zM12,42h1v1h-1zM15,42h1v1h-1zM19,42h1v1h-1zM20,42h1v1h-1zM22,42h1v1h-1zM23,42h1v1h-1zM25,42h1v1h-1zM30,42h1v1h-1zM33,42h1v1h-1zM34,42h1v1h-1zM40,42h1v1h-1zM49,42h1v1h-1zM50,42h1v1h-1zM52,42h1v1h-1zM53,42h1v1h-1zM57,42h1v1h-1zM59,42h1v1h-1zM4,43h1v1h-1zM5,43h1v1h-1zM6,43h1v1h-1zM7,43h1v1h-1zM9,43h1v1h-1zM11,43h1v1h-1zM14,43h1v1h-1zM16,43h1v1h-1zM17,43h1v1h-1zM19,43h1v1h-1zM21,43h1v1h-1zM22,43h1v1h-1zM24,43h1v1h-1zM29,43h1v1h-1zM31,43h1v1h-1zM34,43h1v1h-1zM35,43h1v1h-1zM36,43h1v1h-1zM37,43h1v1h-1zM38,43h1v1h-1zM40,43h1v1h-1zM45,43h1v1h-1zM46,43h1v1h-1zM47,43h1v1h-1zM48,43h1v1h-1zM49,43h1v1h-1zM50,43h1v1h-1zM51,43h1v1h-1zM55,43h1v1h-1zM56,43h1v1h-1zM57,43h1v1h-1zM58,43h1v1h-1zM59,43h1v1h-1zM6,44h1v1h-1zM7,44h1v1h-1zM8,44h1v1h-1zM10,44h1v1h-1zM11,44h1v1h-1zM12,44h1v1h-1zM15,44h1v1h-1zM16,44h1v1h-1zM17,44h1v1h-1zM18,44h1v1h-1zM19,44h1v1h-1zM25,44h1v1h-1zM27,44h1v1h-1zM29,44h1v1h-1zM30,44h1v1h-1zM33,44h1v1h-1zM34,44h1v1h-1zM35,44h1v1h-1zM37,44h1v1h-1zM39,44h1v1h-1zM40,44h1v1h-1zM41,44h1v1h-1zM43,44h1v1h-1zM46,44h1v1h-1zM47,44h1v1h-1zM54,44h1v1h-1zM56,44h1v1h-1zM58,44h1v1h-1zM59,44h1v1h-1zM60,44h1v1h-1zM5,45h1v1h-1zM6,45h1v1h-1zM7,45h1v1h-1zM8,45h1v1h-1zM9,45h1v1h-1zM11,45h1v1h-1zM12,45h1v1h-1zM18,45h1v1h-1zM20,45h1v1h-1zM21,45h1v1h-1zM23,45h1v1h-1zM24,45h1v1h-1zM25,45h1v1h-1zM26,45h1v1h-1zM27,45h1v1h-1zM28,45h1v1h-1zM30,45h1v1h-1zM33,45h1v1h-1zM34,45h1v1h-1zM35,45h1v1h-1zM39,45h1v1h-1zM40,45h1v1h-1zM45,45h1v1h-1zM46,45h1v1h-1zM48,45h1v1h-1zM52,45h1v1h-1zM54,45h1v1h-1zM57,45h1v1h-1zM58,45h1v1h-1zM60,45h1v1h-1zM6,46h1v1h-1zM7,46h1v1h-1zM8,46h1v1h-1zM10,46h1v1h-1zM14,46h1v1h-1zM16,46h1v1h-1zM18,46h1v1h-1zM19,46h1v1h-1zM20,46h1v1h-1zM23,46h1v1h-1zM24,46h1v1h-1zM25,46h1v1h-1zM27,46h1v1h-1zM28,46h1v1h-1zM29,46h1v1h-1zM31,46h1v1h-1zM32,46h1v1h-1zM33,46h1v1h-1zM34,46h1v1h-1zM37,46h1v1h-1zM41,46h1v1h-1zM43,46h1v1h-1zM46,46h1v1h-1zM48,46h1v1h-1zM50,46h1v1h-1zM51,46h1v1h-1zM52,46h1v1h-1zM58,46h1v1h-1zM59,46h1v1h-1zM4,47h1v1h-1zM5,47h1v1h-1zM7,47h1v1h-1zM9,47h1v1h-1zM12,47h1v1h-1zM15,47h1v1h-1zM16,47h1v1h-1zM17,47h1v1h-1zM18,47h1v1h-1zM19,47h1v1h-1zM24,47h1v1h-1zM25,47h1v1h-1zM28,47h1v1h-1zM29,47h1v1h-1zM30,47h1v1h-1zM31,47h1v1h-1zM37,47h1v1h-1zM38,47h1v1h-1zM39,47h1v1h-1zM41,47h1v1h-1zM43,47h1v1h-1zM44,47h1v1h-1zM46,47h1v1h-1zM48,47h1v1h-1zM51,47h1v1h-1zM52,47h1v1h-1zM54,47h1v1h-1zM57,47h1v1h-1zM58,47h1v1h-1zM60,47h1v1h-1zM4,48h1v1h-1zM7,48h1v1h-1zM10,48h1v1h-1zM11,48h1v1h-1zM14,48h1v1h-1zM16,48h1v1h-1zM19,48h1v1h-1zM21,48h1v1h-1zM22,48h1v1h-1zM24,48h1v1h-1zM25,48h1v1h-1zM33,48h1v1h-1zM35,48h1v1h-1zM36,48h1v1h-1zM37,48h1v1h-1zM39,48h1v1h-1zM40,48h1v1h-1zM41,48h1v1h-1zM45,48h1v1h-1zM47,48h1v1h-1zM49,48h1v1h-1zM50,48h1v1h-1zM53,48h1v1h-1zM56,48h1v1h-1zM57,48h1v1h-1zM60,48h1v1h-1zM4,49h1v1h-1zM13,49h1v1h-1zM14,49h1v1h-1zM17,49h1v1h-1zM18,49h1v1h-1zM21,49h1v1h-1zM25,49h1v1h-1zM26,49h1v1h-1zM27,49h1v1h-1zM28,49h1v1h-1zM36,49h1v1h-1zM39,49h1v1h-1zM41,49h1v1h-1zM45,49h1v1h-1zM46,49h1v1h-1zM47,49h1v1h-1zM51,49h1v1h-1zM53,49h1v1h-1zM57,49h1v1h-1zM4,50h1v1h-1zM6,50h1v1h-1zM9,50h1v1h-1zM10,50h1v1h-1zM11,50h1v1h-1zM13,50h1v1h-1zM18,50h1v1h-1zM19,50h1v1h-1zM21,50h1v1h-1zM22,50h1v1h-1zM23,50h1v1h-1zM24,50h1v1h-1zM25,50h1v1h-1zM26,50h1v1h-1zM30,50h1v1h-1zM31,50h1v1h-1zM33,50h1v1h-1zM35,50h1v1h-1zM36,50h1v1h-1zM38,50h1v1h-1zM39,50h1v1h-1zM40,50h1v1h-1zM42,50h1v1h-1zM43,50h1v1h-1zM44,50h1v1h-1zM45,50h1v1h-1zM51,50h1v1h-1zM52,50h1v1h-1zM53,50h1v1h-1zM55,50h1v1h-1zM57,50h1v1h-1zM58,50h1v1h-1zM59,50h1v1h-1zM4,51h1v1h-1zM5,51h1v1h-1zM6,51h1v1h-1zM7,51h1v1h-1zM8,51h1v1h-1zM12,51h1v1h-1zM13,51h1v1h-1zM15,51h1v1h-1zM16,51h1v1h-1zM17,51h1v1h-1zM19,51h1v1h-1zM22,51h1v1h-1zM23,51h1v1h-1zM26,51h1v1h-1zM28,51h1v1h-1zM30,51h1v1h-1zM34,51h1v1h-1zM36,51h1v1h-1zM37,51h1v1h-1zM43,51h1v1h-1zM45,51h1v1h-1zM46,51h1v1h-1zM50,51h1v1h-1zM51,51h1v1h-1zM57,51h1v1h-1zM58,51h1v1h-1zM59,51h1v1h-1zM60,51h1v1h-1zM10,52h1v1h-1zM11,52h1v1h-1zM13,52h1v1h-1zM15,52h1v1h-1zM17,52h1v1h-1zM19,52h1v1h-1zM21,52h1v1h-1zM25,52h1v1h-1zM27,52h1v1h-1zM29,52h1v1h-1zM30,52h1v1h-1zM31,52h1v1h-1zM32,52h1v1h-1zM33,52h1v1h-1zM34,52h1v1h-1zM35,52h1v1h-1zM40,52h1v1h-1zM42,52h1v1h-1zM50,52h1v1h-1zM52,52h1v1h-1zM53,52h1v1h-1zM54,52h1v1h-1zM55,52h1v1h-1zM56,52h1v1h-1zM59,52h1v1h-1zM12,53h1v1h-1zM16,53h1v1h-1zM22,53h1v1h-1zM23,53h1v1h-1zM25,53h1v1h-1zM26,53h1v1h-1zM27,53h1v1h-1zM28,53h1v1h-1zM30,53h1v1h-1zM34,53h1v1h-1zM36,53h1v1h-1zM37,53h1v1h-1zM41,53h1v1h-1zM45,53h1v1h-1zM46,53h1v1h-1zM47,53h1v1h-1zM51,53h1v1h-1zM52,53h1v1h-1zM56,53h1v1h-1zM58,53h1v1h-1zM60,53h1v1h-1zM4,54h1v1h-1zM5,54h1v1h-1zM6,54h1v1h-1zM7,54h1v1h-1zM8,54h1v1h-1zM9,54h1v1h-1zM10,54h1v1h-1zM13,54h1v1h-1zM14,54h1v1h-1zM15,54h1v1h-1zM16,54h1v1h-1zM17,54h1v1h-1zM20,54h1v1h-1zM21,54h1v1h-1zM24,54h1v1h-1zM25,54h1v1h-1zM26,54h1v1h-1zM27,54h1v1h-1zM30,54h1v1h-1zM32,54h1v1h-1zM34,54h1v1h-1zM35,54h1v1h-1zM40,54h1v1h-1zM42,54h1v1h-1zM43,54h1v1h-1zM44,54h1v1h-1zM46,54h1v1h-1zM50,54h1v1h-1zM52,54h1v1h-1zM54,54h1v1h-1zM56,54h1v1h-1zM57,54h1v1h-1zM58,54h1v1h-1zM59,54h1v1h-1zM4,55h1v1h-1zM10,55h1v1h-1zM12,55h1v1h-1zM15,55h1v1h-1zM17,55h1v1h-1zM18,55h1v1h-1zM20,55h1v1h-1zM21,55h1v1h-1zM22,55h1v1h-1zM25,55h1v1h-1zM27,55h1v1h-1zM30,55h1v1h-1zM34,55h1v1h-1zM37,55h1v1h-1zM38,55h1v1h-1zM40,55h1v1h-1zM42,55h1v1h-1zM44,55h1v1h-1zM45,55h1v1h-1zM48,55h1v1h-1zM49,55h1v1h-1zM51,55h1v1h-1zM52,55h1v1h-1zM56,55h1v1h-1zM57,55h1v1h-1zM58,55h1v1h-1zM60,55h1v1h-1zM4,56h1v1h-1zM6,56h1v1h-1zM7,56h1v1h-1zM8,56h1v1h-1zM10,56h1v1h-1zM12,56h1v1h-1zM15,56h1v1h-1zM17,56h1v1h-1zM18,56h1v1h-1zM19,56h1v1h-1zM20,56h1v1h-1zM22,56h1v1h-1zM26,56h1v1h-1zM27,56h1v1h-1zM28,56h1v1h-1zM29,56h1v1h-1zM30,56h1v1h-1zM31,56h1v1h-1zM32,56h1v1h-1zM33,56h1v1h-1zM34,56h1v1h-1zM35,56h1v1h-1zM38,56h1v1h-1zM39,56h1v1h-1zM41,56h1v1h-1zM42,56h1v1h-1zM43,56h1v1h-1zM47,56h1v1h-1zM49,56h1v1h-1zM51,56h1v1h-1zM52,56h1v1h-1zM53,56h1v1h-1zM54,56h1v1h-1zM55,56h1v1h-1zM56,56h1v1h-1zM59,56h1v1h-1zM4,57h1v1h-1zM6,57h1v1h-1zM7,57h1v1h-1zM8,57h1v1h-1zM10,57h1v1h-1zM12,57h1v1h-1zM13,57h1v1h-1zM14,57h1v1h-1zM15,57h1v1h-1zM16,57h1v1h-1zM19,57h1v1h-1zM20,57h1v1h-1zM22,57h1v1h-1zM23,57h1v1h-1zM24,57h1v1h-1zM25,57h1v1h-1zM26,57h1v1h-1zM28,57h1v1h-1zM31,57h1v1h-1zM34,57h1v1h-1zM35,57h1v1h-1zM41,57h1v1h-1zM44,57h1v1h-1zM45,57h1v1h-1zM47,57h1v1h-1zM48,57h1v1h-1zM54,57h1v1h-1zM55,57h1v1h-1zM58,57h1v1h-1zM4,58h1v1h-1zM6,58h1v1h-1zM7,58h1v1h-1zM8,58h1v1h-1zM10,58h1v1h-1zM12,58h1v1h-1zM13,58h1v1h-1zM18,58h1v1h-1zM20,58h1v1h-1zM22,58h1v1h-1zM23,58h1v1h-1zM27,58h1v1h-1zM28,58h1v1h-1zM29,58h1v1h-1zM30,58h1v1h-1zM33,58h1v1h-1zM35,58h1v1h-1zM36,58h1v1h-1zM37,58h1v1h-1zM38,58h1v1h-1zM39,58h1v1h-1zM42,58h1v1h-1zM43,58h1v1h-1zM46,58h1v1h-1zM47,58h1v1h-1zM49,58h1v1h-1zM51,58h1v1h-1zM52,58h1v1h-1zM54,58h1v1h-1zM57,58h1v1h-1zM4,59h1v1h-1zM10,59h1v1h-1zM17,59h1v1h-1zM21,59h1v1h-1zM24,59h1v1h-1zM25,59h1v1h-1zM26,59h1v1h-1zM28,59h1v1h-1zM30,59h1v1h-1zM32,59h1v1h-1zM33,59h1v1h-1zM34,59h1v1h-1zM35,59h1v1h-1zM37,59h1v1h-1zM38,59h1v1h-1zM40,59h1v1h-1zM42,59h1v1h-1zM43,59h1v1h-1zM44,59h1v1h-1zM45,59h1v1h-1zM48,59h1v1h-1zM49,59h1v1h-1zM50,59h1v1h-1zM53,59h1v1h-1zM57,59h1v1h-1zM58,59h1v1h-1zM4,60h1v1h-1zM5,60h1v1h-1zM6,60h1v1h-1zM7,60h1v1h-1zM8,60h1v1h-1zM9,60h1v1h-1zM10,60h1v1h-1zM12,60h1v1h-1zM14,60h1v1h-1zM15,60h1v1h-1zM16,60h1v1h-1zM20,60h1v1h-1zM21,60h1v1h-1zM22,60h1v1h-1zM23,60h1v1h-1zM24,60h1v1h-1zM27,60h1v1h-1zM29,60h1v1h-1zM35,60h1v1h-1zM39,60h1v1h-1zM40,60h1v1h-1zM47,60h1v1h-1zM53,60h1v1h-1zM54,60h1v1h-1zM56,60h1v1h-1zM58,60h1v1h-1zM59,60h1v1h-1z" fill="#111827"/></svg>
+          <span class="hint" style="font-size:11px;">Наведите камеру — откроется помощник отзыва</span>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <h3 style="font-size:17px;">2. Готовый код Schema.org для Тильды (<code>centerdetey.ru</code>)</h3>
+        <button type="button" class="btn btn-primary btn-sm no-print" id="btn-copy-schema">Копировать JSON-LD</button>
+      </div>
+      <p class="hint" style="margin-bottom:8px;">Тильда → Настройки сайта → Ещё → HTML-код для вставки внутрь <code>&lt;head&gt;</code> → вставить и переопубликовать главную:</p>
+      <pre class="code-box" id="k-schema">&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "Конструктерра — детский инженерный центр (Ростов-на-Дону)",
+  "alternateName": ["Constructerra", "Конструктерра Левенцовка"],
+  "description": "Детский инженерный и развивающий центр в Левенцовке (Ростов-на-Дону) для детей 5–16 лет: архитектура и макетирование, инженерия и конструирование, 3D-моделирование и печать на безопасных станках, мастер-классы и лагеря.",
+  "url": "https://centerdetey.ru/",
+  "telephone": "+7 (960) 470-10-22",
+  "priceRange": "1000–7600 ₽",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "RU",
+    "addressLocality": "Ростов-на-Дону",
+    "streetAddress": "ул. Ткачёва, 9, стр. 2, 1 этаж (мкр. Левенцовский)"
+  },
+  "areaServed": {
+    "@type": "Place",
+    "name": "Ростов-на-Дону, Советский район, микрорайон Левенцовский, Западный (ЗЖМ)"
+  },
+  "openingHours": "Mo-Su 09:00-20:00",
+  "sameAs": [
+    "https://yandex.ru/maps/org/konstrukterra/103705300029/",
+    "https://vk.ru/constructerra_rnd",
+    "https://constructerra.com/"
+  ]
+}
+&lt;/script&gt;</pre>
+
+      <h3 style="font-size:17px;margin:20px 0 8px;">3. Чёткий план на 14 дней (без рекламного бюджета)</h3>
+      <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:7px;font-size:14px;">
+        <li><b>День 1–2:</b> Подключить кнопку онлайн-записи в Яндекс Бизнесе, убрать «1 ₽» у акций, добавить первой услугой «Пробное занятие» и прописать UTM в ссылки на <code>centerdetey.ru</code>.</li>
+        <li><b>День 3–4:</b> Вставить код <code>Schema.org</code> выше в <code>&lt;head&gt;</code> Тильды, обновить <code>&lt;title&gt;</code> (добавить «Конструктерра» и «Левенцовка») и добавить блок FAQ из 6 вопросов с ценой 7 600 ₽ и возрастом 5–16 лет.</li>
+        <li><b>День 5–7:</b> Распечатать QR-помощник выше на стойку и лично попросить 5–6 довольных родителей оставить свежие отзывы (с упоминанием «Левенцовка» и «настоящие станки / 3D-принтер») — сломать 2-месячную паузу.</li>
+        <li><b>День 8–14:</b> Обновить профили на <code>zoon.ru</code> и <code>kudarostov.ru</code>, добавить ссылку на 2ГИС на сайт <code>centerdetey.ru</code> и выпустить 1 статью-обзор про инженерные кружки Левенцовки.</li>
+      </ol>
+    </section>
+
+    <section class="feedback-card no-print">
+      <span class="pill pill-pro" style="margin-bottom:8px;">ТЕСТ СЕРВИСОВ КАРТАЧЕК + НЕЙРОЧЕК</span>
+      <h3 style="font-size:19px;color:#FFFFFF;">Честная оценка: полезен такой разбор и автопилот для точки?</h3>
+      <p>Мы запускаем два автоматических сервиса для владельцев офлайн-точек и сетей (Карты + ИИ). Выберите честный вариант — скопируется готовый ответ для Telegram.</p>
+      <div class="fb-btns" id="fb-choices">
+        <button type="button" class="fb-btn" data-fb="🔥 Очень точно, особенно про паузу отзывов и centerdetey.ru — готов тестить/покупать">🔥 Очень точно — готов тестить</button>
+        <button type="button" class="fb-btn" data-fb="👍 Полезно по картам + QR, интересно на всю сеть Конструктерра">👍 Интересно на сеть</button>
+        <button type="button" class="fb-btn" data-fb="🤔 Полезно, но хочется ещё: ">💬 Чего не хватило</button>
+      </div>
+      <div class="fb-extra">
+        <input type="text" id="fb-comment" placeholder="Что зацепило больше всего или чего не хватило?">
+        <button type="button" class="btn btn-primary btn-sm" id="btn-copy-fb">Скопировать ответ для Telegram</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      var toastTimer;
+      function toast(m) {
+        var el = document.getElementById('toast');
+        el.textContent = m; el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2400);
+      }
+      function copy(txt, msg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(function () { toast(msg); });
+        } else {
+          var ta = document.createElement('textarea'); ta.value = txt;
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta); toast(msg);
+        }
+      }
+      document.getElementById('btn-copy-schema').addEventListener('click', function () {
+        copy(document.getElementById('k-schema').textContent, 'Код Schema.org для Тильды скопирован!');
+      });
+      document.getElementById('btn-copy-rh').addEventListener('click', function () {
+        copy("https://sooqka77.github.io/kartachek/?review=eyJuIjoi0JrQvtC90YHRgtGA0YPQutGC0LXRgNGA0LAiLCJrIjoia2lkcyIsInkiOiIxMDM3MDUzMDAwMjkiLCJnIjoiIiwiYyI6Imh0dHBzOi8vd2EubWUvNzk2MDQ3MDEwMjIifQ", 'Ссылка помощника отзывов скопирована!');
+      });
+      var picked = '';
+      document.querySelectorAll('[data-fb]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          document.querySelectorAll('[data-fb]').forEach(function (x) { x.classList.remove('picked'); });
+          b.classList.add('picked');
+          picked = b.getAttribute('data-fb');
+        });
+      });
+      document.getElementById('btn-copy-fb').addEventListener('click', function () {
+        var c = (document.getElementById('fb-comment').value || '').trim();
+        var txt = 'Отзыв по аудиту Конструктерры Ростов (КартаЧек + НейроЧек): ' + (picked || 'Посмотрел отчёт') + (c ? ' | ' + c : '');
+        copy(txt, 'Ответ скопирован — вставьте в Telegram!');
+      });
+      document.getElementById('btn-open-neiro').addEventListener('click', function () {
+        var pt = {"name":"Конструктерра","aliases":"Constructerra, Конструктерра Ростов, centerdetey","niche":"kids","city":"Ростов-на-Дону","district":"Советский район, Левенцовка, ул. Ткачёва, 9с2","address":"ул. Ткачёва, 9, стр. 2 (1 этаж, мкр. Левенцовский)","usp":"детский инженерный центр 5–16 лет: архитектура и макетирование, инженерия, 3D-моделирование и печать на безопасных станках, мастер-классы и лагеря","competitor":"Кибертрон / Генри-Робототехника","siteUrl":"https://centerdetey.ru/","phone":"+7 (960) 470-10-22","hours":"Пн–Вс 09:00–20:00","yandexUrl":"https://yandex.ru/maps/org/konstrukterra/103705300029/","gisUrl":"","vkUrl":"https://vk.ru/constructerra_rnd","tgUrl":"","readiness":{"hasYandexStrong":true,"has2gisFull":true,"hasZoonOtzovik":false,"hasNicheCatalogs":false,"reviewsHaveScenarios":true,"reviewsFresh":false,"ownerRepliesFacts":true,"hasLocalPage":true,"hasFaqOnSite":false,"hasSchemaLocal":false,"botsAllowed":true,"hasLlmsTxt":false,"napConsistent":false,"hasExternalMentions":true},"checkedSources":["Яндекс Карты (основной источник Алисы AI)","2ГИС","VK-сообщество с адресом и товарами"],"promptResults":{"p1":{"model":"ИИ-поиск (26.11.2026)","responseText":"Кружки робототехники и инженерии в Советском районе / Левенцовке (Ростов-на-Дону):\n1. Генри-Робототехника — ул. Жданова, 2/7 (yandex.ru, 2gis.ru, club-genry.ru).\n2. Роботрек — ул. Жданова, 13 (zoon.ru).\n3. Кибертрон — ул. Ткачёва, 16/1 (2gis.ru, zoon.ru, kibertron.tech).\n4. Технодром — пр. Коммунистический, 20 (kudarostov.ru, 2gis.ru).\n5. DonRobot / Сфера — Левенцовка (zoon.ru)."},"p2":{"model":"ИИ-поиск (26.11.2026)","responseText":"Кружок архитектуры, 3D-моделирования и инженерии для детей в Левенцовке:\n1. Конструктерра — ул. Ткачёва, 9, стр. 2, рейтинг 5.0, архитектура, инженерия, 3D-печать на безопасных станках (yandex.ru, vc.ru).\n2. РобоДон — ул. Жданова (robornd.ru)."},"p3":{"model":"ИИ-поиск (26.11.2026)","responseText":"Лучшие детские инженерные кружки и робототехника в Ростове-на-Дону 2026:\n1. Технодром (2gis.ru, gdeprof.ru, kudarostov.ru).\n2. Генри-Робототехника (yandex.ru, zoon.ru, 2gis.ru).\n3. Техноген (yandex.ru).\n4. Умная школа (yandex.ru).\n5. Конструктерра — ул. Ткачёва, 5.0 (yandex.ru)."},"p4":{"model":"ИИ-поиск (26.11.2026)","responseText":"Конструктерра (Ростов-на-Дону, ул. Ткачёва, 9с2, centerdetey.ru) — детский инженерный центр, рейтинг 5.0 (56 отзывов на Яндекс Картах, высокие оценки в 2ГИС). Хвалят практику на станках и 3D-принтерах, педагогов, чистоту. Из минусов иногда упоминают цену абонементов и плотное расписание групп (yandex.ru, 2gis.ru, orgs.biz, constructerra.com)."}},"history":[{"date":"26.11","mentionRate":67,"readiness":54}]};
+        pt.id = 'geo-konstrukterra-rnd';
+        pt.isDemo = false;
+        try {
+          var raw = localStorage.getItem('neirochek_state_v2');
+          var st = raw ? JSON.parse(raw) : { points: [], findingFilter: 'all', activeProTab: 'sources', showAllPrompts: false };
+          st.points = (st.points || []).filter(function (p) { return p.id !== 'geo-konstrukterra-rnd'; });
+          st.points.unshift(pt);
+          st.activePointId = 'geo-konstrukterra-rnd';
+          localStorage.setItem('neirochek_state_v2', JSON.stringify(st));
+        } catch (_) {}
+        window.location.href = './';
+      });
+    })();
+  </script>
+</body>
+</html>
