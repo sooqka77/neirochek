@@ -136,6 +136,8 @@
 
         <div class="btn-row">
           <button type="submit" class="btn btn-primary">Собрать запросы и проверить в ИИ ↓</button>
+          <button type="button" class="btn btn-outline btn-sm hidden" id="btn-site-audit">⚡ Проверить сайт (Schema, robots, llms.txt)</button>
+          <span class="hint" id="site-audit-status"></span>
         </div>
       </form>
     </section>
@@ -152,7 +154,16 @@
 
       <p class="hint" style="margin-bottom:12px;">Нажмите <b>Яндекс AI (Алиса)</b> или <b>GigaChat</b> (работают в РФ без VPN) — запрос сразу откроется или скопируется. С телефона достаточно нажать 1 кнопку статуса (`Мы в топ-3` / `Нас нет`), а если вставить текст ответа — чекер вытащит конкурентов и сайты-источники.</p>
 
-      <!-- Опциональный автопилот через API / будущий сервер -->
+      <!-- Панель 1-клик автопроверки через geo-api (появляется автоматически, когда подключён сервер!) -->
+      <div class="api-box hidden" id="server-auto-box" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <strong style="font-size:14.5px;">⚡ Автопроверка в живом ИИ одной кнопкой (без ключей и копипасты)</strong>
+          <p class="hint" id="server-auto-status" style="margin-top:2px;">Сервер подключён — нажми кнопку и чекер сам прогонит 5 запросов по району за ~10 секунд.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-server-ai-all">Запустить автопроверку 5 запросов ⚡</button>
+      </div>
+
+      <!-- Опциональный автопилот через собственный OpenRouter ключ -->
       <details class="api-box" id="api-drawer">
         <summary>⚡ Автопроверка всех запросов в 1 кнопку (API / серверный режим)</summary>
         <p class="hint" style="margin:8px 0 10px;">На этапе теста можно вставить свой ключ OpenRouter (хранится только в вашем браузере) — или завтра подключить единый бэкенд, чтобы автопроверка работала у всех без ключа.</p>
@@ -369,10 +380,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script>
-    // Конфиг для подключения сервера (Этап 2) и Яндекс Метрики
-    window.NEIRO_CONFIG = { backendUrl: '', metrikaId: null };
-  </script>
+  <script src="config.js"></script>
   <script src="data.js"></script>
   <script src="engine.js"></script>
   <script src="app.js"></script>

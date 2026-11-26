@@ -841,6 +841,93 @@
     });
     $('btn-print-report').addEventListener('click', () => window.print());
 
+    // Подключение к единому geo-api (если задан backendUrl в config.js или ?api=...)
+    const backendUrl = getBackendUrl();
+    if (backendUrl) {
+      $('btn-site-audit').classList.remove('hidden');
+      $('server-auto-box').classList.remove('hidden');
+      trackEvent('page_view');
+
+      $('btn-site-audit').addEventListener('click', async () => {
+        const pt = getActivePoint();
+        if (!pt.siteUrl) {
+          showToast('Сначала укажите адрес сайта в «Полном профиле» выше');
+          return;
+        }
+        const btn = $('btn-site-audit');
+        const st = $('site-audit-status');
+        btn.disabled = true;
+        st.textContent = 'Проверяем сайт (Schema.org, robots.txt, llms.txt)...';
+        try {
+          const r = await fetch(`${backendUrl}/api/site-audit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: pt.siteUrl, app: 'neirochek' })
+          });
+          const data = await r.json();
+          if (!r.ok || !data.ok) throw new Error(data.error || 'audit_failed');
+          const rep = data.report;
+          pt.readiness.hasSchemaLocal = !!rep.schema?.hasLocalBusiness;
+          pt.readiness.hasFaqOnSite = !!rep.hasFaq;
+          pt.readiness.botsAllowed = !!rep.robots?.allAllowed;
+          pt.readiness.hasLlmsTxt = !!rep.hasLlmsTxt;
+          pt.readiness.hasLocalPage = !!(rep.https && rep.hasViewport);
+          if (rep.links?.yandexUrl && !pt.yandexUrl) pt.yandexUrl = rep.links.yandexUrl;
+          if (rep.links?.gisUrl && !pt.gisUrl) pt.gisUrl = rep.links.gisUrl;
+          if (rep.links?.vkUrl && !pt.vkUrl) pt.vkUrl = rep.links.vkUrl;
+          if (rep.links?.tgUrl && !pt.tgUrl) pt.tgUrl = rep.links.tgUrl;
+          pt.isDemo = false;
+          saveState();
+          populateFormFromPoint(pt);
+          renderAll();
+          st.textContent = `✓ Проверено: Schema.org ${rep.schema?.hasLocalBusiness ? 'есть' : 'нет'} · robots.txt ${rep.robots?.allAllowed ? 'открыт' : 'блокирует ' + rep.robots.blockedBots.join(',')} · llms.txt ${rep.hasLlmsTxt ? 'есть' : 'нет'}`;
+          showToast('Технический GEO-аудит сайта готов!');
+        } catch (err) {
+          st.textContent = 'Не удалось проверить сайт: ' + err.message;
+        }
+        btn.disabled = false;
+      });
+
+      $('btn-server-ai-all').addEventListener('click', async () => {
+        const pt = getActivePoint();
+        const safePt = Object.assign({}, pt, { name: pt.name || 'Моя компания' });
+        const prompts = NeiroEngine.buildPromptMatrix(safePt).slice(0, 5);
+        const btn = $('btn-server-ai-all');
+        const st = $('server-auto-status');
+        btn.disabled = true;
+        for (let i = 0; i < prompts.length; i++) {
+          st.textContent = `Опрашиваем живой ИИ: запрос ${i + 1} из ${prompts.length}...`;
+          try {
+            const r = await fetch(`${backendUrl}/api/ai/check`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ prompt: prompts[i].text, businessName: safePt.name })
+            });
+            const data = await r.json();
+            if (!r.ok || !data.ok) {
+              throw new Error(data.message || data.error || 'server_error');
+            }
+            pt.promptResults[prompts[i].id] = {
+              model: data.model || 'ИИ-сервер',
+              responseText: data.responseText || '',
+              quickStatus: ''
+            };
+            pt.isDemo = false;
+            saveState();
+            renderAll();
+          } catch (err) {
+            st.textContent = `Остановлено на запросе #${i + 1}: ${err.message}`;
+            btn.disabled = false;
+            return;
+          }
+        }
+        st.textContent = '✓ Все 5 запросов проверены автоматически! Смотрите дашборд ниже.';
+        btn.disabled = false;
+        showToast('Автопроверка ИИ завершена!');
+        $('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
     // Feedback decision block
     $('fb-choices').querySelectorAll('[data-fb]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -854,9 +941,27 @@
       const a = NeiroEngine.runGeoAudit(pt);
       const verdict = state.selectedFeedback || 'Протестировал НейроЧек';
       const comment = ($('fb-comment').value || '').trim();
+      trackEvent('verdict', { verdict, comment, score: a.totalScore });
       const msg = `Тест НейроЧек (${pt.name}, GEO ${a.totalScore}/100): ${verdict}${comment ? ' | Комментарий: ' + comment : ''}`;
       copyText(msg, 'Вердикт скопирован — вставьте в Telegram!');
     });
+  }
+
+  function getBackendUrl() {
+    return (window.NEIRO_CONFIG && window.NEIRO_CONFIG.backendUrl) ? window.NEIRO_CONFIG.backendUrl.replace(/\/+$/, '') : '';
+  }
+
+  function trackEvent(event, meta) {
+    const api = getBackendUrl();
+    if (!api) return;
+    try {
+      fetch(`${api}/api/telemetry/event`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ app: 'neirochek', event, meta: meta || {} }),
+        keepalive: true
+      }).catch(() => {});
+    } catch (_) {}
   }
 
   initStaticControls();
