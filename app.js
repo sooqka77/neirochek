@@ -1,9 +1,19 @@
-/* UI-контроллер НейроЧек */
+/* UI-контроллер НейроЧек v2 */
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'neirochek_state_v1';
+  const STORAGE_KEY = 'neirochek_state_v2';
   const API_KEY_STORAGE = 'neirochek_local_api_key';
+  const QUICK_CHECK_KEYS = [
+    { key: 'hasYandexStrong', short: 'Яндекс Карты 4.7+' },
+    { key: 'has2gisFull', short: '2ГИС заполнен' },
+    { key: 'hasZoonOtzovik', short: 'Есть Zoon / Отзовик' },
+    { key: 'reviewsHaveScenarios', short: 'Отзывы со сценариями' },
+    { key: 'hasFaqOnSite', short: 'Есть FAQ на сайте' },
+    { key: 'hasSchemaLocal', short: 'Schema.org разметка' }
+  ];
+  const QUICK_KEY_SET = new Set(QUICK_CHECK_KEYS.map(x => x.key));
+
   const $ = (id) => document.getElementById(id);
 
   function esc(str) {
@@ -45,22 +55,50 @@
     }
   }
 
+  function createBlankPoint() {
+    return {
+      id: 'geo-' + Date.now(),
+      isDemo: false,
+      name: '',
+      aliases: '',
+      niche: 'kids',
+      city: 'Москва',
+      district: '',
+      address: '',
+      usp: '',
+      competitor: '',
+      siteUrl: '',
+      phone: '',
+      hours: 'Пн–Вс 10:00–20:00',
+      yandexUrl: '',
+      gisUrl: '',
+      vkUrl: '',
+      tgUrl: '',
+      readiness: { botsAllowed: true },
+      checkedSources: [],
+      promptResults: {},
+      history: []
+    };
+  }
+
   function defaultState() {
     const first = JSON.parse(JSON.stringify(NeiroData.DEMO_PRESETS[0].point));
     first.id = 'geo-1';
+    first.isDemo = true;
     return {
       activePointId: 'geo-1',
       points: [first],
       findingFilter: 'all',
       activeProTab: 'sources',
-      showAllPrompts: false
+      showAllPrompts: false,
+      selectedFeedback: ''
     };
   }
 
   function loadState() {
     let st = defaultState();
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('neirochek_state_v1');
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && Array.isArray(parsed.points) && parsed.points.length) {
@@ -74,6 +112,7 @@
       if (payload && payload.name) {
         const id = 'geo-shared-' + Date.now();
         payload.id = id;
+        payload.isDemo = false;
         payload.readiness = payload.readiness || {};
         payload.promptResults = payload.promptResults || {};
         payload.checkedSources = payload.checkedSources || [];
@@ -88,25 +127,47 @@
   }
 
   let state = loadState();
-  let customFaqByPoint = {}; // редактируемые ответы FAQ в рамках сессии
+  let customFaqByPoint = {};
 
   function saveState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (_) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
   }
 
   function getActivePoint() {
     let pt = state.points.find(p => p.id === state.activePointId);
-    if (!pt) {
-      pt = state.points[0];
-      state.activePointId = pt.id;
-    }
+    if (!pt) { pt = state.points[0]; state.activePointId = pt.id; }
     pt.readiness = pt.readiness || {};
     pt.promptResults = pt.promptResults || {};
     pt.checkedSources = pt.checkedSources || [];
     pt.history = pt.history || [];
     return pt;
+  }
+
+  function syncTapChipsVisual() {
+    document.querySelectorAll('.tap-chip').forEach(lbl => {
+      const cb = lbl.querySelector('input[type="checkbox"]');
+      if (cb) lbl.classList.toggle('checked', cb.checked);
+    });
+  }
+
+  function startOwnBlankPoint() {
+    const active = getActivePoint();
+    if (active.isDemo) {
+      const fresh = createBlankPoint();
+      fresh.id = active.id;
+      Object.assign(active, fresh);
+    } else {
+      const fresh = createBlankPoint();
+      state.points.push(fresh);
+      state.activePointId = fresh.id;
+    }
+    delete customFaqByPoint[state.activePointId];
+    saveState();
+    populateFormFromPoint(getActivePoint());
+    renderAll();
+    $('g-name').focus();
+    $('g-name').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast('Форма очищена — введите название и район вашей точки');
   }
 
   function initStaticControls() {
@@ -115,7 +176,7 @@
       .join('');
 
     $('demo-buttons').innerHTML = NeiroData.DEMO_PRESETS
-      .map(d => `<button type="button" class="demo-btn" data-demo="${esc(d.id)}">${esc(d.label)}</button>`)
+      .map(d => `<button type="button" class="demo-btn" data-demo="${esc(d.id)}">${esc(d.label.replace(/^Пример \d+: /, ''))}</button>`)
       .join('');
 
     $('demo-buttons').querySelectorAll('[data-demo]').forEach(btn => {
@@ -123,7 +184,7 @@
         const preset = NeiroData.DEMO_PRESETS.find(d => d.id === btn.getAttribute('data-demo'));
         if (!preset) return;
         const pt = getActivePoint();
-        Object.assign(pt, JSON.parse(JSON.stringify(preset.point)), { id: pt.id });
+        Object.assign(pt, JSON.parse(JSON.stringify(preset.point)), { id: pt.id, isDemo: true });
         delete customFaqByPoint[pt.id];
         saveState();
         populateFormFromPoint(pt);
@@ -132,19 +193,33 @@
       });
     });
 
-    // 14 чекбоксов готовности
-    $('readiness-checks').innerHTML = NeiroEngine.READINESS_CHECKS.map(chk => `
-      <label class="check-item">
-        <input type="checkbox" data-readiness="${esc(chk.key)}">
-        <span>${esc(chk.label)}</span>
+    // 6 главных тап-чипсов на 1-м экране
+    $('quick-readiness-chips').innerHTML = QUICK_CHECK_KEYS.map(item => `
+      <label class="tap-chip">
+        <input type="checkbox" data-readiness="${esc(item.key)}">
+        <span class="dot">✓</span>
+        <span>${esc(item.short)}</span>
       </label>
     `).join('');
 
-    // Восстанавливаем локальный OpenRouter ключ (если пользователь вводил)
+    // Остальные 8 факторов GEO в раскрывающемся блоке
+    $('adv-readiness-checks').innerHTML = NeiroEngine.READINESS_CHECKS
+      .filter(chk => !QUICK_KEY_SET.has(chk.key))
+      .map(chk => `
+        <label class="check-item">
+          <input type="checkbox" data-readiness="${esc(chk.key)}">
+          <span>${esc(chk.label)}</span>
+        </label>
+      `).join('');
+
     try {
       const savedKey = localStorage.getItem(API_KEY_STORAGE);
       if (savedKey) $('api-key').value = savedKey;
     } catch (_) {}
+
+    if (window.NEIRO_CONFIG && window.NEIRO_CONFIG.backendUrl) {
+      $('api-endpoint').value = window.NEIRO_CONFIG.backendUrl;
+    }
   }
 
   function populateFormFromPoint(pt) {
@@ -167,11 +242,13 @@
     document.querySelectorAll('[data-readiness]').forEach(cb => {
       cb.checked = !!pt.readiness[cb.getAttribute('data-readiness')];
     });
+    syncTapChipsVisual();
   }
 
   function syncPointFromForm() {
     const pt = getActivePoint();
-    pt.name = $('g-name').value.trim() || 'Моя компания';
+    pt.isDemo = false;
+    pt.name = $('g-name').value.trim();
     pt.niche = $('g-niche').value || 'other';
     pt.city = $('g-city').value.trim() || 'Москва';
     pt.district = $('g-district').value.trim();
@@ -190,6 +267,7 @@
     document.querySelectorAll('[data-readiness]').forEach(cb => {
       pt.readiness[cb.getAttribute('data-readiness')] = cb.checked;
     });
+    syncTapChipsVisual();
     delete customFaqByPoint[pt.id];
     saveState();
     return pt;
@@ -198,11 +276,12 @@
   function renderPointsBar() {
     const wrap = $('points-bar');
     const chips = state.points.map(pt => {
-      const a = NeiroEngine.runGeoAudit(pt);
+      const safe = Object.assign({}, pt, { name: pt.name || 'Новая точка' });
+      const a = NeiroEngine.runGeoAudit(safe);
       const isAct = pt.id === state.activePointId;
       return `
         <div class="point-chip ${isAct ? 'active' : ''}" data-select-pt="${esc(pt.id)}" role="button" tabindex="0">
-          <span>${esc(pt.name || 'Новая точка')}</span>
+          <span>${esc(safe.name)}</span>
           <span class="chip-score">${a.totalScore}</span>
           ${state.points.length > 1 ? `<button type="button" class="chip-del" data-del-pt="${esc(pt.id)}" title="Удалить">×</button>` : ''}
         </div>
@@ -210,7 +289,7 @@
     }).join('');
 
     const countNote = state.points.length >= 3
-      ? `<span class="hint">Бесплатный лимит: 3 точки · доп. точки открыты в PRO-тесте</span>`
+      ? `<span class="hint">Бесплатно: 3 точки · доп. точки открыты в PRO-тесте</span>`
       : `<span class="hint">Точек: ${state.points.length} / 3 бесплатно</span>`;
 
     wrap.innerHTML = `${chips}<button type="button" class="add-point-btn" id="btn-add-point">+ Добавить точку</button>${countNote}`;
@@ -239,48 +318,26 @@
     });
 
     $('btn-add-point').addEventListener('click', () => {
-      const id = 'geo-' + Date.now();
-      const newPt = {
-        id,
-        name: `Точка #${state.points.length + 1}`,
-        aliases: '',
-        niche: 'kids',
-        city: 'Москва',
-        district: '',
-        address: '',
-        usp: '',
-        competitor: '',
-        siteUrl: '',
-        phone: '',
-        hours: 'Пн–Вс 10:00–20:00',
-        yandexUrl: '',
-        gisUrl: '',
-        vkUrl: '',
-        tgUrl: '',
-        readiness: { botsAllowed: true },
-        checkedSources: [],
-        promptResults: {},
-        history: []
-      };
-      state.points.push(newPt);
-      state.activePointId = id;
+      const fresh = createBlankPoint();
+      state.points.push(fresh);
+      state.activePointId = fresh.id;
       saveState();
-      populateFormFromPoint(newPt);
+      populateFormFromPoint(fresh);
       renderAll();
       $('g-name').focus();
-      $('g-name').select();
     });
   }
 
   function renderPrompts(pt, audit) {
     const visiblePrompts = state.showAllPrompts ? audit.prompts : audit.prompts.slice(0, 5);
-    const models = ['Алиса / Яндекс AI', 'ChatGPT Search', 'Perplexity', 'GigaChat', 'DeepSeek'];
+    const models = ['Алиса / Яндекс AI', 'GigaChat', 'ChatGPT Search', 'Perplexity', 'DeepSeek'];
 
     const html = visiblePrompts.map((p, idx) => {
-      const saved = pt.promptResults[p.id] || { model: models[0], responseText: '' };
+      const saved = pt.promptResults[p.id] || { model: models[0], responseText: '', quickStatus: '' };
       const an = audit.live.perPromptAnalysis[p.id];
+      const isBrand = p.id === 'p4';
       let cardCls = '';
-      let badgeHtml = `<span class="res-badge idle">Ещё не проверено</span>`;
+      let badgeHtml = `<span class="res-badge idle">Не проверено</span>`;
 
       if (an) {
         if (an.hallucinationFlags.length) {
@@ -289,24 +346,39 @@
         } else if (an.isDirectBrandCheck) {
           cardCls = an.sentiment === 'negative' ? 'miss' : 'hit';
           badgeHtml = an.sentiment === 'negative'
-            ? `<span class="res-badge bad">Есть негатив в памяти ИИ</span>`
-            : `<span class="res-badge good">✓ ИИ знает о бренде (${an.sentiment === 'positive' ? 'позитив' : 'нейтрально'})</span>`;
+            ? `<span class="res-badge bad">Есть негатив / ошибка</span>`
+            : `<span class="res-badge good">✓ ИИ знает бренд</span>`;
         } else if (an.mentioned) {
           cardCls = 'hit';
-          badgeHtml = `<span class="res-badge good">✓ Упомянуты · позиция #${an.position || 1}</span>`;
+          badgeHtml = `<span class="res-badge good">✓ Упомянуты · #${an.position || 1}</span>`;
         } else {
           cardCls = 'miss';
           badgeHtml = `<span class="res-badge bad">✕ Не упомянуты</span>`;
         }
       }
 
+      const qs = saved.quickStatus || '';
+      const quickButtonsHtml = isBrand ? `
+        <div class="quick-verdict-row">
+          <span class="hint">Быстро (1 тап):</span>
+          <button type="button" class="qv-btn ${qs === 'brand_ok' ? 'active-good' : ''}" data-qv="${esc(p.id)}" data-val="brand_ok">✓ Знает хорошо</button>
+          <button type="button" class="qv-btn ${qs === 'brand_vacuum' ? 'active-warn' : ''}" data-qv="${esc(p.id)}" data-val="brand_vacuum">~ Мало данных</button>
+          <button type="button" class="qv-btn ${qs === 'brand_bad' ? 'active-bad' : ''}" data-qv="${esc(p.id)}" data-val="brand_bad">⚠ Ошибся / негатив</button>
+        </div>
+      ` : `
+        <div class="quick-verdict-row">
+          <span class="hint">Быстро (1 тап):</span>
+          <button type="button" class="qv-btn ${qs === 'top3' ? 'active-good' : ''}" data-qv="${esc(p.id)}" data-val="top3">✓ Мы в топ-3</button>
+          <button type="button" class="qv-btn ${qs === 'low' ? 'active-warn' : ''}" data-qv="${esc(p.id)}" data-val="low">~ В конце списка</button>
+          <button type="button" class="qv-btn ${qs === 'miss' ? 'active-bad' : ''}" data-qv="${esc(p.id)}" data-val="miss">✕ Нас нет</button>
+        </div>
+      `;
+
       const metaTags = [];
-      if (an && an.competitors.length) {
-        metaTags.push(`<span class="mini-tag">Конкуренты: ${esc(an.competitors.slice(0, 4).join(', '))}</span>`);
-      }
-      if (an && an.domains.length) {
-        metaTags.push(`<span class="mini-tag">Источники: ${esc(an.domains.slice(0, 4).join(', '))}</span>`);
-      }
+      if (an && an.competitors.length) metaTags.push(`<span class="mini-tag">Конкуренты: ${esc(an.competitors.slice(0, 4).join(', '))}</span>`);
+      if (an && an.domains.length) metaTags.push(`<span class="mini-tag">Источники: ${esc(an.domains.slice(0, 4).join(', '))}</span>`);
+
+      const hasText = !!(saved.responseText && saved.responseText.trim());
 
       return `
         <div class="prompt-card ${cardCls}" data-pid="${esc(p.id)}">
@@ -321,28 +393,30 @@
           <div class="prompt-q">${esc(p.text)}</div>
 
           <div class="ai-btn-row">
-            <button type="button" class="ai-chip yandex" data-launch-url="${esc(p.links.yandexAi)}" data-copy-q="${esc(p.text)}">Яндекс AI (Алиса) ↗</button>
-            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.chatgpt)}" data-copy-q="${esc(p.text)}">ChatGPT ↗</button>
-            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.perplexity)}" data-copy-q="${esc(p.text)}">Perplexity ↗</button>
-            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.gigachat)}" data-copy-q="${esc(p.text)}">GigaChat (копир.) ↗</button>
-            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.deepseek)}" data-copy-q="${esc(p.text)}">DeepSeek (копир.) ↗</button>
-            <button type="button" class="ai-chip" data-copy-only="${esc(p.text)}">Копировать запрос</button>
+            <button type="button" class="ai-chip ru-main" data-launch-url="${esc(p.links.yandexAi)}" data-copy-q="${esc(p.text)}">Яндекс AI (Алиса) ↗</button>
+            <button type="button" class="ai-chip ru-giga" data-launch-url="${esc(p.links.gigachat)}" data-copy-q="${esc(p.text)}">GigaChat ↗</button>
+            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.chatgpt)}" data-copy-q="${esc(p.text)}">ChatGPT <span class="vpn-badge">VPN</span> ↗</button>
+            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.perplexity)}" data-copy-q="${esc(p.text)}">Perplexity <span class="vpn-badge">VPN</span> ↗</button>
+            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.deepseek)}" data-copy-q="${esc(p.text)}">DeepSeek ↗</button>
+            <button type="button" class="ai-chip" data-copy-only="${esc(p.text)}">Копировать</button>
           </div>
 
-          <div class="form-grid-2" style="margin-top:8px;align-items:start;">
-            <div class="field" style="grid-column: span 2;">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-                <label>Вставьте ответ, который дала нейросеть (анализируется автоматически)</label>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <select class="btn-xs" data-model-for="${esc(p.id)}" style="padding:4px 8px;border:1px solid var(--line);border-radius:7px;background:#FFF;">
-                    ${models.map(m => `<option value="${esc(m)}" ${saved.model === m ? 'selected' : ''}>${esc(m)}</option>`).join('')}
-                  </select>
-                  ${saved.responseText ? `<button type="button" class="btn btn-outline btn-xs" data-clear-resp="${esc(p.id)}">Очистить</button>` : ''}
-                </div>
+          ${quickButtonsHtml}
+
+          <details class="paste-toggle" ${hasText ? 'open' : ''}>
+            <summary>${hasText ? 'Разобранный ответ ИИ (нажмите, чтобы скрыть)' : '+ Вставить полный текст ответа ИИ (для авторазбора конкурентов и доменов)'}</summary>
+            <div style="margin-top:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+                <select class="btn-xs" data-model-for="${esc(p.id)}" style="padding:4px 8px;border:1px solid var(--line);border-radius:7px;background:#FFF;">
+                  ${models.map(m => `<option value="${esc(m)}" ${saved.model === m ? 'selected' : ''}>${esc(m)}</option>`).join('')}
+                </select>
+                ${(hasText || qs) ? `<button type="button" class="btn btn-outline btn-xs" data-clear-resp="${esc(p.id)}">Сбросить</button>` : ''}
               </div>
-              <textarea rows="3" data-resp-for="${esc(p.id)}" placeholder="Скопируйте ответ из Алисы / ChatGPT / Perplexity и вставьте сюда...">${esc(saved.responseText || '')}</textarea>
+              <div class="field">
+                <textarea rows="3" data-resp-for="${esc(p.id)}" placeholder="Вставьте сюда ответ из Алисы, GigaChat, ChatGPT или Perplexity...">${esc(saved.responseText || '')}</textarea>
+              </div>
             </div>
-          </div>
+          </details>
 
           ${metaTags.length ? `<div class="prompt-meta">${metaTags.join('')}</div>` : ''}
         </div>
@@ -359,38 +433,50 @@
 
     $('prompts-list').innerHTML = html + toggleBtn;
 
-    // Bind launch & copy
     $('prompts-list').querySelectorAll('[data-launch-url]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const q = btn.getAttribute('data-copy-q');
-        const url = btn.getAttribute('data-launch-url');
-        copyText(q, 'Запрос скопирован — открываем нейросеть!');
-        window.open(url, '_blank', 'noopener');
+        copyText(btn.getAttribute('data-copy-q'), 'Запрос скопирован — открываем нейросеть!');
+        window.open(btn.getAttribute('data-launch-url'), '_blank', 'noopener');
       });
     });
     $('prompts-list').querySelectorAll('[data-copy-only]').forEach(btn => {
       btn.addEventListener('click', () => copyText(btn.getAttribute('data-copy-only'), 'Запрос скопирован!'));
     });
 
-    // Bind textareas & model selects (update dashboard without destroying textarea focus!)
+    // 1-тап быстрые вердикты
+    $('prompts-list').querySelectorAll('[data-qv]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pid = btn.getAttribute('data-qv');
+        const val = btn.getAttribute('data-val');
+        const prev = pt.promptResults[pid] || { model: models[0], responseText: '', quickStatus: '' };
+        pt.promptResults[pid] = {
+          model: prev.model,
+          responseText: prev.responseText,
+          quickStatus: prev.quickStatus === val ? '' : val
+        };
+        pt.isDemo = false;
+        saveState();
+        renderAll();
+      });
+    });
+
     $('prompts-list').querySelectorAll('[data-resp-for]').forEach(ta => {
       ta.addEventListener('input', () => {
         const pid = ta.getAttribute('data-resp-for');
-        const prev = pt.promptResults[pid] || { model: models[0], responseText: '' };
-        pt.promptResults[pid] = { model: prev.model, responseText: ta.value };
+        const prev = pt.promptResults[pid] || { model: models[0], responseText: '', quickStatus: '' };
+        pt.promptResults[pid] = { model: prev.model, responseText: ta.value, quickStatus: prev.quickStatus };
+        pt.isDemo = false;
         saveState();
         renderDashboardOnly();
       });
-      ta.addEventListener('blur', () => {
-        renderAll();
-      });
+      ta.addEventListener('blur', () => renderAll());
     });
 
     $('prompts-list').querySelectorAll('[data-model-for]').forEach(sel => {
       sel.addEventListener('change', () => {
         const pid = sel.getAttribute('data-model-for');
-        const prev = pt.promptResults[pid] || { model: sel.value, responseText: '' };
-        pt.promptResults[pid] = { model: sel.value, responseText: prev.responseText };
+        const prev = pt.promptResults[pid] || { model: sel.value, responseText: '', quickStatus: '' };
+        pt.promptResults[pid] = { model: sel.value, responseText: prev.responseText, quickStatus: prev.quickStatus };
         saveState();
         renderDashboardOnly();
       });
@@ -412,11 +498,13 @@
 
   function renderDashboardOnly() {
     const pt = getActivePoint();
-    const audit = NeiroEngine.runGeoAudit(pt);
+    const safePt = Object.assign({}, pt, { name: pt.name || 'Моя компания' });
+    const audit = NeiroEngine.runGeoAudit(safePt);
 
+    $('demo-banner').classList.toggle('hidden', !pt.isDemo);
     renderPointsBar();
 
-    $('res-title').textContent = pt.name + (pt.district ? ` · ${pt.district}` : '');
+    $('res-title').textContent = safePt.name + (safePt.district ? ` · ${safePt.district}` : '');
     $('res-score').textContent = audit.totalScore;
     const stBadge = $('res-status');
     stBadge.textContent = audit.status.label;
@@ -453,22 +541,26 @@
       `;
     }).join('');
 
-    // Hallucinations / blind spots
     $('hallucination-slot').innerHTML = l.hallucinations.length
       ? `<div class="alert-box"><b>Обнаружены риски в ответах ИИ:</b><ul style="margin:6px 0 0;padding-left:18px;">${l.hallucinations.map(h => `<li><b>${esc(h.promptTitle)} (${esc(h.model)}):</b> ${esc(h.flag)}</li>`).join('')}</ul></div>`
       : '';
 
-    // Competitors rank
     $('comp-rank-list').innerHTML = l.topCompetitors.length
       ? l.topCompetitors.map((c, i) => `<div class="rank-row"><span><b>#${i + 1}</b> ${esc(c.name)}</span><span class="mono" style="font-weight:700;">${c.hits} упом.</span></div>`).join('')
-      : `<p class="hint" style="margin-top:8px;">Вставьте хотя бы 1 ответ из Алисы или ChatGPT в Шаге 2 выше — здесь автоматически соберётся список конкурентов, которые обходят вас в ИИ.</p>`;
+      : `<p class="hint" style="margin-top:8px;">Вставьте хотя бы 1 полный ответ из Алисы или ChatGPT в Шаге 2 — здесь соберётся рейтинг конкурентов, которые обходят вас в ИИ.</p>`;
 
-    // Domains rank
     $('domain-rank-list').innerHTML = l.topDomains.length
-      ? l.topDomains.map(d => `<div class="rank-row"><span class="mono" style="font-weight:700;">${esc(d.domain)}</span><span class="hint">цитируется ${d.hits} раз(а)</span></div>`).join('')
-      : `<p class="hint" style="margin-top:8px;">После вставки ответов ИИ здесь появятся конкретные домены (2gis.ru, zoon.ru, yandex.ru, afisha.ru...), откуда нейросети берут рекомендации в вашем районе.</p>`;
+      ? l.topDomains.map(d => `
+          <div class="rank-row">
+            <div>
+              <span class="mono" style="font-weight:700;">${esc(d.domain)}</span>
+              <span class="hint" style="margin-left:6px;">(${d.hits} упом.)</span>
+            </div>
+            <span class="gap-pill ${d.present ? 'ok' : 'miss'}">${d.present ? '✓ Вы там есть' : '✕ Пробел — вас нет'}</span>
+          </div>
+        `).join('')
+      : `<p class="hint" style="margin-top:8px;">После вставки ответов ИИ здесь появятся сайты, откуда нейросети берут ответы, и сразу подсветится, где вас ещё нет.</p>`;
 
-    // Findings
     const filtered = state.findingFilter === 'all'
       ? audit.findings
       : audit.findings.filter(f => f.level === state.findingFilter);
@@ -489,12 +581,12 @@
         }).join('')
       : `<p class="hint">В этой категории пунктов нет.</p>`;
 
-    renderProArtifacts(pt, audit);
+    renderProArtifacts(safePt, audit);
   }
 
   function renderProArtifacts(pt, audit) {
-    // 1. Нишевая карта источников РФ
-    const checked = new Set(pt.checkedSources || []);
+    const activeReal = getActivePoint();
+    const checked = new Set(activeReal.checkedSources || []);
     $('sources-checklist').innerHTML = audit.niche.sources.map(src => {
       const done = checked.has(src.name);
       const pCls = src.priority === 'Критично' ? 'crit' : src.priority === 'Важно' ? 'imp' : 'opt';
@@ -518,27 +610,23 @@
     $('sources-checklist').querySelectorAll('[data-src-name]').forEach(cb => {
       cb.addEventListener('change', () => {
         const name = cb.getAttribute('data-src-name');
-        const set = new Set(pt.checkedSources || []);
+        const set = new Set(activeReal.checkedSources || []);
         if (cb.checked) set.add(name);
         else set.delete(name);
-        pt.checkedSources = Array.from(set);
+        activeReal.checkedSources = Array.from(set);
         saveState();
-        renderProArtifacts(pt, audit);
+        renderDashboardOnly();
       });
     });
 
-    // 2. Schema.org JSON-LD
     $('schema-code').textContent = NeiroEngine.generateSchemaJsonLd(pt);
-
-    // 3. llms.txt & robots.txt
     $('llms-code').textContent = NeiroEngine.generateLlmsTxt(pt);
     $('robots-code').textContent = NeiroEngine.generateRobotsSnippet();
 
-    // 4. GEO-FAQ editor + code
-    if (!customFaqByPoint[pt.id]) {
-      customFaqByPoint[pt.id] = NeiroEngine.generateFaqItems(pt);
+    if (!customFaqByPoint[activeReal.id]) {
+      customFaqByPoint[activeReal.id] = NeiroEngine.generateFaqItems(pt);
     }
-    const faqItems = customFaqByPoint[pt.id];
+    const faqItems = customFaqByPoint[activeReal.id];
     $('faq-editor').innerHTML = faqItems.map((it, i) => `
       <div style="border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:8px;background:#F9FAFD;">
         <div class="field" style="margin-bottom:6px;">
@@ -566,12 +654,11 @@
       });
     });
 
-    // 5. Словарь смыслов отзывов + история замеров
     $('semantics-list').innerHTML = audit.niche.semanticAnchors
       .map((a, idx) => `<div class="anchor-chip"><b>${idx + 1}.</b> ${esc(a)}</div>`)
       .join('');
 
-    renderHistoryChart(pt);
+    renderHistoryChart(activeReal);
   }
 
   function renderHistoryChart(pt) {
@@ -618,14 +705,15 @@
 
   function renderAll() {
     const pt = getActivePoint();
-    const audit = NeiroEngine.runGeoAudit(pt);
+    const safePt = Object.assign({}, pt, { name: pt.name || 'Моя компания' });
+    const audit = NeiroEngine.runGeoAudit(safePt);
     renderPrompts(pt, audit);
     renderDashboardOnly();
   }
 
   function saveSnapshotToday() {
     const pt = getActivePoint();
-    const audit = NeiroEngine.runGeoAudit(pt);
+    const audit = NeiroEngine.runGeoAudit(Object.assign({}, pt, { name: pt.name || 'Моя компания' }));
     const now = new Date();
     const d = String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0');
     pt.history = pt.history || [];
@@ -641,36 +729,33 @@
   }
 
   function bindEvents() {
-    $('geo-form').addEventListener('input', () => {
-      syncPointFromForm();
-      renderAll();
-    });
-    $('geo-form').addEventListener('change', () => {
-      syncPointFromForm();
-      renderAll();
-    });
+    $('btn-start-own').addEventListener('click', startOwnBlankPoint);
+    $('btn-clear-demo').addEventListener('click', startOwnBlankPoint);
+
+    $('geo-form').addEventListener('input', () => { syncPointFromForm(); renderAll(); });
+    $('geo-form').addEventListener('change', () => { syncPointFromForm(); renderAll(); });
     $('geo-form').addEventListener('submit', (e) => {
       e.preventDefault();
       syncPointFromForm();
       renderAll();
-      $('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      showToast('GEO-диагноз обновлён');
+      $('prompts-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast('Запросы обновлены — проверьте 3–5 штук в Алисе или GigaChat');
     });
 
-    // Автопроверка через API (опционально)
     $('btn-run-api-all').addEventListener('click', async () => {
       const apiKey = $('api-key').value.trim();
       const endpoint = $('api-endpoint').value.trim();
       const model = $('api-model').value;
       const statusEl = $('api-status');
       if (!apiKey && endpoint.includes('openrouter.ai')) {
-        showToast('Вставьте OpenRouter API Key или используйте 1-клик кнопки ниже без ключа');
+        showToast('Вставьте OpenRouter API Key или используйте кнопки без ключа ниже');
         return;
       }
       try { if (apiKey) localStorage.setItem(API_KEY_STORAGE, apiKey); } catch (_) {}
 
       const pt = getActivePoint();
-      const prompts = NeiroEngine.buildPromptMatrix(pt).slice(0, 5);
+      const safePt = Object.assign({}, pt, { name: pt.name || 'Моя компания' });
+      const prompts = NeiroEngine.buildPromptMatrix(safePt).slice(0, 5);
       const btn = $('btn-run-api-all');
       btn.disabled = true;
 
@@ -683,7 +768,8 @@
             model,
             promptText: prompts[i].text
           });
-          pt.promptResults[prompts[i].id] = { model, responseText: answer };
+          pt.promptResults[prompts[i].id] = { model, responseText: answer, quickStatus: '' };
+          pt.isDemo = false;
           saveState();
           renderAll();
         } catch (err) {
@@ -697,7 +783,6 @@
       showToast('Автопроверка ИИ завершена!');
     });
 
-    // Фильтры находок
     $('findings-filters').querySelectorAll('[data-filter]').forEach(btn => {
       btn.addEventListener('click', () => {
         state.findingFilter = btn.getAttribute('data-filter');
@@ -706,7 +791,6 @@
       });
     });
 
-    // PRO tabs
     $('pro-tabs').querySelectorAll('[data-pro-tab]').forEach(btn => {
       btn.addEventListener('click', () => {
         const tab = btn.getAttribute('data-pro-tab');
@@ -716,17 +800,15 @@
       });
     });
 
-    // Paywall preview toggle
     $('paywall-toggle').addEventListener('change', (e) => {
       $('pro-body').classList.toggle('paywall-locked', e.target.checked);
     });
     $('btn-unlock-test').addEventListener('click', () => {
       $('paywall-toggle').checked = false;
       $('pro-body').classList.remove('paywall-locked');
-      showToast('PRO GEO-доступ открыт бесплатно на время теста');
+      showToast('PRO GEO-доступ открыт бесплатно на тест');
     });
 
-    // Copy & download artifacts
     $('btn-copy-schema').addEventListener('click', () => copyText($('schema-code').textContent, 'Schema.org JSON-LD скопирован!'));
     $('btn-copy-llms').addEventListener('click', () => copyText($('llms-code').textContent, 'Текст llms.txt скопирован!'));
     $('btn-copy-robots').addEventListener('click', () => copyText($('robots-code').textContent, 'Блок robots.txt скопирован!'));
@@ -742,7 +824,6 @@
       showToast('Файл llms.txt скачан');
     });
 
-    // History snapshots
     $('btn-save-snapshot').addEventListener('click', saveSnapshotToday);
     $('btn-save-snapshot-2').addEventListener('click', saveSnapshotToday);
     $('btn-clear-history').addEventListener('click', () => {
@@ -752,26 +833,29 @@
       showToast('История замеров очищена');
     });
 
-    // Share & Print
     $('btn-share-report').addEventListener('click', () => {
       const pt = Object.assign({}, getActivePoint());
       delete pt.id;
       const base = window.location.origin + window.location.pathname;
-      const shareUrl = `${base}#share=${NeiroEngine.encodePayload(pt)}`;
-      copyText(shareUrl, 'Ссылка на GEO-отчёт скопирована!');
+      copyText(`${base}#share=${NeiroEngine.encodePayload(pt)}`, 'Ссылка на GEO-отчёт скопирована!');
     });
     $('btn-print-report').addEventListener('click', () => window.print());
 
-    // Feedback
-    document.querySelectorAll('[data-fb]').forEach(btn => {
+    // Feedback decision block
+    $('fb-choices').querySelectorAll('[data-fb]').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-fb]').forEach(b => b.classList.remove('picked'));
+        $('fb-choices').querySelectorAll('[data-fb]').forEach(b => b.classList.remove('picked'));
         btn.classList.add('picked');
-        const pt = getActivePoint();
-        const a = NeiroEngine.runGeoAudit(pt);
-        const msg = `Тест НейроЧек (${pt.name}, GEO ${a.totalScore}/100): ${btn.getAttribute('data-fb')}`;
-        copyText(msg, 'Текст оценки скопирован — вставьте в Telegram!');
+        state.selectedFeedback = btn.getAttribute('data-fb');
       });
+    });
+    $('btn-copy-feedback').addEventListener('click', () => {
+      const pt = Object.assign({}, getActivePoint(), { name: getActivePoint().name || 'Моя компания' });
+      const a = NeiroEngine.runGeoAudit(pt);
+      const verdict = state.selectedFeedback || 'Протестировал НейроЧек';
+      const comment = ($('fb-comment').value || '').trim();
+      const msg = `Тест НейроЧек (${pt.name}, GEO ${a.totalScore}/100): ${verdict}${comment ? ' | Комментарий: ' + comment : ''}`;
+      copyText(msg, 'Вердикт скопирован — вставьте в Telegram!');
     });
   }
 

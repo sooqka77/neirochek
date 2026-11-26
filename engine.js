@@ -301,7 +301,7 @@
       0, 100
     );
 
-    // 2. Агрегируем реальные проверки промптов (отделяем discovery-запросы от прямого brand-чека p4)
+    // 2. Агрегируем реальные проверки промптов (полный текст ответа ИЛИ быстрый 1-тап статус с телефона)
     const promptResults = point.promptResults || {};
     let testedCount = 0;
     let discoveryTested = 0;
@@ -315,11 +315,34 @@
 
     for (const p of prompts) {
       const entry = promptResults[p.id];
-      if (!entry || !entry.responseText || !entry.responseText.trim()) continue;
-      const an = analyzeAiResponse(entry.responseText, point);
-      if (!an) continue;
+      if (!entry) continue;
+      const hasText = !!(entry.responseText && entry.responseText.trim());
+      const hasQuick = !!entry.quickStatus;
+      if (!hasText && !hasQuick) continue;
+
       const isDirectBrandCheck = p.id === 'p4';
-      perPromptAnalysis[p.id] = { ...an, model: entry.model || 'ИИ', isDirectBrandCheck };
+      let an;
+      if (hasText) {
+        an = analyzeAiResponse(entry.responseText, point);
+      } else {
+        // Быстрый 1-тап вердикт (удобно на телефоне без копипасты)
+        const qs = entry.quickStatus;
+        an = {
+          mentioned: qs === 'top3' || qs === 'low' || qs === 'brand_ok',
+          position: qs === 'top3' ? 2 : qs === 'low' ? 5 : null,
+          sentiment: qs === 'brand_bad' ? 'negative' : (qs === 'top3' || qs === 'brand_ok') ? 'positive' : 'neutral',
+          competitors: [],
+          domains: [],
+          hallucinationFlags: qs === 'brand_vacuum'
+            ? ['⚠ Информационный вакуум: отмечено, что у ИИ мало данных о точке.']
+            : qs === 'brand_bad'
+              ? ['⚠ Риск репутации/галлюцинации: отмечена ошибка или негатив в ответе ИИ.']
+              : []
+        };
+      }
+      if (!an) continue;
+
+      perPromptAnalysis[p.id] = { ...an, model: entry.model || 'ИИ', isDirectBrandCheck, quickStatus: entry.quickStatus || '' };
       testedCount++;
       if (isDirectBrandCheck) {
         brandCheckStatus = an.hallucinationFlags.length ? 'vacuum' : an.sentiment;
@@ -362,7 +385,11 @@
     const topDomains = Object.entries(domainCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 8)
-      .map(([domain, hits]) => ({ domain, hits }));
+      .map(([domain, hits]) => ({
+        domain,
+        hits,
+        present: checkDomainPresence(domain, point)
+      }));
 
     const lvlOrder = { red: 0, yellow: 1, green: 2 };
     findings.sort((a, b) => lvlOrder[a.level] - lvlOrder[b.level] || b.weight - a.weight);
@@ -394,6 +421,23 @@
         hallucinations
       }
     };
+  }
+
+  function checkDomainPresence(domain, point) {
+    const d = String(domain || '').toLowerCase();
+    const r = point.readiness || {};
+    const checked = (point.checkedSources || []).join(' ').toLowerCase();
+    if (d.includes('yandex')) return !!(r.hasYandexStrong || point.yandexUrl || checked.includes('яндекс'));
+    if (d.includes('2gis')) return !!(r.has2gisFull || point.gisUrl || checked.includes('2гис'));
+    if (d.includes('zoon')) return !!(r.hasZoonOtzovik || checked.includes('zoon'));
+    if (d.includes('otzovik') || d.includes('irecommend')) return !!(r.hasZoonOtzovik || checked.includes('отзовик'));
+    if (d.includes('vk.com')) return !!(point.vkUrl || checked.includes('vk'));
+    if (d.includes('t.me')) return !!point.tgUrl;
+    if (d.includes('afisha')) return !!(r.hasNicheCatalogs || checked.includes('афиша'));
+    if (d.includes('prodoctorov')) return !!(r.hasNicheCatalogs || checked.includes('продокторов'));
+    if (d.includes('kidsreview') || d.includes('restoclub') || d.includes('drive2')) return !!r.hasNicheCatalogs;
+    if (point.siteUrl && point.siteUrl.toLowerCase().includes(d)) return true;
+    return false;
   }
 
   /* 4. PRO-генератор Schema.org JSON-LD */

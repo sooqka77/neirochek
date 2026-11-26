@@ -27,47 +27,63 @@
         </span>
         <span>
           <span class="brand-name">НейроЧек</span>
-          <span class="brand-sub">Алиса AI · ChatGPT · Perplexity · GigaChat</span>
+          <span class="brand-sub">Алиса AI · GigaChat · ChatGPT · Perplexity</span>
         </span>
       </a>
       <div class="topbar-right">
-        <span class="pill pill-test">● MVP-тест: PRO открыт бесплатно</span>
-        <label class="pill-lock" title="Переключить превью будущего платного экрана">
+        <span class="pill pill-test">● Тест: PRO открыт бесплатно</span>
+        <label class="pill-lock" title="Посмотреть, как будет выглядеть платный экран в релизе">
           <input type="checkbox" id="paywall-toggle">
-          <span>Показать paywall</span>
+          <span>Превью paywall</span>
         </label>
       </div>
     </div>
   </header>
 
-  <main class="wrap">
-    <section class="hero">
-      <h1>Советуют ли вашу точку <span class="hl">Алиса, ChatGPT и GigaChat?</span></h1>
-      <p class="hero-lead">Проверьте, кого нейросети рекомендуют вместо вас по районным запросам, на какие сайты они ссылаются и что нужно поправить в белую, чтобы попадать в ответы ИИ. Бесплатно до 3 точек.</p>
-      <div class="hero-bar">
-        <span class="demo-label">Быстрый пример:</span>
-        <div id="demo-buttons" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  <section class="hero-wrap">
+    <div class="wrap hero">
+      <h1>Советуют ли вашу точку <span class="hl">Алиса, GigaChat и ChatGPT?</span></h1>
+      <p class="hero-lead">Проверьте за 2 минуты, кого нейросети рекомендуют в вашем районе вместо вас, с каких сайтов они берут ответы и какие белые шаги поднимут точку в ИИ-выдаче. Бесплатно до 3 точек.</p>
+
+      <div class="hero-actions no-print">
+        <button type="button" class="demo-btn primary-start" id="btn-start-own">+ Проверить свою точку с нуля</button>
+        <span class="demo-label">или пример:</span>
+        <div id="demo-buttons" style="display:flex;gap:7px;flex-wrap:wrap;"></div>
       </div>
-    </section>
 
-    <div class="points-bar" id="points-bar"></div>
+      <div class="how-strip">
+        <div class="how-step"><b>01</b> Алиса AI и нейросети берут до 70% фактов из Яндекс Карт, 2ГИС, Zoon и отзовиков</div>
+        <div class="how-step"><b>02</b> Сценарии («для новичков», «с парковкой») ИИ вытаскивает прямо из текстов отзывов</div>
+        <div class="how-step"><b>03</b> Сайт закрепляет бренд через <code>Schema.org</code>, прямой FAQ и файл <code>llms.txt</code></div>
+      </div>
+    </div>
+  </section>
 
-    <!-- ШАГ 1: ПРОФИЛЬ ТОЧКИ -->
+  <main class="wrap">
+    <!-- Плашка демо-режима -->
+    <div class="demo-banner hidden no-print" id="demo-banner">
+      <span>👀 Сейчас открыт <b>демо-пример</b> с разобранными ответами ИИ, чтобы сразу увидеть дашборд и PRO-код.</span>
+      <button type="button" class="btn btn-primary btn-sm" id="btn-clear-demo">Очистить под свою точку →</button>
+    </div>
+
+    <div class="points-bar no-print" id="points-bar"></div>
+
+    <!-- ШАГ 1: КОМПАКТНЫЙ ПРОФИЛЬ ТОЧКИ -->
     <section class="card no-print">
-      <div class="card-head">
+      <div class="card-head" style="margin-bottom:12px;">
         <div>
-          <span class="eyebrow">Шаг 1 · Паспорт бизнеса</span>
-          <h2 style="font-size:20px;">Расскажите о вашей точке</h2>
+          <span class="eyebrow">Шаг 1 · Экспресс-профиль (20 секунд)</span>
+          <h2 style="font-size:19px;">Что и где ищут ваши клиенты</h2>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button type="button" class="btn btn-outline btn-sm" id="btn-share-report">Поделиться ссылкой</button>
-          <button type="button" class="btn btn-outline btn-sm" id="btn-print-report">Сохранить PDF</button>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline btn-sm" id="btn-share-report">Поделиться</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-print-report">PDF</button>
         </div>
       </div>
 
       <form id="geo-form">
         <div class="form-grid">
-          <div class="field span-2">
+          <div class="field">
             <label for="g-name">Название бизнеса</label>
             <input type="text" id="g-name" placeholder="Например: Инжинириум · Коммунарка">
           </div>
@@ -76,55 +92,50 @@
             <select id="g-niche"></select>
           </div>
           <div class="field">
-            <label for="g-city">Город</label>
-            <input type="text" id="g-city" placeholder="Москва">
-          </div>
-          <div class="field">
-            <label for="g-district">Район / метро / ЖК</label>
-            <input type="text" id="g-district" placeholder="ЖК Скандинавия, м. Коммунарка">
-          </div>
-          <div class="field">
-            <label for="g-address">Точный адрес</label>
-            <input type="text" id="g-address" placeholder="ул. Эдварда Грига, 5">
+            <label for="g-district">Город и район / метро / ЖК</label>
+            <input type="text" id="g-district" placeholder="Москва, ЖК Скандинавия">
           </div>
           <div class="field span-2">
-            <label for="g-usp">Главная фишка / сценарий (под что люди вас ищут)</label>
-            <input type="text" id="g-usp" placeholder="Например: робототехника для детей 6–12 лет, маленькие группы, бесплатное пробное">
+            <label for="g-usp">Главная фишка (по какому запросу хотите выпадать в ИИ)</label>
+            <input type="text" id="g-usp" placeholder="Например: робототехника для детей 6–12 лет, маленькие группы, пробное бесплатно">
           </div>
           <div class="field">
-            <label for="g-comp">Главный конкурент рядом (если знаете)</label>
+            <label for="g-comp">Главный конкурент рядом (опционально)</label>
             <input type="text" id="g-comp" placeholder="Например: Яркие дети">
-          </div>
-          <div class="field">
-            <label for="g-aliases">Синонимы / латиница (через запятую)</label>
-            <input type="text" id="g-aliases" placeholder="Квант, Kvant">
-          </div>
-          <div class="field">
-            <label for="g-site">Сайт</label>
-            <input type="url" id="g-site" placeholder="https://vash-site.ru">
-          </div>
-          <div class="field">
-            <label for="g-phone">Телефон и график (для разметки ИИ)</label>
-            <input type="text" id="g-phone" placeholder="+7 (495) 000-00-00">
           </div>
         </div>
 
-        <details style="margin-top:12px;">
-          <summary style="font-size:13px;font-weight:700;cursor:pointer;color:var(--accent);">+ Ссылки на карты и соцсети (нужны для генерации Schema.org sameAs и llms.txt)</summary>
-          <div class="form-grid" style="margin-top:10px;">
-            <div class="field"><label for="g-yandex">Яндекс Карты</label><input type="url" id="g-yandex" placeholder="https://yandex.ru/maps/org/..."></div>
-            <div class="field"><label for="g-gis">2ГИС</label><input type="url" id="g-gis" placeholder="https://2gis.ru/..."></div>
+        <div style="margin-top:14px;">
+          <span class="hint" style="font-weight:700;color:var(--ink);">Отметьте одним тапом, что уже есть у точки:</span>
+          <div class="chip-toggles" id="quick-readiness-chips"></div>
+        </div>
+
+        <!-- Раскрывающийся блок: полный профиль + ссылки для Schema.org + все 14 факторов -->
+        <details class="adv-drawer">
+          <summary>
+            <span>⚙ Полный профиль: адрес, сайт, ссылки на карты/VK/TG (для Schema.org и llms.txt) и все 14 факторов</span>
+            <span class="hint">Развернуть ▾</span>
+          </summary>
+
+          <div class="form-grid">
+            <div class="field"><label for="g-city">Город</label><input type="text" id="g-city" placeholder="Москва"></div>
+            <div class="field"><label for="g-address">Точный адрес</label><input type="text" id="g-address" placeholder="ул. Эдварда Грига, 5"></div>
+            <div class="field"><label for="g-aliases">Синонимы / латиница</label><input type="text" id="g-aliases" placeholder="Квант, Kvant"></div>
+            <div class="field"><label for="g-site">Сайт</label><input type="url" id="g-site" placeholder="https://vash-site.ru"></div>
+            <div class="field"><label for="g-phone">Телефон</label><input type="text" id="g-phone" placeholder="+7 (495) 000-00-00"></div>
             <div class="field"><label for="g-hours">График работы</label><input type="text" id="g-hours" placeholder="Пн–Вс 10:00–20:00"></div>
+            <div class="field"><label for="g-yandex">Ссылка на Яндекс Карты</label><input type="url" id="g-yandex" placeholder="https://yandex.ru/maps/org/..."></div>
+            <div class="field"><label for="g-gis">Ссылка на 2ГИС</label><input type="url" id="g-gis" placeholder="https://2gis.ru/..."></div>
             <div class="field"><label for="g-vk">ВКонтакте</label><input type="url" id="g-vk" placeholder="https://vk.com/..."></div>
-            <div class="field span-2"><label for="g-tg">Telegram-канал или бот</label><input type="url" id="g-tg" placeholder="https://t.me/..."></div>
+            <div class="field span-3"><label for="g-tg">Telegram-канал или бот</label><input type="url" id="g-tg" placeholder="https://t.me/..."></div>
           </div>
+
+          <p class="hint" style="font-weight:700;color:var(--ink);margin-top:14px;">Дополнительные факторы ИИ-готовности:</p>
+          <div class="checks-grid" id="adv-readiness-checks"></div>
         </details>
 
-        <div class="checks-title">Быстрый чекап ИИ-готовности (14 белых GEO-сигналов — отметьте, что уже сделано)</div>
-        <div class="checks-grid" id="readiness-checks"></div>
-
         <div class="btn-row">
-          <button type="submit" class="btn btn-primary">Обновить GEO-диагноз ↓</button>
+          <button type="submit" class="btn btn-primary">Собрать запросы и проверить в ИИ ↓</button>
         </div>
       </form>
     </section>
@@ -133,18 +144,18 @@
     <section class="card no-print" id="prompts-section">
       <div class="card-head">
         <div>
-          <span class="eyebrow">Шаг 2 · Реальная проверка в нейросетях (без фейков)</span>
-          <h2 style="font-size:20px;">Проверьте, как ИИ отвечает прямо сейчас</h2>
+          <span class="eyebrow">Шаг 2 · Живая проверка в нейросетях (без фейков)</span>
+          <h2 style="font-size:19px;">Проверьте 3–5 запросов в Алисе, GigaChat или ChatGPT</h2>
         </div>
         <span class="pill pill-test">5 базовых бесплатно + 5 PRO открыто</span>
       </div>
 
-      <p class="hint" style="margin-bottom:12px;">Нажмите кнопку нужной нейросети — запрос откроется сразу с готовым текстом (или скопируется в буфер). Вставьте ответ ИИ ниже — анализатор сам найдёт вашу позицию, конкурентов, домены-источники и галлюцинации.</p>
+      <p class="hint" style="margin-bottom:12px;">Нажмите <b>Яндекс AI (Алиса)</b> или <b>GigaChat</b> (работают в РФ без VPN) — запрос сразу откроется или скопируется. С телефона достаточно нажать 1 кнопку статуса (`Мы в топ-3` / `Нас нет`), а если вставить текст ответа — чекер вытащит конкурентов и сайты-источники.</p>
 
-      <!-- Опциональный автопилот через API -->
-      <details class="api-box">
-        <summary>⚡ Автопроверка в 1 кнопку через API (необязательно — если есть свой ключ OpenRouter)</summary>
-        <p class="hint" style="margin:8px 0 10px;">Ключ хранится только в вашем браузере и никуда не передаётся. Позволяет в 1 клик автоматически прогнать все запросы через живые веб-модели (Perplexity Sonar, GPT-4o Online, Gemini Online).</p>
+      <!-- Опциональный автопилот через API / будущий сервер -->
+      <details class="api-box" id="api-drawer">
+        <summary>⚡ Автопроверка всех запросов в 1 кнопку (API / серверный режим)</summary>
+        <p class="hint" style="margin:8px 0 10px;">На этапе теста можно вставить свой ключ OpenRouter (хранится только в вашем браузере) — или завтра подключить единый бэкенд, чтобы автопроверка работала у всех без ключа.</p>
         <div class="form-grid">
           <div class="field">
             <label for="api-key">OpenRouter API Key</label>
@@ -159,12 +170,12 @@
             </select>
           </div>
           <div class="field">
-            <label for="api-endpoint">Endpoint (по умолчанию OpenRouter)</label>
+            <label for="api-endpoint">Endpoint</label>
             <input type="url" id="api-endpoint" value="https://openrouter.ai/api/v1/chat/completions">
           </div>
         </div>
         <div class="btn-row" style="margin-top:10px;">
-          <button type="button" class="btn btn-primary btn-sm" id="btn-run-api-all">Запустить автопроверку 5 базовых запросов</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-run-api-all">Запустить автопроверку 5 запросов</button>
           <span class="hint" id="api-status"></span>
         </div>
       </details>
@@ -172,12 +183,12 @@
       <div id="prompts-list"></div>
     </section>
 
-    <!-- ДАШБОРД РЕЗУЛЬТАТОВ (БЕСПЛАТНО) -->
+    <!-- ДАШБОРД РЕЗУЛЬТАТОВ -->
     <section class="card" id="results-section">
       <div class="card-head">
         <div>
           <span class="eyebrow">Бесплатный GEO-рентген · До 3 точек</span>
-          <h2 style="font-size:21px;" id="res-title">Индекс видимости в ИИ</h2>
+          <h2 style="font-size:20px;" id="res-title">Индекс видимости в ИИ</h2>
         </div>
         <button type="button" class="btn btn-outline btn-sm no-print" id="btn-save-snapshot">+ Зафиксировать замер сегодня</button>
       </div>
@@ -207,18 +218,18 @@
       <div id="hallucination-slot"></div>
     </section>
 
-    <!-- Конкуренты и источники из реальных ответов ИИ -->
+    <!-- Конкуренты и Карта пробелов цитирования -->
     <section class="split-2">
       <div class="card">
         <span class="eyebrow">Из ваших проверок ИИ</span>
-        <h3 style="font-size:17px;">Кого ИИ рекомендует вместо вас</h3>
+        <h3 style="font-size:17px;">Кого ИИ советует вместо вас</h3>
         <p class="hint" style="margin-top:4px;">Компании, которые чаще всего выпадают в ответах по вашему району.</p>
         <div class="rank-list" id="comp-rank-list"></div>
       </div>
       <div class="card">
-        <span class="eyebrow">Карта цитирования</span>
-        <h3 style="font-size:17px;">На какие сайты опирается ИИ</h3>
-        <p class="hint" style="margin-top:4px;">Именно на этих площадках нужно быть и обновлять отзывы, чтобы ИИ начал советовать вас.</p>
+        <span class="eyebrow">Карта пробелов цитирования</span>
+        <h3 style="font-size:17px;">Откуда ИИ берёт ответы (и где вас нет)</h3>
+        <p class="hint" style="margin-top:4px;">Сравниваем сайты, которые цитирует ИИ, с вашим присутствием на них.</p>
         <div class="rank-list" id="domain-rank-list"></div>
       </div>
     </section>
@@ -247,7 +258,7 @@
           <span class="pill pill-pro">PRO · 2 490 ₽/мес</span>
           <h2>Белые GEO-инструменты попадания в ответы ИИ</h2>
         </div>
-        <span class="pill pill-test">Открыто бесплатно на время теста</span>
+        <span class="pill pill-test">Открыто бесплатно на тест</span>
       </div>
 
       <div class="pro-body" id="pro-body">
@@ -270,29 +281,26 @@
             <button type="button" class="pro-tab" data-pro-tab="semantics">5. Смыслы отзывов и динамика</button>
           </div>
 
-          <!-- PRO 1: Карта источников РФ -->
           <div class="pro-pane" id="pro-pane-sources">
             <h3 style="font-size:17px;margin-bottom:6px;">Где нужно быть в вашей нише, чтобы ИИ вас цитировал</h3>
-            <p class="hint" style="margin-bottom:12px;">Отмечайте площадки, где карточка уже полностью заполнена с единым адресом, телефоном и свежими отзывами.</p>
+            <p class="hint" style="margin-bottom:12px;">Отмечайте площадки, где карточка заполнена с единым адресом, телефоном и свежими отзывами — это сразу обновляет Карту пробелов выше.</p>
             <div id="sources-checklist"></div>
           </div>
 
-          <!-- PRO 2: Schema.org JSON-LD -->
           <div class="pro-pane hidden" id="pro-pane-schema">
             <h3 style="font-size:17px;margin-bottom:6px;">Микроразметка Schema.org (LocalBusiness + sameAs)</h3>
-            <p class="hint" style="margin-bottom:12px;">Вставьте этот блок в <code>&lt;head&gt;</code> страницы вашей точки (в Тильде: Настройки сайта → Ещё → HTML-код для вставки внутрь head). Свойство <code>sameAs</code> связывает сайт с Яндекс Картами и 2ГИС для нейросетей.</p>
+            <p class="hint" style="margin-bottom:12px;">Вставьте этот блок в <code>&lt;head&gt;</code> страницы точки (в Тильде: Настройки сайта → Ещё → HTML-код для вставки внутрь head).</p>
             <div class="btn-row" style="margin-top:0;margin-bottom:10px;">
               <button type="button" class="btn btn-primary btn-sm" id="btn-copy-schema">Копировать JSON-LD</button>
             </div>
             <pre class="code-box" id="schema-code"></pre>
           </div>
 
-          <!-- PRO 3: llms.txt & robots.txt -->
           <div class="pro-pane hidden" id="pro-pane-llms">
             <div class="split-2">
               <div>
                 <h3 style="font-size:16px;margin-bottom:6px;">Файл /llms.txt (паспорт точки для ИИ)</h3>
-                <p class="hint" style="margin-bottom:10px;">Сохраните файл и загрузите в корень сайта (<code>vash-site.ru/llms.txt</code>) — ИИ-агенты получают чистые факты без шума вёрстки.</p>
+                <p class="hint" style="margin-bottom:10px;">Положите в корень сайта (<code>vash-site.ru/llms.txt</code>) — ИИ-агенты получают чистые факты без шума вёрстки.</p>
                 <div class="btn-row" style="margin-top:0;margin-bottom:10px;">
                   <button type="button" class="btn btn-primary btn-sm" id="btn-download-llms">Скачать llms.txt</button>
                   <button type="button" class="btn btn-outline btn-sm" id="btn-copy-llms">Копировать</button>
@@ -301,7 +309,7 @@
               </div>
               <div>
                 <h3 style="font-size:16px;margin-bottom:6px;">Блок для /robots.txt (доступ ИИ-ботам)</h3>
-                <p class="hint" style="margin-bottom:10px;">Убедитесь, что сайт не блокирует краулеров Яндекса, OpenAI, Perplexity и Google.</p>
+                <p class="hint" style="margin-bottom:10px;">Явно разрешает индексацию Яндексу, ChatGPT, Perplexity и Google.</p>
                 <div class="btn-row" style="margin-top:0;margin-bottom:10px;">
                   <button type="button" class="btn btn-outline btn-sm" id="btn-copy-robots">Копировать для robots.txt</button>
                 </div>
@@ -310,10 +318,9 @@
             </div>
           </div>
 
-          <!-- PRO 4: GEO-FAQ -->
           <div class="pro-pane hidden" id="pro-pane-faq">
             <h3 style="font-size:17px;margin-bottom:6px;">Готовый GEO-блок FAQ (вопросы, которые люди задают ИИ)</h3>
-            <p class="hint" style="margin-bottom:12px;">Отредактируйте ответы под ваши реальные цены и условия — и скопируйте готовый HTML + разметку <code>FAQPage</code> на сайт.</p>
+            <p class="hint" style="margin-bottom:12px;">Отредактируйте ответы под ваши точные цены и условия — и скопируйте готовый HTML + разметку <code>FAQPage</code>.</p>
             <div id="faq-editor"></div>
             <div class="btn-row" style="margin-bottom:10px;">
               <button type="button" class="btn btn-primary btn-sm" id="btn-copy-faq">Копировать HTML + FAQPage JSON-LD</button>
@@ -321,21 +328,20 @@
             <pre class="code-box" id="faq-code"></pre>
           </div>
 
-          <!-- PRO 5: Смыслы отзывов и трекер динамики -->
           <div class="pro-pane hidden" id="pro-pane-semantics">
             <div class="split-2">
               <div>
                 <h3 style="font-size:16px;margin-bottom:6px;">Словарь смыслов для живых отзывов</h3>
-                <p class="hint" style="margin-bottom:10px;">Алиса и ChatGPT рекомендуют вас по конкретным запросам, когда находят эти факты в отзывах реальных клиентов:</p>
+                <p class="hint" style="margin-bottom:10px;">Алиса и ChatGPT рекомендуют вас по конкретным сценариям, когда видят эти детали в отзывах:</p>
                 <div id="semantics-list"></div>
               </div>
               <div>
                 <h3 style="font-size:16px;margin-bottom:6px;">Динамика видимости по замерам</h3>
-                <p class="hint" style="margin-bottom:10px;">Повторяйте замер раз в 2 недели после обновления карточек, отзывов и сайта.</p>
+                <p class="hint" style="margin-bottom:10px;">Повторяйте замер раз в 2 недели после обновления карточек и сайта.</p>
                 <div id="history-chart-wrap"></div>
                 <div class="btn-row" style="margin-top:10px;">
                   <button type="button" class="btn btn-primary btn-sm" id="btn-save-snapshot-2">+ Сохранить текущий замер</button>
-                  <button type="button" class="btn btn-outline btn-sm" id="btn-clear-history">Сбросить историю</button>
+                  <button type="button" class="btn btn-outline btn-sm" id="btn-clear-history">Сбросить</button>
                 </div>
               </div>
             </div>
@@ -344,22 +350,29 @@
       </div>
     </section>
 
-    <!-- Блок обратной связи для теста гипотезы -->
+    <!-- Фидбек «Вот купишь сразу?» -->
     <section class="feedback-card no-print">
-      <div>
-        <h3 style="font-size:17px;color:#FFFFFF;">Тестируете НейроЧек? Оцените идею за 1 клик</h3>
-        <p>Мы проверяем, нужен ли российским предпринимателям такой инструмент для попадания в Алису и ChatGPT. Кнопка скопирует короткий отзыв для Telegram.</p>
+      <span class="pill pill-pro" style="margin-bottom:8px;">ТЕСТ ИДЕИ · ОТВЕТ ЗА 10 СЕКУНД</span>
+      <h3 style="font-size:19px;color:#FFFFFF;">Честный вопрос: купили бы такой сервис для своего бизнеса?</h3>
+      <p>Если на следующем шаге добавим полную автопроверку по 1 кнопке (без копирования ответов) и еженедельные алерты в Telegram — выберите честный вариант и отправьте в Telegram.</p>
+      <div class="fb-btns" id="fb-choices">
+        <button type="button" class="fb-btn" data-fb="🔥 Купил бы сразу за 2 490 ₽/мес">🔥 Купил бы сразу (2 490 ₽/мес)</button>
+        <button type="button" class="fb-btn" data-fb="🤖 Купил бы, когда будет полный автомат в 1 кнопку">🤖 Купил бы с полным автоматом</button>
+        <button type="button" class="fb-btn" data-fb="🤔 Интересно бесплатно, но платить пока не готов">🤔 Только бесплатно</button>
       </div>
-      <div class="fb-btns">
-        <button type="button" class="fb-btn" data-fb="Огонь, купил бы за 2 490 ₽/мес (особенно с автопроверкой)">👍 Купил бы</button>
-        <button type="button" class="fb-btn" data-fb="Очень интересно, но хочется чтобы само проверяло без ручного копирования">🤖 Хочу полный автомат</button>
-        <button type="button" class="fb-btn" data-fb="Чего не хватило: ">💬 Чего не хватает</button>
+      <div class="fb-extra">
+        <input type="text" id="fb-comment" placeholder="Что бы точно добавили или поменяли? (необязательно)">
+        <button type="button" class="btn btn-primary btn-sm" id="btn-copy-feedback">Скопировать вердикт для Telegram</button>
       </div>
     </section>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script>
+    // Конфиг для подключения сервера (Этап 2) и Яндекс Метрики
+    window.NEIRO_CONFIG = { backendUrl: '', metrikaId: null };
+  </script>
   <script src="data.js"></script>
   <script src="engine.js"></script>
   <script src="app.js"></script>
