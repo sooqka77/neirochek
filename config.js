@@ -4,7 +4,7 @@
  * Также можно временно проверить любой URL, дописав в браузере ?api=https://...
  */
 window.NEIRO_CONFIG = {
-  backendUrl: 'https://sooqka77-geo-api-f2ca.twc1.net',
+  backendUrl: 'https://api.checkgeo.ru',
   metrikaId: null
 };
 (function () {
