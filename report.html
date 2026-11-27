@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>PRO-аудит Карты + ИИ · CheckGeo &amp; NeiroScan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .dual-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .score-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+    .score-card.maps { border-top: 3px solid #EAB308; }
+    .score-card.ai { border-top: 3px solid #1D4ED8; }
+    .mini-hero { display: flex; align-items: center; gap: 16px; margin: 10px 0 12px; }
+    .big-ring { width: 84px; height: 84px; position: relative; flex-shrink: 0; }
+    .big-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .big-ring .num { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 24px; font-weight: 800; }
+    .exec-box { background: #111315; color: #F8FAFC; border-radius: var(--radius); padding: 18px 20px; margin-bottom: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .exec-item { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 12px 14px; }
+    .exec-item .e-k { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 4px; }
+    .exec-item .e-k.ok { color: #6EE7B7; }
+    .exec-item .e-k.warn { color: #FCD34D; }
+    .exec-item .e-k.bad { color: #FCA5A5; }
+    .exec-item p { font-size: 13px; line-height: 1.45; color: #E2E8F0; }
+    .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin-top: 10px; }
+    .audit-tbl { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--paper); min-width: 640px; }
+    .audit-tbl th { text-align: left; padding: 9px 11px; background: var(--soft); font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
+    .audit-tbl td { padding: 10px 11px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .audit-tbl tr:last-child td { border-bottom: 0; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+    .badge.ok { background: #DCFCE7; color: #15803D; }
+    .badge.warn { background: #FEF3C7; color: #B45309; }
+    .badge.bad { background: #FEE2E2; color: #B91C1C; }
+    .badge.info { background: #EFF6FF; color: #1D4ED8; }
+    .sem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+    .sem-row { padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; margin-bottom: 8px; background: #FAFAF8; }
+    .sem-row.gap { background: #FFF8F8; border-color: #FECACA; }
+    .sem-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+    .sem-track { height: 6px; background: #E2E8F0; border-radius: 999px; margin: 6px 0 2px; overflow: hidden; }
+    .sem-fill { height: 100%; border-radius: 999px; }
+    .sem-fill.good { background: #15803D; }
+    .sem-fill.bad { background: #B91C1C; }
+    .pulse-chart { display: flex; align-items: flex-end; gap: 10px; height: 110px; padding: 12px 6px 0; }
+    .pulse-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+    .pulse-bar { width: 100%; max-width: 40px; background: #111315; border-radius: 6px 6px 2px 2px; }
+    .tool-tabs { display: flex; gap: 7px; flex-wrap: wrap; margin: 12px 0 16px; }
+    .tool-tab { background: var(--paper); border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 700; color: var(--muted); }
+    .tool-tab.active { background: var(--ink); color: #FFFFFF; border-color: var(--ink); }
+    .tool-pane { display: none; }
+    .tool-pane.active { display: block; }
+    .qr-inline { display: grid; grid-template-columns: 1fr 220px; gap: 18px; align-items: center; }
+    .qr-box { background: #FFFFFF; border: 2px solid #111315; border-radius: 12px; padding: 14px; text-align: center; }
+    .qr-box svg { display: block; margin: 8px auto; width: 176px; height: 176px; }
+    .script-card { background: #FAFAF8; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .script-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+    .script-text { font-size: 13.5px; white-space: pre-wrap; line-height: 1.5; }
+    .price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 0 14px; }
+    .price-item { border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; background: #FAFAF8; }
+    .price-top { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; font-size: 13.5px; }
+    .state-screen { max-width: 560px; margin: 56px auto; text-align: center; background: #FFFFFF; border: 1px solid var(--line); border-radius: 14px; padding: 32px 24px; }
+    .print-pane-title { display: none; }
+    @media (max-width: 820px) { .dual-scores, .exec-box, .sem-grid, .qr-inline, .price-grid { grid-template-columns: 1fr; } }
+    @media print {
+      .no-print, .tool-tabs { display: none !important; }
+      .tool-pane { display: block !important; margin-bottom: 16px; page-break-inside: avoid; }
+      .print-pane-title { display: block !important; font-size: 15px; margin: 14px 0 6px; border-bottom: 1px solid #CBD5E1; padding-bottom: 4px; }
+      body { background: #FFFFFF; }
+      .card, .score-card { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="./">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="8.5" stroke="#FFFFFF" stroke-width="1.8" stroke-dasharray="3 3"/>
+            <circle cx="12" cy="12" r="4.5" stroke="#FFFFFF" stroke-width="1.8"/>
+            <circle cx="12" cy="12" r="2" fill="#FFFFFF"/>
+          </svg>
+        </span>
+        <span>
+          <span class="brand-name">CheckGeo + NeiroScan</span>
+          <span class="brand-sub" id="hdr-sub">Загрузка PRO-отчёта...</span>
+        </span>
+      </a>
+      <div class="topbar-right no-print">
+        <button type="button" class="btn btn-outline btn-sm" id="btn-export-csv">Матрица LLM (CSV) ↓</button>
+        <button type="button" class="btn btn-dark btn-sm" onclick="window.print()">Сохранить PDF</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" id="report-root">
+    <div class="state-screen" id="loading-box">
+      <span class="eyebrow">PRO-АУДИТ</span>
+      <h2 id="state-title" style="font-size:21px;margin-bottom:8px;">Загружаем ваш отчёт...</h2>
+      <p class="hint" id="state-desc">Подключаемся к серверу CheckGeo / NeiroScan.</p>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="qr.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const apiBase = ((window.NEIRO_CONFIG && window.NEIRO_CONFIG.backendUrl) || (window.KARTA_CONFIG && window.KARTA_CONFIG.backendUrl) || 'https://api.checkgeo.ru').replace(/\/+$/, '');
+      const params = new URLSearchParams(window.location.search);
+      const reportId = params.get('id');
+      const orderId = params.get('order');
+
+      let toastTimer = null;
+      function toast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+      }
+
+      function copy(txt, msg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(() => toast(msg)).catch(() => fallbackCopy(txt, msg));
+        } else fallbackCopy(txt, msg);
+      }
+      function fallbackCopy(txt, msg) {
+        const ta = document.createElement('textarea');
+        ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+        document.body.removeChild(ta); toast(msg);
+      }
+
+      function ringSvg(score, color) {
+        const C = 263.89;
+        const off = (C * (1 - Math.max(0, Math.min(100, Number(score) || 0)) / 100)).toFixed(1);
+        return `<div class="big-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#E5E7EB" stroke-width="10"/><circle cx="50" cy="50" r="42" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="${off}"/></svg><span class="num">${Math.round(score || 0)}</span></div>`;
+      }
+
+      let currentReport = null;
+
+      function exportCsv(r) {
+        const cell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+        const header = ['Дата', 'Точка', 'Контур', 'Интент', 'Запрос', 'Модель', 'Упомянут', 'Позиция', 'Галлюцинации', 'Конкуренты', 'Домены', 'Фрагмент'];
+        const rows = [header.map(cell).join(';')];
+        const dt = String(r.createdAt || '').slice(0, 10);
+        for (const c of (r.aiChecks || [])) {
+          rows.push([
+            dt, r.point?.name || '', c.contour || '', c.intent || '', c.text || '', c.model || '',
+            c.mentioned ? 'Да' : 'Нет', c.position ? '#' + c.position : '—',
+            (c.hallucinations || []).join(' | ') || 'Нет',
+            (c.competitors || []).join(', '),
+            (c.domains || []).join(', '),
+            c.responseSnippet || ''
+          ].map(cell).join(';'));
+        }
+        const blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `pro-matrix-${r.id || 'report'}.csv`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        toast('Матрица LLM скачана в CSV (Excel / Google Sheets)');
+      }
+
+      function renderReport(r) {
+        currentReport = r;
+        const p = r.point || {};
+        const dt = String(r.createdAt || '').slice(0, 10);
+        document.title = `PRO-аудит: ${p.name || 'Точка'} (${p.city || ''})`;
+        document.getElementById('hdr-sub').textContent = `${r.tier === 'recs_250' ? 'Рекомендации (250 ₽)' : 'Полный PRO-аудит (950 ₽)'} · ${dt}`;
+
+        const mapsStroke = r.scores.maps >= 75 ? '#15803D' : r.scores.maps >= 50 ? '#D97706' : '#B91C1C';
+        const aiStroke = r.scores.ai >= 70 ? '#15803D' : r.scores.ai >= 45 ? '#1D4ED8' : '#B91C1C';
+        const yc = r.yandexCard;
+        const sem = yc && yc.ok ? yc.semantics : null;
+
+        let qrSvg = '';
+        try {
+          if (window.KartaQR && r.toolkit?.reviewHelperUrl) {
+            qrSvg = window.KartaQR.toSVG(r.toolkit.reviewHelperUrl, { sizePx: 176, quietZone: 3, dark: '#111315', light: '#FFFFFF' });
+          }
+        } catch (_) {}
+
+        const semBlock = sem && sem.totalParsed > 0 ? `
+          <section class="card" id="part-semantics">
+            <span class="eyebrow">Разбор ${sem.totalParsed} последних отзывов и ответов владельца</span>
+            <h2 style="font-size:20px;margin-bottom:6px;">Живая семантика отзывов и пульс по месяцам</h2>
+            <p class="hint">Последний отзыв: <b>${esc(sem.newestDate || '—')}</b> · За 30 дней: <b>${sem.recent30d}</b> · Ответы владельца: <b>${sem.replyRate}% (${sem.replyCount}/${sem.totalParsed})</b> · Средняя длина: <b>${sem.avgLength} симв.</b>${sem.templateRepliesCount ? ` · Шаблонных ответов: <b>${sem.templateRepliesCount}</b>` : ''}</p>
+            ${sem.byMonth && sem.byMonth.length ? `
+              <div class="pulse-chart">
+                ${sem.byMonth.map(m => {
+                  const maxN = Math.max(1, ...sem.byMonth.map(x => x.count));
+                  const h = Math.max(16, Math.round((m.count / maxN) * 76));
+                  return `<div class="pulse-col"><span class="mono" style="font-size:12px;font-weight:700;">${m.count}</span><div class="pulse-bar" style="height:${h}px"></div><span class="hint" style="font-size:11px;">${esc(m.month)}</span></div>`;
+                }).join('')}
+              </div>` : ''}
+            <div class="sem-grid">
+              <div>
+                <h3 style="font-size:15px;margin-bottom:8px;">Что уже сильно звучит (козыри)</h3>
+                ${(sem.strongThemes || []).map(t => `
+                  <div class="sem-row"><div class="sem-head"><b>${esc(t.label)}</b><span class="mono hint">${t.revHits}/${t.total} (${t.pct}%) · ответы: ${t.repHits}</span></div>
+                  <div class="sem-track"><div class="sem-fill good" style="width:${Math.max(4, t.pct)}%"></div></div></div>
+                `).join('') || '<p class="hint">Недостаточно данных.</p>'}
+              </div>
+              <div>
+                <h3 style="font-size:15px;margin-bottom:8px;">Семантические пробелы (почему ИИ не видит)</h3>
+                ${(sem.gapThemes || []).map(t => `
+                  <div class="sem-row gap"><div class="sem-head"><b>${esc(t.label)}</b><span class="mono" style="font-size:12px;color:#B91C1C;">${t.revHits}/${t.total} (${t.pct}%) · ответы: <b>${t.repHits}</b></span></div>
+                  <div class="sem-track"><div class="sem-fill bad" style="width:${Math.max(3, t.pct)}%"></div></div></div>
+                `).join('') || '<p class="hint">Критических пробелов не найдено.</p>'}
+              </div>
+            </div>
+          </section>` : '';
+
+        const compBlock = (r.competitors && r.competitors.length) ? `
+          <section class="card" id="part-comp">
+            <span class="eyebrow">Конкурентная разведка</span>
+            <h2 style="font-size:20px;margin-bottom:6px;">Кто забирает ваш спрос и «Приём конкурента → ваша адаптация»</h2>
+            <div class="tbl-wrap"><table class="audit-tbl">
+              <thead><tr><th>Конкурент</th><th>Что работает у них</th><th>Слабое место</th><th>Ваша адаптация</th></tr></thead>
+              <tbody>
+                ${r.competitors.map(c => `<tr><td><b>${esc(c.name)}</b><br><span class="hint">${esc(c.where || '')}</span></td><td>${esc(c.strength)}</td><td>${esc(c.weakness)}</td><td><b>${esc(c.adaptation)}</b></td></tr>`).join('')}
+              </tbody>
+            </table></div>
+          </section>` : '';
+
+        const findingsHtml = (list) => (list || []).map(f => `
+          <div class="finding ${esc(f.level || 'yellow')}">
+            <span class="f-tag ${esc(f.level || 'yellow')}">${esc(f.tag || 'Точка роста')}</span>
+            <div>
+              <h4>${esc(f.title)}</h4>
+              <p class="f-why">${esc(f.why)}</p>
+              ${f.fix ? `<div class="f-fix"><b>Что сделать:</b> ${esc(f.fix)}</div>` : ''}
+            </div>
+          </div>`).join('');
+
+        const root = document.getElementById('report-root');
+        root.innerHTML = `
+          <section class="hero-wrap" style="margin:0 -18px 18px;padding:24px 18px 20px;">
+            <div class="wrap" style="padding:0;">
+              <span class="eyebrow">${esc([p.city, p.address || p.district, p.siteUrl].filter(Boolean).join(' · '))}</span>
+              <h1>${esc(p.name || 'Точка')}: <span class="hl">PRO-аудит Карты + ИИ</span></h1>
+              <p class="hero-lead">Автоматический комплексный разбор от <b>${esc(dt)}</b> (собран за ${(r.elapsedMs / 1000).toFixed(1)} сек · синтез: <code>${esc(r.synthProvider)}</code>). Внутри — живые данные, конкуренты, матрица запросов к ИИ и готовый пакет внедрения за 15 минут.</p>
+            </div>
+          </section>
+
+          <section class="dual-scores">
+            <div class="score-card maps">
+              <span class="eyebrow">CheckGeo · Яндекс Карты и площадки</span>
+              <div class="mini-hero">
+                ${ringSvg(r.scores.maps, mapsStroke)}
+                <div>
+                  <h2 style="font-size:17px;">Индекс карточек и отзывов</h2>
+                  <p class="hint" style="margin-top:4px;">${yc?.ok ? `Рейтинг ${yc.meta.rating || '—'} · ${yc.meta.reviewCount || 0} отзывов · ${yc.meta.photoCount || '—'} фото · ответы ${yc.semantics.replyRate}%` : 'Анализ по введённым данным, сайту и справочникам.'}</p>
+                </div>
+              </div>
+            </div>
+            <div class="score-card ai">
+              <span class="eyebrow">NeiroScan · Видимость в ИИ</span>
+              <div class="mini-hero">
+                ${ringSvg(r.scores.ai, aiStroke)}
+                <div>
+                  <h2 style="font-size:17px;">Упоминаемость: ${r.scores.mentionRate}% (${r.scores.mentionedCount}/${r.scores.discoveryCount})</h2>
+                  <p class="hint" style="margin-top:4px;">В Топ-3: <b>${r.scores.top3Rate}%</b> · Техготовность сайта: <b>${r.scores.aiReadiness}/100</b> · Schema.org: <b>${r.site?.hasSchemaLocal ? 'есть' : 'нет'}</b></p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="exec-box">
+            ${(r.execSummary || []).map((e, i) => `
+              <div class="exec-item">
+                <span class="e-k ${esc(e.kind || 'ok')}">${i + 1} · ${esc(e.title)}</span>
+                <p>${esc(e.text)}</p>
+              </div>
+            `).join('')}
+          </section>
+
+          <section class="card" id="part-maps">
+            <span class="eyebrow">Часть 1 · Карты, 2ГИС, Zoon и Отзовик</span>
+            <h2 style="font-size:20px;margin-bottom:10px;">Точки роста на картах и площадках отзывов</h2>
+            <div class="findings-list">${findingsHtml(r.mapsFindings)}</div>
+          </section>
+
+          ${semBlock}
+          ${compBlock}
+
+          <section class="card" id="part-ai">
+            <span class="eyebrow">Часть 2 · Матрица живых запросов в ИИ + Рентген сайта</span>
+            <h2 style="font-size:20px;margin-bottom:8px;">Как ваш бизнес видят нейросети (Бренд + Небренд)</h2>
+            <div class="tbl-wrap" style="margin-bottom:16px;"><table class="audit-tbl">
+              <thead><tr><th>Контур / Интент</th><th>Запрос</th><th>Результат</th><th>Конкуренты и источники</th></tr></thead>
+              <tbody>
+                ${(r.aiChecks || []).map(c => `
+                  <tr>
+                    <td><span class="badge info">${esc(c.contour)}</span><br><span class="hint">${esc(c.intent)}</span></td>
+                    <td>${esc(c.text)}</td>
+                    <td>${c.mentioned ? `<span class="badge ${c.position <= 3 ? 'ok' : 'warn'}">✓ #${c.position}</span>` : `<span class="badge bad">✕ Нет в топе</span>`}${c.hallucinations?.length ? `<br><span class="badge bad" style="margin-top:4px;">⚠ ${esc(c.hallucinations[0])}</span>` : ''}</td>
+                    <td>${c.competitors?.length ? `<b>Выше:</b> ${esc(c.competitors.slice(0, 4).join(', '))}` : '—'}${c.domains?.length ? `<br><span class="mono hint">${esc(c.domains.slice(0, 4).join(' · '))}</span>` : ''}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table></div>
+
+            <h3 style="font-size:16px;margin:14px 0 8px;">Дыры видимости в ИИ и техрентген сайта</h3>
+            <div class="findings-list">${findingsHtml(r.aiFindings)}</div>
+
+            ${(r.siteAuditNotes && r.siteAuditNotes.length) ? `
+              <div style="margin-top:14px;padding:13px 15px;border:1px solid var(--line);border-radius:10px;background:#FAFAF8;">
+                <b style="font-size:14px;">Замечания по тексту сайта, нестыковкам и первым фото карточки:</b>
+                <ul style="margin:6px 0 0;padding-left:18px;font-size:13.5px;display:flex;flex-direction:column;gap:5px;">
+                  ${r.siteAuditNotes.map(n => `<li>${esc(n)}</li>`).join('')}
+                </ul>
+              </div>` : ''}
+          </section>
+
+          <section class="card pro-card" id="part-ready">
+            <div class="pro-banner">
+              <div class="pro-banner-left">
+                <span class="pill pill-pro">PRO-ПАКЕТ · ВНЕДРЕНИЕ ЗА 15 МИНУТ</span>
+                <h2>Готовые материалы для администратора и сайта</h2>
+              </div>
+            </div>
+
+            <div class="tool-tabs no-print">
+              <button type="button" class="tool-tab active" data-tab="t-qr">1. QR + 3 скрипта</button>
+              <button type="button" class="tool-tab" data-tab="t-price">2. Прайс + UTM</button>
+              <button type="button" class="tool-tab" data-tab="t-schema">3. Schema + Title</button>
+              <button type="button" class="tool-tab" data-tab="t-faq">4. Блок FAQ</button>
+              <button type="button" class="tool-tab" data-tab="t-llms">5. План 14 дней + llms</button>
+            </div>
+
+            <div class="tool-pane active" id="t-qr">
+              <h3 class="print-pane-title">1. QR-помощник отзывов и 3 скрипта для команды</h3>
+              <div class="qr-inline" style="margin-bottom:16px;">
+                <div>
+                  <h3 style="font-size:16px;margin-bottom:6px;">Живой QR-помощник отзывов</h3>
+                  <p class="hint" style="margin-bottom:10px;">Сканируется любой камерой: клиент выбирает теги и попадает прямо на форму отзыва, а при замечании срабатывает перехват в ваш контакт.</p>
+                  <div class="btn-row">
+                    <a class="btn btn-dark btn-sm" href="${esc(r.toolkit.reviewHelperUrl)}" target="_blank" rel="noopener">Открыть как клиент ↗</a>
+                    <button type="button" class="btn btn-outline btn-sm" data-copy-text="${esc(r.toolkit.reviewHelperUrl)}" data-copy-msg="Ссылка помощника скопирована!">Копировать ссылку</button>
+                  </div>
+                </div>
+                <div class="qr-box">
+                  <span class="mono" style="font-size:10.5px;font-weight:700;">${esc((p.name || 'ОТЗЫВ').toUpperCase().slice(0, 26))}</span>
+                  ${qrSvg}
+                  <span class="hint" style="font-size:11px;">Наведите камеру телефона</span>
+                </div>
+              </div>
+              ${(r.toolkit.scripts || []).map((sc, i) => `
+                <div class="script-card">
+                  <div class="script-head"><b>${esc(sc.title)}</b><button type="button" class="btn btn-outline btn-sm no-print" data-copy-id="sc-${i}" data-copy-msg="Скрипт скопирован!">Копировать</button></div>
+                  <div class="script-text" id="sc-${i}">${esc(sc.text)}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="tool-pane" id="t-price">
+              <h3 class="print-pane-title">2. Обновлённая витрина услуг и UTM-ссылки</h3>
+              <div class="price-grid">
+                ${(r.toolkit.priceItems || []).map((it, i) => `
+                  <div class="price-item"><div class="price-top"><span>${i + 1}. ${esc(it.name)}</span><span class="mono" style="color:var(--accent);">${esc(it.price)}</span></div><p class="hint" style="margin-top:4px;">${esc(it.note || '')}</p></div>
+                `).join('')}
+              </div>
+              ${r.toolkit.utmYandex ? `<div class="script-card"><div class="script-head"><b>UTM для Яндекс Карт</b><button type="button" class="btn btn-outline btn-sm no-print" data-copy-text="${esc(r.toolkit.utmYandex)}" data-copy-msg="UTM скопирована!">Копировать</button></div><code style="font-size:12px;word-break:break-all;">${esc(r.toolkit.utmYandex)}</code></div>` : ''}
+              ${r.toolkit.utm2gis ? `<div class="script-card"><div class="script-head"><b>UTM для 2ГИС</b><button type="button" class="btn btn-outline btn-sm no-print" data-copy-text="${esc(r.toolkit.utm2gis)}" data-copy-msg="UTM скопирована!">Копировать</button></div><code style="font-size:12px;word-break:break-all;">${esc(r.toolkit.utm2gis)}</code></div>` : ''}
+            </div>
+
+            <div class="tool-pane" id="t-schema">
+              <h3 class="print-pane-title">3. Обновлённые мета-теги и Schema.org</h3>
+              <div class="script-card"><div class="script-head"><b>Новый &lt;title&gt;</b><button type="button" class="btn btn-outline btn-sm no-print" data-copy-id="m-title" data-copy-msg="Title скопирован!">Копировать</button></div><div class="script-text" id="m-title">${esc(r.toolkit.metaTitle)}</div></div>
+              <div class="script-card"><div class="script-head"><b>Новый &lt;meta description&gt;</b><button type="button" class="btn btn-outline btn-sm no-print" data-copy-id="m-desc" data-copy-msg="Description скопирован!">Копировать</button></div><div class="script-text" id="m-desc">${esc(r.toolkit.metaDescription)}</div></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 6px;"><b>JSON-LD Schema.org (вставить в &lt;head&gt; сайта):</b><button type="button" class="btn btn-dark btn-sm no-print" data-copy-id="k-schema" data-copy-msg="Schema.org скопирован!">Копировать JSON-LD</button></div>
+              <pre class="code-box" id="k-schema">${esc(r.toolkit.schemaJsonLd)}</pre>
+            </div>
+
+            <div class="tool-pane" id="t-faq">
+              <h3 class="print-pane-title">4. Блок FAQ и микроразметка FAQPage</h3>
+              ${(r.toolkit.faq || []).map((f, i) => `<div class="script-card"><b>${i + 1}. ${esc(f.q)}</b><p class="hint" style="margin-top:4px;color:var(--ink);">${esc(f.a)}</p></div>`).join('')}
+              <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 6px;"><b>JSON-LD FAQPage:</b><button type="button" class="btn btn-dark btn-sm no-print" data-copy-id="k-faq-json" data-copy-msg="FAQPage скопирован!">Копировать FAQPage</button></div>
+              <pre class="code-box" id="k-faq-json">${esc(r.toolkit.faqJsonLd)}</pre>
+            </div>
+
+            <div class="tool-pane" id="t-llms">
+              <h3 class="print-pane-title">5. План на 14 дней и опциональный /llms.txt</h3>
+              <h3 style="font-size:16px;margin-bottom:8px;">Пошаговый план внедрения на 14 дней</h3>
+              <ol style="margin:0 0 18px;padding-left:20px;display:flex;flex-direction:column;gap:7px;font-size:13.5px;">
+                ${(r.toolkit.plan14 || []).map(st => `<li>${esc(st)}</li>`).join('')}
+              </ol>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+                <div><b>Опционально: /llms.txt</b> <span class="hint">(не доказан как фактор ранжирования, гигиена на будущее)</span></div>
+                <div class="btn-row no-print" style="margin:0;">
+                  <button type="button" class="btn btn-outline btn-sm" data-copy-id="k-llms" data-copy-msg="llms.txt скопирован!">Копировать</button>
+                  <button type="button" class="btn btn-dark btn-sm" id="btn-dl-llms">Скачать llms.txt ↓</button>
+                </div>
+              </div>
+              <pre class="code-box" id="k-llms">${esc(r.toolkit.llmsTxt)}</pre>
+            </div>
+          </section>
+
+          <section class="card" style="background:#FAFAF8;">
+            <span class="eyebrow">Методика и прозрачность</span>
+            <h3 style="font-size:15.5px;margin-bottom:6px;">Источники данных и границы выводов</h3>
+            <ul style="margin:0;padding-left:18px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px;">
+              ${(r.sourcesAndLimits || []).map(s => `<li>${esc(s)}</li>`).join('')}
+            </ul>
+          </section>
+        `;
+
+        // Bind interactive controls
+        root.querySelectorAll('.tool-tab').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-tab');
+            root.querySelectorAll('.tool-tab').forEach(b => b.classList.toggle('active', b === btn));
+            root.querySelectorAll('.tool-pane').forEach(p => p.classList.toggle('active', p.id === id));
+          });
+        });
+        root.querySelectorAll('[data-copy-id]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const el = document.getElementById(btn.getAttribute('data-copy-id'));
+            if (el) copy(el.textContent, btn.getAttribute('data-copy-msg') || 'Скопировано!');
+          });
+        });
+        root.querySelectorAll('[data-copy-text]').forEach(btn => {
+          btn.addEventListener('click', () => copy(btn.getAttribute('data-copy-text'), btn.getAttribute('data-copy-msg') || 'Скопировано!'));
+        });
+        const dlBtn = document.getElementById('btn-dl-llms');
+        if (dlBtn) {
+          dlBtn.addEventListener('click', () => {
+            const blob = new Blob([document.getElementById('k-llms').textContent], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob); a.download = 'llms.txt'; a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            toast('Файл llms.txt скачан!');
+          });
+        }
+      }
+
+      document.getElementById('btn-export-csv').addEventListener('click', () => {
+        if (currentReport) exportCsv(currentReport);
+        else toast('Отчёт ещё загружается');
+      });
+
+      async function loadById(id) {
+        const res = await fetch(`${apiBase}/api/reports/${encodeURIComponent(id)}`);
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Отчёт не найден');
+        renderReport(data.report);
+      }
+
+      async function pollOrder(oid) {
+        const titleEl = document.getElementById('state-title');
+        const descEl = document.getElementById('state-desc');
+        for (let attempt = 0; attempt < 30; attempt++) {
+          const res = await fetch(`${apiBase}/api/orders/${encodeURIComponent(oid)}`);
+          const d = await res.json();
+          if (!res.ok || !d.ok) throw new Error('Заказ не найден');
+          if (d.status === 'ready' && d.reportId) {
+            history.replaceState(null, '', `?id=${encodeURIComponent(d.reportId)}`);
+            return loadById(d.reportId);
+          }
+          if (d.status === 'failed') throw new Error('Ошибка генерации: ' + (d.error || 'попробуйте позже'));
+          titleEl.textContent = d.status === 'generating' || d.status === 'paid'
+            ? 'Собираем ваш PRO-отчёт (15–25 сек)...'
+            : `Статус заказа: ${d.status}`;
+          descEl.textContent = `Тариф: ${d.tariffTitle} (${d.priceRub} ₽). Страница обновится автоматически.`;
+          await new Promise(r => setTimeout(r, 3000));
+        }
+        throw new Error('Генерация заняла больше времени — обновите страницу через минуту.');
+      }
+
+      (async function init() {
+        try {
+          if (reportId) await loadById(reportId);
+          else if (orderId) await pollOrder(orderId);
+          else throw new Error('Не передан идентификатор отчёта (?id=...)');
+        } catch (err) {
+          document.getElementById('state-title').textContent = 'Не удалось открыть отчёт';
+          document.getElementById('state-desc').textContent = err.message || 'Проверьте ссылку.';
+        }
+      })();
+    })();
+  </script>
+</body>
+</html>

@@ -971,15 +971,53 @@
       });
       $('btn-close-order').addEventListener('click', () => ordBack.classList.add('hidden'));
       ordBack.addEventListener('click', (e) => { if (e.target === ordBack) ordBack.classList.add('hidden'); });
-      $('order-form').addEventListener('submit', (e) => {
+      $('order-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const pointName = ($('ord-point').value || '').trim();
         const contact = ($('ord-contact').value || '').trim();
         const pt = getActivePoint();
-        trackEvent('order_intent', { plan: selectedPlan, pointName, url: pt.siteUrl || pt.yandexUrl || '', contact });
+        const planLow = selectedPlan.toLowerCase();
+        const tariffId = planLow.includes('250') ? 'recs_250'
+          : planLow.includes('3 карточ') ? 'pack_3'
+          : planLow.includes('10 карточ') ? 'pack_10'
+          : planLow.includes('vip') || planLow.includes('5 000') ? 'vip_5000'
+          : 'pro_950';
+        const api = getBackendUrl();
+        const stEl = $('order-status');
+        stEl.textContent = 'Сохраняем заявку...';
+        if (api) {
+          try {
+            const r = await fetch(`${api}/api/orders/create`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                app: 'neiroscan',
+                tariffId,
+                contact,
+                input: {
+                  name: pt.name || pointName,
+                  city: pt.city || '',
+                  district: pt.district || '',
+                  niche: pt.niche || 'other',
+                  usp: pt.usp || '',
+                  yandexUrl: pt.yandexUrl || (/yandex\./i.test(pointName) ? pointName : ''),
+                  gisUrl: pt.gisUrl || '',
+                  siteUrl: pt.siteUrl || '',
+                  phone: pt.phone || ''
+                }
+              })
+            });
+            const d = await r.json();
+            if (r.ok && d.ok && d.mode === 'payment' && d.paymentUrl) {
+              stEl.textContent = 'Переходим к оплате...';
+              window.location.href = d.paymentUrl;
+              return;
+            }
+          } catch (_) {}
+        }
         const txt = `Заявка NeiroScan (${selectedPlan}): ${pointName} | Контакт: ${contact}`;
         copyText(txt, 'Заявка зафиксирована и скопирована!');
-        $('order-status').textContent = '✓ Заявка отправлена! Мы свяжемся по указанному контакту (текст также скопирован в буфер).';
+        stEl.textContent = '✓ Заявка отправлена! Мы свяжемся по указанному контакту (текст также скопирован в буфер).';
         setTimeout(() => ordBack.classList.add('hidden'), 1800);
       });
     }
