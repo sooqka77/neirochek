@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>НейроЧек — как вашу офлайн-точку видят Алиса, ChatGPT, Perplexity и GigaChat</title>
-  <meta name="description" content="Бесплатная проверка видимости локального бизнеса в ИИ (Яндекс с Алисой, ChatGPT, Perplexity, GigaChat): кого рекомендуют вместо вас, откуда ИИ берёт ответы и белый GEO-план.">
-  <meta property="og:title" content="НейроЧек — советует ли вашу точку Алиса и ChatGPT?">
-  <meta property="og:description" content="Проверьте видимость бизнеса в нейросетях за 2 минуты, узнайте источники цитирования и получите готовые Schema.org, llms.txt и GEO-план.">
+  <title>NeiroScan — видимость бизнеса в Алисе, GigaChat, ChatGPT и Perplexity</title>
+  <meta name="description" content="Проверка видимости бизнеса в нейросетях (Алиса AI, GigaChat, ChatGPT, Perplexity): брендовый и небрендовый спрос, матрица ответов LLM, цитируемые источники и план роста.">
+  <meta property="og:title" content="NeiroScan — кого рекомендуют Алиса, GigaChat и ChatGPT в вашем районе">
+  <meta property="og:description" content="Бесплатная проверка видимости в ИИ за 2 минуты, экспорт матрицы ответов LLM в Excel/Sheets и полные PRO-аудиты.">
   <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,23 +18,27 @@
     <div class="wrap topbar-inner">
       <a class="brand" href="./">
         <span class="brand-mark" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="9" stroke="#FFFFFF" stroke-width="1.8" stroke-dasharray="3 3"/>
-            <circle cx="12" cy="12" r="5" stroke="#FFFFFF" stroke-width="1.8"/>
-            <circle cx="12" cy="12" r="2.2" fill="#FFFFFF"/>
-            <path d="M12 12L18.5 5.5" stroke="#A5F3FC" stroke-width="2" stroke-linecap="round"/>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="8.5" stroke="#FFFFFF" stroke-width="1.8" stroke-dasharray="3 3"/>
+            <circle cx="12" cy="12" r="4.5" stroke="#FFFFFF" stroke-width="1.8"/>
+            <circle cx="12" cy="12" r="2" fill="#FFFFFF"/>
+            <path d="M12 12L18 6" stroke="#93C5FD" stroke-width="2" stroke-linecap="round"/>
           </svg>
         </span>
         <span>
-          <span class="brand-name">НейроЧек</span>
-          <span class="brand-sub">Алиса AI · GigaChat · ChatGPT · Perplexity</span>
+          <span class="brand-name">NeiroScan</span>
+          <span class="brand-sub">neiroscan.ru · Алиса AI · GigaChat · ChatGPT</span>
         </span>
       </a>
       <div class="topbar-right">
-        <span class="pill pill-test">● Тест: PRO открыт бесплатно</span>
-        <label class="pill-lock" title="Посмотреть, как будет выглядеть платный экран в релизе">
+        <nav class="nav-links no-print" aria-label="Сервисы">
+          <a class="nav-link" href="https://checkgeo.ru/">Карты · CheckGeo</a>
+          <a class="nav-link active" href="./">ИИ · NeiroScan</a>
+          <a class="nav-link" href="#pricing-section">Тарифы</a>
+        </nav>
+        <label class="pill-lock no-print" title="Посмотреть, как будет выглядеть платный экран">
           <input type="checkbox" id="paywall-toggle">
-          <span>Превью paywall</span>
+          <span>Paywall</span>
         </label>
       </div>
     </div>
@@ -42,19 +46,20 @@
 
   <section class="hero-wrap">
     <div class="wrap hero">
-      <h1>Советуют ли вашу точку <span class="hl">Алиса, GigaChat и ChatGPT?</span></h1>
-      <p class="hero-lead">Проверьте за 2 минуты, кого нейросети рекомендуют в вашем районе вместо вас, с каких сайтов они берут ответы и какие белые шаги поднимут точку в ИИ-выдаче. Бесплатно до 3 точек.</p>
+      <h1>Кого советуют <span class="hl">Алиса, GigaChat и ChatGPT</span> вместо вас?</h1>
+      <p class="hero-lead">За 2 минуты проверяем брендовый и небрендовый спрос в ИИ, показываем реальных конкурентов в выдаче, цитируемые источники (Я.Карты, 2ГИС, Zoon, Отзовик) и выгружаем матрицу ответов в Excel / Google Sheets.</p>
 
       <div class="hero-actions no-print">
-        <button type="button" class="demo-btn primary-start" id="btn-start-own">+ Проверить свою точку с нуля</button>
-        <span class="demo-label">или пример:</span>
+        <button type="button" class="demo-btn primary-start" id="btn-start-own">+ Проверить свою точку бесплатно</button>
+        <span class="demo-label">примеры:</span>
         <div id="demo-buttons" style="display:flex;gap:7px;flex-wrap:wrap;"></div>
+        <a class="demo-btn" href="./konstrukterra.html" target="_blank" rel="noopener">Пример PRO-отчёта ↗</a>
       </div>
 
       <div class="how-strip">
-        <div class="how-step"><b>01</b> Алиса AI и нейросети берут до 70% фактов из Яндекс Карт, 2ГИС, Zoon и отзовиков</div>
-        <div class="how-step"><b>02</b> Сценарии («для новичков», «с парковкой») ИИ вытаскивает прямо из текстов отзывов</div>
-        <div class="how-step"><b>03</b> Сайт закрепляет бренд через <code>Schema.org</code>, прямой FAQ и файл <code>llms.txt</code></div>
+        <div class="how-step"><b>01</b> Алиса и нейропоиск опираются на Яндекс Карты, 2ГИС, Zoon, Отзовик.ру и отраслевые подборки</div>
+        <div class="how-step"><b>02</b> Сценарии клиентов («для новичков», «детский ДР», «рядом с домом») ИИ извлекает из текстов отзывов</div>
+        <div class="how-step"><b>03</b> Сайт закрепляет факты через <code>Schema.org</code>, прямой FAQ и отсутствие галлюцинаций в бренд-контуре</div>
       </div>
     </div>
   </section>
@@ -198,10 +203,13 @@
     <section class="card" id="results-section">
       <div class="card-head">
         <div>
-          <span class="eyebrow">Бесплатный GEO-рентген · До 3 точек</span>
+          <span class="eyebrow">Бесплатный GEO-рентген · Бренд + Небренд</span>
           <h2 style="font-size:20px;" id="res-title">Индекс видимости в ИИ</h2>
         </div>
-        <button type="button" class="btn btn-outline btn-sm no-print" id="btn-save-snapshot">+ Зафиксировать замер сегодня</button>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;" class="no-print">
+          <button type="button" class="btn btn-outline btn-sm" id="btn-export-csv">Матрица LLM (CSV / Excel) ↓</button>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-save-snapshot">+ Зафиксировать замер</button>
+        </div>
       </div>
 
       <div class="score-hero">
@@ -266,20 +274,20 @@
     <section class="card pro-card" id="pro-section">
       <div class="pro-banner">
         <div class="pro-banner-left">
-          <span class="pill pill-pro">PRO · 2 490 ₽/мес</span>
-          <h2>Белые GEO-инструменты попадания в ответы ИИ</h2>
+          <span class="pill pill-pro">PRO · от 250 ₽</span>
+          <h2>Инструменты роста видимости в ИИ и отзовиках</h2>
         </div>
-        <span class="pill pill-test">Открыто бесплатно на тест</span>
+        <a class="btn btn-outline btn-sm no-print" href="#pricing-section" style="background:#FFFFFF;color:#111315;">Тарифы и полный отчёт →</a>
       </div>
 
       <div class="pro-body" id="pro-body">
         <div class="paywall-overlay">
           <div class="paywall-modal">
-            <span class="pill pill-pro" style="margin-bottom:10px;">PRO GEO ТАРИФ</span>
-            <h3>План и готовый код попадания в Алису и ChatGPT</h3>
-            <p>Нишевая карта источников РФ, генератор Schema.org JSON-LD + sameAs, llms.txt + robots.txt, GEO-FAQ, словарь смыслов для отзывов и трекер динамики.</p>
-            <div class="paywall-price">2 490 ₽ <span style="font-size:14px;font-weight:500;color:var(--muted);">/ мес за точку</span></div>
-            <button type="button" class="btn btn-primary" id="btn-unlock-test" style="width:100%;">Открыть бесплатно (режим теста)</button>
+            <span class="pill pill-pro" style="margin-bottom:10px;">PRO-ДОСТУП</span>
+            <h3>Готовый код, карта источников и матрица LLM</h3>
+            <p>Экспресс-пакет от 250 ₽ или полный комплексный аудит «Карты + ИИ» за 1 500 ₽ (разбор 50 отзывов, конкуренты и готовый пакет внедрения).</p>
+            <div class="paywall-price">от 250 ₽ <span style="font-size:14px;font-weight:500;color:var(--muted);">разово</span></div>
+            <button type="button" class="btn btn-primary" id="btn-unlock-test" style="width:100%;">Открыть демо-инструменты</button>
           </div>
         </div>
 
@@ -310,17 +318,17 @@
           <div class="pro-pane hidden" id="pro-pane-llms">
             <div class="split-2">
               <div>
-                <h3 style="font-size:16px;margin-bottom:6px;">Файл /llms.txt (паспорт точки для ИИ)</h3>
-                <p class="hint" style="margin-bottom:10px;">Положите в корень сайта (<code>vash-site.ru/llms.txt</code>) — ИИ-агенты получают чистые факты без шума вёрстки.</p>
+                <h3 style="font-size:16px;margin-bottom:6px;">Опционально: файл /llms.txt</h3>
+                <p class="hint" style="margin-bottom:10px;"><b>Честно:</b> по исследованиям рынка (Ahrefs) <code>/llms.txt</code> не доказан как фактор ранжирования в ИИ. Добавляйте только как дополнительную гигиену после закрытия карт, отзывов и Schema.org.</p>
                 <div class="btn-row" style="margin-top:0;margin-bottom:10px;">
-                  <button type="button" class="btn btn-primary btn-sm" id="btn-download-llms">Скачать llms.txt</button>
+                  <button type="button" class="btn btn-outline btn-sm" id="btn-download-llms">Скачать llms.txt</button>
                   <button type="button" class="btn btn-outline btn-sm" id="btn-copy-llms">Копировать</button>
                 </div>
                 <pre class="code-box" id="llms-code"></pre>
               </div>
               <div>
-                <h3 style="font-size:16px;margin-bottom:6px;">Блок для /robots.txt (доступ ИИ-ботам)</h3>
-                <p class="hint" style="margin-bottom:10px;">Явно разрешает индексацию Яндексу, ChatGPT, Perplexity и Google.</p>
+                <h3 style="font-size:16px;margin-bottom:6px;">Проверка /robots.txt для ИИ-ботов</h3>
+                <p class="hint" style="margin-bottom:10px;">Нужно <b>только если заблокирован корень <code>/</code></b>. Намеренно закрытые служебные разделы (<code>/webview/</code>, <code>/feed/</code>, <code>/cabinet/</code>) открывать не нужно.</p>
                 <div class="btn-row" style="margin-top:0;margin-bottom:10px;">
                   <button type="button" class="btn btn-outline btn-sm" id="btn-copy-robots">Копировать для robots.txt</button>
                 </div>
@@ -361,19 +369,127 @@
       </div>
     </section>
 
+    <!-- ПРОЗРАЧНЫЕ ТАРИФЫ (0 / 250 / 1 500 / 3-10 КАРТОЧЕК / VIP 5 000 ₽) -->
+    <section class="card no-print" id="pricing-section">
+      <div class="card-head" style="margin-bottom:6px;">
+        <div>
+          <span class="eyebrow">Тарифы · Прозрачная разница в ценности</span>
+          <h2 style="font-size:21px;">Бесплатный чек, разовый PRO-аудит или пакет на сеть</h2>
+        </div>
+        <a class="btn btn-outline btn-sm" href="./konstrukterra.html" target="_blank" rel="noopener">Смотреть живой пример PRO-отчёта за 1 500 ₽ ↗</a>
+      </div>
+      <p class="hint">Базовая проверка бесплатна. Платите только когда нужен глубокий разбор с отзывами, соседями и готовым пакетом внедрения за 15 минут.</p>
+
+      <div class="pricing-grid">
+        <div class="plan-box">
+          <div class="plan-top"><span class="plan-tag">Старт</span></div>
+          <div class="plan-price">0 ₽ <span>навсегда</span></div>
+          <p class="plan-desc">Понять текущую картину за 2 минуты и увидеть главные пробелы.</p>
+          <ul class="plan-list">
+            <li>Индекс видимости 0–100 и 14 факторов GEO</li>
+            <li>Техрентген сайта (Schema.org, FAQ, robots)</li>
+            <li>Базовые проверки ИИ и экспорт матрицы в CSV</li>
+            <li>Превью QR-помощника отзывов в <a href="https://checkgeo.ru/">CheckGeo</a></li>
+          </ul>
+          <a class="btn btn-outline btn-sm" href="#geo-form" style="width:100%;">Уже открыто выше ↑</a>
+        </div>
+
+        <div class="plan-box">
+          <div class="plan-top"><span class="plan-tag">Экспресс · 1 канал</span></div>
+          <div class="plan-price">250 ₽ <span>разово / 1 точка</span></div>
+          <p class="plan-desc">Быстро закрыть главную дыру по одному каналу — Карты ИЛИ ИИ.</p>
+          <ul class="plan-list">
+            <li>Детальный чек 1 канала (Яндекс/2ГИС <b>или</b> 5 запросов ИИ)</li>
+            <li>Проверка наличия на Zoon и Отзовик.ру</li>
+            <li>Готовый QR-помощник отзывов на вашу карточку</li>
+            <li>1 ключевой пакет кода (Schema.org + UTM) и PDF-отчёт</li>
+          </ul>
+          <button type="button" class="btn btn-outline btn-sm" style="width:100%;" data-order-plan="Экспресс-чек (250 ₽ · 1 точка)">Заказать за 250 ₽ →</button>
+        </div>
+
+        <div class="plan-box featured">
+          <div class="plan-top"><span class="plan-tag">Полный PRO · Карты + ИИ</span><span class="pill pill-pro">ХИТ</span></div>
+          <div class="plan-price">1 500 ₽ <span>разово / 1 точка</span></div>
+          <p class="plan-desc">Уровень агентского аудита, готовый к передаче админу и в сайт за 15 минут:</p>
+          <ul class="plan-list">
+            <li><b>Оба канала сразу:</b> Я.Карты + 2ГИС + Zoon / Отзовик.ру + ИИ</li>
+            <li><b>Семантика 50 последних отзывов и 50 ответов</b> (перекосы по району и услугам)</li>
+            <li><b>Таблица сравнения с 4–5 реальными соседями</b> по району</li>
+            <li><b>6–8 живых запросов к ИИ</b> (включая высокомаржинальные услуги)</li>
+            <li><b>5-вкладочный пакет внедрения:</b> QR, 3 скрипта админу, переписанный прайс с UTM, Schema.org, FAQPage и план на 14 дней + отдельная ссылка и PDF</li>
+          </ul>
+          <button type="button" class="btn btn-dark btn-sm" style="width:100%;" data-order-plan="Полный PRO-аудит Карты + ИИ (1 500 ₽ · 1 точка)">Получить полный PRO за 1 500 ₽ →</button>
+        </div>
+      </div>
+
+      <div class="packs-strip">
+        <div class="pack-card">
+          <div>
+            <strong>Пакет на 3 карточки — 3 900 ₽ <span class="hint">(1 300 ₽ / точка)</span></strong>
+            <span class="hint">3 полных PRO-отчёта «Карты + ИИ» + сводное сравнение филиалов между собой.</span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" data-order-plan="Пакет 3 карточки (3 900 ₽)">Выбрать 3 точки</button>
+        </div>
+        <div class="pack-card">
+          <div>
+            <strong>Пакет на 10 карточек — 9 900 ₽ <span class="hint">(990 ₽ / точка)</span></strong>
+            <span class="hint">Для сетей и франшиз: рейтинг всех 10 филиалов, где просадка и единый план работ.</span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" data-order-plan="Пакет 10 карточек (9 900 ₽)">Выбрать 10 точек</button>
+        </div>
+      </div>
+
+      <div class="vip-box">
+        <div>
+          <span class="pill" style="background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);color:#FFFFFF;margin-bottom:6px;">ДЛЯ КОРПОРАТОВ И SEO-ОТДЕЛОВ · ОТ 5 000 ₽ / МЕС</span>
+          <h3 style="font-size:18px;color:#FFFFFF;">Автоматический GEO-мониторинг вместо ручных агентских таблиц</h3>
+          <p>Без базовых советов для Тильды — только данные для вашей SEO/IT-команды: ежемесячная матрица 30–100 промптов (брендовый + небрендовый спрос), Share of Voice против конкурентов, список цитируемых URL (Citation Audit), трекер галлюцинаций и выгрузка в Google Sheets / Excel.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" data-order-plan="VIP Корпоративный мониторинг (от 5 000 ₽/мес)">Запросить VIP-пилот →</button>
+      </div>
+    </section>
+
+    <!-- Модалка быстрого заказа тарифа -->
+    <div class="order-backdrop hidden no-print" id="order-backdrop" role="dialog" aria-modal="true" aria-labelledby="order-title">
+      <div class="order-modal">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div>
+            <span class="eyebrow">Оформление отчёта</span>
+            <h3 id="order-title">Заказ отчёта</h3>
+          </div>
+          <button type="button" class="btn btn-outline btn-xs" id="btn-close-order">✕</button>
+        </div>
+        <p class="hint" id="order-plan-label" style="margin-top:4px;font-weight:600;color:var(--ink);"></p>
+        <form id="order-form">
+          <div class="field">
+            <label for="ord-point">Компания и город / ссылка на Яндекс Карты</label>
+            <input type="text" id="ord-point" required placeholder="Например: Конструктерра, Ростов-на-Дону или ссылка">
+          </div>
+          <div class="field">
+            <label for="ord-contact">Куда прислать отчёт (Telegram @username или телефон)</label>
+            <input type="text" id="ord-contact" required placeholder="@username или +7 999 000-00-00">
+          </div>
+          <div class="btn-row" style="margin-top:14px;">
+            <button type="submit" class="btn btn-dark" style="flex:1;">Отправить заявку →</button>
+          </div>
+          <p class="hint" id="order-status" style="margin-top:8px;"></p>
+        </form>
+      </div>
+    </div>
+
     <!-- Фидбек «Вот купишь сразу?» -->
     <section class="feedback-card no-print">
-      <span class="pill pill-pro" style="margin-bottom:8px;">ТЕСТ ИДЕИ · ОТВЕТ ЗА 10 СЕКУНД</span>
-      <h3 style="font-size:19px;color:#FFFFFF;">Честный вопрос: купили бы такой сервис для своего бизнеса?</h3>
-      <p>Если на следующем шаге добавим полную автопроверку по 1 кнопке (без копирования ответов) и еженедельные алерты в Telegram — выберите честный вариант и отправьте в Telegram.</p>
+      <span class="pill pill-pro" style="margin-bottom:8px;">ОБРАТНАЯ СВЯЗЬ · 10 СЕКУНД</span>
+      <h3 style="font-size:19px;color:#FFFFFF;">Какой формат полезнее всего для вашего бизнеса?</h3>
+      <p>Выберите честный вариант — ответ зафиксируется и скопируется для Telegram.</p>
       <div class="fb-btns" id="fb-choices">
-        <button type="button" class="fb-btn" data-fb="🔥 Купил бы сразу за 2 490 ₽/мес">🔥 Купил бы сразу (2 490 ₽/мес)</button>
-        <button type="button" class="fb-btn" data-fb="🤖 Купил бы, когда будет полный автомат в 1 кнопку">🤖 Купил бы с полным автоматом</button>
-        <button type="button" class="fb-btn" data-fb="🤔 Интересно бесплатно, но платить пока не готов">🤔 Только бесплатно</button>
+        <button type="button" class="fb-btn" data-fb="Полный PRO-отчёт за 1 500 ₽ — отличный чек">Полный PRO за 1 500 ₽</button>
+        <button type="button" class="fb-btn" data-fb="Пакет на 3 или 10 карточек / VIP-мониторинг">Пакет 3–10 точек / VIP 5 000 ₽</button>
+        <button type="button" class="fb-btn" data-fb="Хватает бесплатного или 250 ₽">Бесплатно / 250 ₽</button>
       </div>
       <div class="fb-extra">
-        <input type="text" id="fb-comment" placeholder="Что бы точно добавили или поменяли? (необязательно)">
-        <button type="button" class="btn btn-primary btn-sm" id="btn-copy-feedback">Скопировать вердикт для Telegram</button>
+        <input type="text" id="fb-comment" placeholder="Чего не хватило или какую площадку добавить?">
+        <button type="button" class="btn btn-primary btn-sm" id="btn-copy-feedback">Скопировать отзыв для Telegram</button>
       </div>
     </section>
   </main>

@@ -826,6 +826,28 @@
 
     $('btn-save-snapshot').addEventListener('click', saveSnapshotToday);
     $('btn-save-snapshot-2').addEventListener('click', saveSnapshotToday);
+    const btnCsv = $('btn-export-csv');
+    if (btnCsv) {
+      btnCsv.addEventListener('click', () => {
+        const pt = Object.assign({}, getActivePoint(), { name: getActivePoint().name || 'Точка' });
+        const audit = NeiroEngine.runGeoAudit(pt);
+        const csv = NeiroEngine.exportMatrixCsv(pt, audit);
+        const lines = csv.split(/\r?\n/).filter(Boolean);
+        if (lines.length <= 1) {
+          showToast('Сначала проверьте хотя бы 1 запрос в Шаге 2 — и матрица выгрузится в CSV');
+          return;
+        }
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        const slug = (pt.name || 'llm-matrix').toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-').slice(0, 32);
+        a.download = `neiroscan-matrix-${slug}.csv`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        trackEvent('export_csv', { rows: lines.length - 1 });
+        showToast(`Матрица LLM (${lines.length - 1} строк) скачана для Excel / Google Sheets`);
+      });
+    }
     $('btn-clear-history').addEventListener('click', () => {
       getActivePoint().history = [];
       saveState();
@@ -876,11 +898,15 @@
           if (rep.links?.gisUrl && !pt.gisUrl) pt.gisUrl = rep.links.gisUrl;
           if (rep.links?.vkUrl && !pt.vkUrl) pt.vkUrl = rep.links.vkUrl;
           if (rep.links?.tgUrl && !pt.tgUrl) pt.tgUrl = rep.links.tgUrl;
+          if (rep.links?.zoonUrl || rep.links?.otzovikUrl || rep.links?.irecommendUrl) {
+            pt.readiness.hasZoonOtzovik = true;
+          }
           pt.isDemo = false;
           saveState();
           populateFormFromPoint(pt);
           renderAll();
-          st.textContent = `✓ Проверено: Schema.org ${rep.schema?.hasLocalBusiness ? 'есть' : 'нет'} · robots.txt ${rep.robots?.allAllowed ? 'открыт' : 'блокирует ' + rep.robots.blockedBots.join(',')} · llms.txt ${rep.hasLlmsTxt ? 'есть' : 'нет'}`;
+          const robotsMsg = rep.robots?.note || (rep.robots?.allAllowed ? 'индексация корня открыта' : 'блокирует ' + rep.robots.blockedBots.join(','));
+          st.textContent = `✓ Проверено: Schema.org ${rep.schema?.hasLocalBusiness ? 'есть' : 'нет'} · FAQ ${rep.hasFaq ? 'есть' : 'нет'} · ${robotsMsg}`;
           showToast('Технический GEO-аудит сайта готов!');
         } catch (err) {
           st.textContent = 'Не удалось проверить сайт: ' + err.message;
@@ -925,6 +951,36 @@
         btn.disabled = false;
         showToast('Автопроверка ИИ завершена!');
         $('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    // Order / pricing modal
+    const ordBack = $('order-backdrop');
+    let selectedPlan = '';
+    if (ordBack) {
+      document.querySelectorAll('[data-order-plan]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedPlan = btn.getAttribute('data-order-plan') || '';
+          const pt = getActivePoint();
+          $('order-plan-label').textContent = selectedPlan;
+          $('ord-point').value = [pt.name, pt.city, pt.yandexUrl || pt.siteUrl].filter(Boolean).join(' · ');
+          $('order-status').textContent = '';
+          ordBack.classList.remove('hidden');
+          trackEvent('order_open', { plan: selectedPlan });
+        });
+      });
+      $('btn-close-order').addEventListener('click', () => ordBack.classList.add('hidden'));
+      ordBack.addEventListener('click', (e) => { if (e.target === ordBack) ordBack.classList.add('hidden'); });
+      $('order-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const pointName = ($('ord-point').value || '').trim();
+        const contact = ($('ord-contact').value || '').trim();
+        const pt = getActivePoint();
+        trackEvent('order_intent', { plan: selectedPlan, pointName, url: pt.siteUrl || pt.yandexUrl || '', contact });
+        const txt = `Заявка NeiroScan (${selectedPlan}): ${pointName} | Контакт: ${contact}`;
+        copyText(txt, 'Заявка зафиксирована и скопирована!');
+        $('order-status').textContent = '✓ Заявка отправлена! Мы свяжемся по указанному контакту (текст также скопирован в буфер).';
+        setTimeout(() => ordBack.classList.add('hidden'), 1800);
       });
     }
 

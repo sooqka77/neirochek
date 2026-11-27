@@ -100,6 +100,7 @@
 
     return prompts.map(p => ({
       ...p,
+      contour: p.id === 'p4' ? 'Брендовый' : 'Небрендовый',
       links: {
         yandexAi: `https://ya.ru/search/?text=${encodeURIComponent(p.text)}`,
         chatgpt: `https://chatgpt.com/?q=${encodeURIComponent(p.text)}`,
@@ -252,7 +253,7 @@
     // Карты и источники Алисы (35 б)
     { key: 'hasYandexStrong', pillar: 'sources', weight: 12, label: 'Сильная карточка на Яндекс Картах (4.7+, 30+ отзывов, свежий прайс)', why: 'Алиса и Поиск с Алисой берут до 70% фактов о локальном бизнесе напрямую из Яндекс Бизнеса.', fix: 'Доведите рейтинг до 4.7+, заполните все услуги с ценами и собирайте от 6 свежих отзывов в месяц.' },
     { key: 'has2gisFull', pillar: 'sources', weight: 9, label: 'Полная и свежая карточка в 2ГИС', why: 'ChatGPT, Perplexity и DeepSeek регулярно цитируют 2ГИС при районных запросах по РФ.', fix: 'Заполните карточку 2ГИС полностью: описание, рубрики, фото, график и ответы на отзывы.' },
-    { key: 'hasZoonOtzovik', pillar: 'sources', weight: 8, label: 'Заполнены профили на Zoon и Отзовике', why: 'Веб-поиск нейросетей обожает агрегаторы отзывов — они часто обгоняют сайт самой компании.', fix: 'Зарегистрируйте официальную карточку на Zoon и добавьте подробное описание услуг и цен.' },
+    { key: 'hasZoonOtzovik', pillar: 'sources', weight: 9, label: 'Заполнены профили на Zoon, Отзовик.ру и IRecommend', why: 'Веб-поиск нейросетей активно цитирует независимые отзовики и агрегаторы — они часто обгоняют сайт самой компании.', fix: 'Зарегистрируйте и заполните официальные карточки на Zoon, Отзовик.ру и IRecommend с актуальными услугами и ценами.' },
     { key: 'hasNicheCatalogs', pillar: 'sources', weight: 6, label: 'Есть в профильных каталогах и подборках ниши', why: 'ИИ доверяет сторонним спискам «Топ-10 ... в районе» больше, чем саморекламе на сайте.', fix: 'Попадите в 2–3 нишевых каталога (список со ссылками — в PRO-блоке ниже) и локальные СМИ/ТГ-каналы района.' },
 
     // Семантика отзывов (25 б)
@@ -260,12 +261,12 @@
     { key: 'reviewsFresh', pillar: 'reviews', weight: 8, label: 'Есть свежие текстовые отзывы за последние 30–60 дней', why: 'Поисковые ИИ понижают точки без свежих сигналов — они боятся советовать закрытые места.', fix: 'Запустите регулярный ритм: минимум 4–8 живых отзывов каждый месяц.' },
     { key: 'ownerRepliesFacts', pillar: 'reviews', weight: 6, label: 'Ответы владельца содержат факты об услугах и районе (а не «Спасибо»)', why: 'Ответы организации индексируются вместе с отзывами и уточняют специализацию бизнеса.', fix: 'В ответах естественно называйте ключевую услугу и ориентир района.' },
 
-    // Техническая готовность сайта для ИИ (25 б)
+    // Техническая готовность сайта для ИИ (24 б)
     { key: 'hasLocalPage', pillar: 'tech', weight: 7, label: 'Отдельная страница сайта с точным адресом, районом, метро и ценами', why: 'Если у сети один общий сайт без страниц филиалов, ИИ не понимает, в каком районе вы работаете.', fix: 'Сделайте отдельную страницу под каждую точку: адрес, как дойти от метро/ЖК, прайс, фото.' },
     { key: 'hasFaqOnSite', pillar: 'tech', weight: 7, label: 'На сайте есть блок FAQ («Вопрос клиента → Прямой ответ»)', why: 'Нейросети извлекают ответы прямо из структурированных блоков «вопрос — короткий ответ с цифрами».', fix: 'Добавьте на сайт 6–8 прямых ответов на главные вопросы клиентов (готовый генератор ниже).' },
     { key: 'hasSchemaLocal', pillar: 'tech', weight: 6, label: 'Внедрена микроразметка Schema.org (LocalBusiness + sameAs)', why: 'JSON-LD однозначно связывает ваш сайт с Яндекс Картами, 2ГИС и соцсетями в графе знаний ИИ.', fix: 'Скопируйте готовый JSON-LD из вкладки PRO и вставьте в <head> сайта (в Тильде — за 2 минуты).' },
-    { key: 'botsAllowed', pillar: 'tech', weight: 3, label: 'robots.txt не блокирует YandexBot, GPTBot, OAI-SearchBot и PerplexityBot', why: 'Некоторые конструкторы и WAF по умолчанию режут ИИ-краулеров — нейросети просто не видят сайт.', fix: 'Проверьте /robots.txt и добавьте явное разрешение для ИИ-ботов (готовый блок ниже).' },
-    { key: 'hasLlmsTxt', pillar: 'tech', weight: 2, label: 'Добавлен файл /llms.txt (паспорт точки для ИИ)', why: 'Новый стандарт: даёт ИИ-агентам чистую, безошибочную выжимку услуг, адресов и цен без мусора вёрстки.', fix: 'Скачайте готовый llms.txt ниже и положите в корень сайта.' },
+    { key: 'botsAllowed', pillar: 'tech', weight: 3, label: 'robots.txt не блокирует корень (/) для YandexBot, GPTBot, OAI-SearchBot и PerplexityBot', why: 'Если случайно стоит Disallow: / для ИИ-краулеров, нейросети не видят сайт. Закрытые служебные разделы (/webview/, /feed/, /cabinet/) открывать не нужно.', fix: 'Проверьте /robots.txt только на запрет корня / для поисковых и ИИ-ботов — служебные Disallow не трогайте.' },
+    { key: 'hasLlmsTxt', pillar: 'tech', weight: 1, optional: true, label: 'Опционально: файл /llms.txt (не фактор ранжирования, на будущее)', why: 'По исследованиям рынка (Ahrefs) наличие /llms.txt не гарантирует рост в ИИ-выдаче, но может служить чистой сводкой фактов для ИИ-агентов.', fix: 'Не критично — добавляйте только после закрытия карт, отзывов, цитируемых источников и Schema.org.' },
 
     // Чистота бренда / Entity Consistency (15 б)
     { key: 'napConsistent', pillar: 'entity', weight: 9, label: 'Единое название, адрес, телефон и график на сайте, в картах и каталогах', why: 'Если на Яндексе «Чемпионика», на сайте «Зенит-Чемпионика», а в 2ГИС старый телефон — ИИ не склеивает сущность.', fix: 'Приведите название, адрес, телефон и часы работы к единому стандарту на всех площадках.' },
@@ -279,9 +280,9 @@
 
     // 1. Считаем AI-Readiness (0–100)
     const pillars = {
-      sources: { key: 'sources', label: 'Карты и каталоги (Алиса/ИИ)', score: 0, max: 35 },
+      sources: { key: 'sources', label: 'Карты и каталоги (Алиса/ИИ)', score: 0, max: 36 },
       reviews: { key: 'reviews', label: 'Семантика и свежесть отзывов', score: 0, max: 25 },
-      tech: { key: 'tech', label: 'Сайт и разметка для ИИ', score: 0, max: 25 },
+      tech: { key: 'tech', label: 'Сайт и разметка для ИИ', score: 0, max: 24 },
       entity: { key: 'entity', label: 'Чистота бренда (Entity)', score: 0, max: 15 }
     };
 
@@ -513,7 +514,8 @@ ${links.length ? links.join('\n') : '- Добавьте ссылки на Янд
   }
 
   function generateRobotsSnippet() {
-    return `# Разрешаем индексацию основным поисковым и ИИ-ботам (добавить в /robots.txt)
+    return `# Вставлять ТОЛЬКО если корень сайта (/) сейчас закрыт для ИИ-ботов!
+# Важно: намеренно закрытые служебные разделы (/webview/, /feed/, /cabinet/, /api/) открывать НЕ нужно.
 User-agent: Yandex
 Allow: /
 
@@ -526,8 +528,43 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
-User-agent: Google-Extended
+User-agent: ClaudeBot
 Allow: /`;
+  }
+
+  /* 5b. Экспорт матрицы ответов LLM в CSV (для Excel и Google Sheets — корпоративный стандарт) */
+  function exportMatrixCsv(point, audit) {
+    const a = audit || runGeoAudit(point);
+    const today = new Date().toISOString().slice(0, 10);
+    const cell = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+    const header = [
+      'Дата', 'Точка / Бренд', 'Контур', 'Интент', 'Запрос к ИИ', 'Модель',
+      'Упомянут бренд', 'Позиция', 'Тональность', 'Галлюцинации',
+      'Конкуренты в ответе', 'Цитируемые домены', 'Фрагмент ответа'
+    ];
+    const rows = [header.map(cell).join(';')];
+    const results = point.promptResults || {};
+    for (const p of a.prompts) {
+      const an = a.live.perPromptAnalysis[p.id];
+      const raw = results[p.id] || {};
+      if (!an && !raw.responseText && !raw.quickStatus) continue;
+      rows.push([
+        today,
+        point.name || '',
+        p.contour || (p.id === 'p4' ? 'Брендовый' : 'Небрендовый'),
+        p.intent || '',
+        p.text || '',
+        (an && an.model) || raw.model || '',
+        an ? (an.mentioned ? 'Да' : 'Нет') : '',
+        an && an.position ? `#${an.position}` : '—',
+        an ? an.sentiment : '',
+        an && an.hallucinationFlags && an.hallucinationFlags.length ? an.hallucinationFlags.join(' | ') : 'Нет',
+        an && an.competitors ? an.competitors.join(', ') : '',
+        an && an.domains ? an.domains.join(', ') : '',
+        String(raw.responseText || raw.quickStatus || '').slice(0, 320)
+      ].map(cell).join(';'));
+    }
+    return '\uFEFF' + rows.join('\r\n');
   }
 
   /* 6. PRO-генератор GEO FAQ + FAQPage JSON-LD */
@@ -632,6 +669,7 @@ Allow: /`;
     generateSchemaJsonLd,
     generateLlmsTxt,
     generateRobotsSnippet,
+    exportMatrixCsv,
     generateFaqItems,
     buildFaqCode,
     runLiveApiPrompt,
