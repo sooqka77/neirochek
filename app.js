@@ -1,9 +1,8 @@
-/* UI-контроллер НейроЧек v2 */
+/* UI-контроллер NeiroScan v3 — чистый 1-кнопочный поток без демо-шума */
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'neirochek_state_v2';
-  const API_KEY_STORAGE = 'neirochek_local_api_key';
+  const STORAGE_KEY = 'neiroscan_state_v3';
   const QUICK_CHECK_KEYS = [
     { key: 'hasYandexStrong', short: 'Яндекс Карты 4.7+' },
     { key: 'has2gisFull', short: '2ГИС заполнен' },
@@ -32,7 +31,7 @@
     el.textContent = msg;
     el.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
   }
 
   async function copyText(text, successMsg) {
@@ -62,7 +61,7 @@
       name: '',
       aliases: '',
       niche: 'kids',
-      city: 'Москва',
+      city: '',
       district: '',
       address: '',
       usp: '',
@@ -77,32 +76,30 @@
       readiness: { botsAllowed: true },
       checkedSources: [],
       promptResults: {},
-      history: []
+      history: [],
+      siteSummary: ''
     };
   }
 
   function defaultState() {
-    const first = JSON.parse(JSON.stringify(NeiroData.DEMO_PRESETS[0].point));
-    first.id = 'geo-1';
-    first.isDemo = true;
     return {
-      activePointId: 'geo-1',
-      points: [first],
+      hasRunCheck: false,
+      point: createBlankPoint(),
       findingFilter: 'all',
       activeProTab: 'sources',
-      showAllPrompts: false,
-      selectedFeedback: ''
+      showAllPrompts: false
     };
   }
 
   function loadState() {
     let st = defaultState();
     try {
-      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('neirochek_state_v1');
+      const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.points) && parsed.points.length) {
+        if (parsed && parsed.point && !parsed.point.isDemo && parsed.point.name) {
           st = Object.assign(st, parsed);
+          st.point = Object.assign(createBlankPoint(), parsed.point);
         }
       }
     } catch (_) {}
@@ -110,37 +107,50 @@
     if (window.location.hash && window.location.hash.startsWith('#share=')) {
       const payload = NeiroEngine.decodePayload(window.location.hash.slice(7));
       if (payload && payload.name) {
-        const id = 'geo-shared-' + Date.now();
-        payload.id = id;
-        payload.isDemo = false;
-        payload.readiness = payload.readiness || {};
-        payload.promptResults = payload.promptResults || {};
-        payload.checkedSources = payload.checkedSources || [];
-        payload.history = payload.history || [];
-        st.points.unshift(payload);
-        st.activePointId = id;
+        st.point = Object.assign(createBlankPoint(), payload, { isDemo: false });
+        st.hasRunCheck = true;
         history.replaceState(null, '', window.location.pathname + window.location.search);
-        setTimeout(() => showToast(`Открыт GEO-отчёт по точке «${payload.name}»`), 300);
+        setTimeout(() => showToast(`Открыт отчёт по точке «${payload.name}»`), 300);
       }
     }
     return st;
   }
 
   let state = loadState();
-  let customFaqByPoint = {};
+  let customFaq = null;
+  let isScanning = false;
 
   function saveState() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
   }
 
-  function getActivePoint() {
-    let pt = state.points.find(p => p.id === state.activePointId);
-    if (!pt) { pt = state.points[0]; state.activePointId = pt.id; }
+  function getPoint() {
+    if (!state.point) state.point = createBlankPoint();
+    const pt = state.point;
     pt.readiness = pt.readiness || {};
     pt.promptResults = pt.promptResults || {};
     pt.checkedSources = pt.checkedSources || [];
     pt.history = pt.history || [];
     return pt;
+  }
+
+  function getBackendUrl() {
+    return (window.NEIRO_CONFIG && window.NEIRO_CONFIG.backendUrl)
+      ? window.NEIRO_CONFIG.backendUrl.replace(/\/+$/, '')
+      : '';
+  }
+
+  function trackEvent(event, meta) {
+    const api = getBackendUrl();
+    if (!api) return;
+    try {
+      fetch(`${api}/api/telemetry/event`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ app: 'neirochek', event, meta: meta || {} }),
+        keepalive: true
+      }).catch(() => {});
+    } catch (_) {}
   }
 
   function syncTapChipsVisual() {
@@ -150,50 +160,11 @@
     });
   }
 
-  function startOwnBlankPoint() {
-    const active = getActivePoint();
-    if (active.isDemo) {
-      const fresh = createBlankPoint();
-      fresh.id = active.id;
-      Object.assign(active, fresh);
-    } else {
-      const fresh = createBlankPoint();
-      state.points.push(fresh);
-      state.activePointId = fresh.id;
-    }
-    delete customFaqByPoint[state.activePointId];
-    saveState();
-    populateFormFromPoint(getActivePoint());
-    renderAll();
-    $('g-name').focus();
-    $('g-name').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    showToast('Форма очищена — введите название и район вашей точки');
-  }
-
   function initStaticControls() {
     $('g-niche').innerHTML = Object.values(NeiroData.NICHES)
       .map(n => `<option value="${esc(n.id)}">${esc(n.label)}</option>`)
       .join('');
 
-    $('demo-buttons').innerHTML = NeiroData.DEMO_PRESETS
-      .map(d => `<button type="button" class="demo-btn" data-demo="${esc(d.id)}">${esc(d.label.replace(/^Пример \d+: /, ''))}</button>`)
-      .join('');
-
-    $('demo-buttons').querySelectorAll('[data-demo]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const preset = NeiroData.DEMO_PRESETS.find(d => d.id === btn.getAttribute('data-demo'));
-        if (!preset) return;
-        const pt = getActivePoint();
-        Object.assign(pt, JSON.parse(JSON.stringify(preset.point)), { id: pt.id, isDemo: true });
-        delete customFaqByPoint[pt.id];
-        saveState();
-        populateFormFromPoint(pt);
-        renderAll();
-        showToast(`Загружен пример: ${preset.point.name}`);
-      });
-    });
-
-    // 6 главных тап-чипсов на 1-м экране
     $('quick-readiness-chips').innerHTML = QUICK_CHECK_KEYS.map(item => `
       <label class="tap-chip">
         <input type="checkbox" data-readiness="${esc(item.key)}">
@@ -202,7 +173,6 @@
       </label>
     `).join('');
 
-    // Остальные 8 факторов GEO в раскрывающемся блоке
     $('adv-readiness-checks').innerHTML = NeiroEngine.READINESS_CHECKS
       .filter(chk => !QUICK_KEY_SET.has(chk.key))
       .map(chk => `
@@ -211,23 +181,19 @@
           <span>${esc(chk.label)}</span>
         </label>
       `).join('');
-
-    try {
-      const savedKey = localStorage.getItem(API_KEY_STORAGE);
-      if (savedKey) $('api-key').value = savedKey;
-    } catch (_) {}
   }
 
   function populateFormFromPoint(pt) {
     $('g-name').value = pt.name || '';
-    $('g-niche').value = pt.niche || 'other';
-    $('g-city').value = pt.city || '';
-    $('g-district').value = pt.district || '';
-    $('g-address').value = pt.address || '';
+    $('g-niche').value = pt.niche || 'kids';
+    $('g-district').value = pt.district || pt.city || '';
+    $('g-site').value = pt.siteUrl || '';
     $('g-usp').value = pt.usp || '';
+
+    $('g-city').value = pt.city || '';
+    $('g-address').value = pt.address || '';
     $('g-comp').value = pt.competitor || '';
     $('g-aliases').value = pt.aliases || '';
-    $('g-site').value = pt.siteUrl || '';
     $('g-phone').value = pt.phone || '';
     $('g-hours').value = pt.hours || '';
     $('g-yandex').value = pt.yandexUrl || '';
@@ -241,21 +207,27 @@
     syncTapChipsVisual();
   }
 
+  function parseCityFromDistrict(districtText, explicitCity) {
+    if (explicitCity) return explicitCity;
+    const raw = String(districtText || '').trim();
+    if (!raw) return 'Москва';
+    const first = raw.split(/[,/]+/)[0].trim();
+    return first || 'Москва';
+  }
+
   function syncPointFromForm() {
-    const pt = getActivePoint();
-    const wasDemo = !!pt.isDemo;
-    const prevName = pt.name || '';
-    const nextName = $('g-name').value.trim();
+    const pt = getPoint();
     pt.isDemo = false;
-    pt.name = nextName;
-    pt.niche = $('g-niche').value || 'other';
-    pt.city = $('g-city').value.trim() || 'Москва';
+    pt.name = $('g-name').value.trim();
+    pt.niche = $('g-niche').value || 'kids';
     pt.district = $('g-district').value.trim();
-    pt.address = $('g-address').value.trim();
+    const explicitCity = $('g-city').value.trim();
+    pt.city = parseCityFromDistrict(pt.district, explicitCity);
+    pt.siteUrl = $('g-site').value.trim();
     pt.usp = $('g-usp').value.trim();
+    pt.address = $('g-address').value.trim();
     pt.competitor = $('g-comp').value.trim();
     pt.aliases = $('g-aliases').value.trim();
-    pt.siteUrl = $('g-site').value.trim();
     pt.phone = $('g-phone').value.trim();
     pt.hours = $('g-hours').value.trim();
     pt.yandexUrl = $('g-yandex').value.trim();
@@ -263,74 +235,172 @@
     pt.vkUrl = $('g-vk').value.trim();
     pt.tgUrl = $('g-tg').value.trim();
 
-    // Если клиент начал вводить свой бизнес поверх демо-примера — сбрасываем демо-ответы ИИ и демо-историю
-    if (wasDemo && nextName !== prevName) {
-      pt.promptResults = {};
-      pt.history = [];
-    }
-
     document.querySelectorAll('[data-readiness]').forEach(cb => {
       pt.readiness[cb.getAttribute('data-readiness')] = cb.checked;
     });
     syncTapChipsVisual();
-    delete customFaqByPoint[pt.id];
+    customFaq = null;
     saveState();
     return pt;
   }
 
-  function renderPointsBar() {
-    const wrap = $('points-bar');
-    const chips = state.points.map(pt => {
-      const safe = Object.assign({}, pt, { name: pt.name || 'Новая точка' });
-      const a = NeiroEngine.runGeoAudit(safe);
-      const isAct = pt.id === state.activePointId;
+  function setProgress(visible, pct, statusText, noteText) {
+    const box = $('scan-progress');
+    box.classList.toggle('hidden', !visible);
+    if (!visible) return;
+    $('scan-pct').textContent = Math.round(pct) + '%';
+    $('scan-fill').style.width = Math.max(4, Math.min(100, pct)) + '%';
+    if (statusText) $('scan-status').textContent = statusText;
+    if (noteText) $('scan-note').textContent = noteText;
+  }
+
+  async function runAutomatedCheck() {
+    if (isScanning) return;
+    const errEl = $('form-error');
+    errEl.classList.add('hidden');
+    const pt = syncPointFromForm();
+
+    if (!pt.name) {
+      errEl.textContent = 'Введите название вашего бизнеса, чтобы мы проверили упоминаемость в ИИ.';
+      errEl.classList.remove('hidden');
+      $('g-name').focus();
+      return;
+    }
+
+    // Нормализуем сайт, если ввели без https://
+    let cleanSite = (pt.siteUrl || '').trim();
+    if (cleanSite && !/^https?:\/\//i.test(cleanSite)) {
+      cleanSite = 'https://' + cleanSite;
+      pt.siteUrl = cleanSite;
+      $('g-site').value = cleanSite;
+    }
+
+    isScanning = true;
+    const btn = $('btn-run-full-check');
+    btn.disabled = true;
+    btn.textContent = 'Проверяем бизнес в ИИ...';
+
+    // Сбрасываем прошлые ответы при новом прогоне
+    pt.promptResults = {};
+    pt.siteSummary = '';
+    saveState();
+
+    const api = getBackendUrl();
+    const prompts = NeiroEngine.buildPromptMatrix(pt).slice(0, 5);
+    const totalSteps = (cleanSite ? 1 : 0) + prompts.length;
+    let doneSteps = 0;
+
+    setProgress(true, 6, 'Запускаем проверку...', cleanSite ? 'Сначала проверим ваш сайт, затем зададим 5 вопросов нейросетям.' : 'Задаём 5 реальных покупательских запросов по вашему району.');
+
+    // Шаг 1 (автоматически): рентген сайта, если указан
+    if (api && cleanSite) {
+      setProgress(true, 10, 'Проверяем сайт (Schema.org, FAQ, robots.txt)...', cleanSite);
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 14000);
+        const r = await fetch(`${api}/api/site-audit`, {
+          method: 'POST',
+          signal: ctrl.signal,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: cleanSite, app: 'neirochek' })
+        });
+        clearTimeout(t);
+        const data = await r.json();
+        if (r.ok && data.ok && data.report) {
+          const rep = data.report;
+          pt.readiness.hasSchemaLocal = !!rep.schema?.hasLocalBusiness;
+          pt.readiness.hasFaqOnSite = !!rep.hasFaq;
+          pt.readiness.botsAllowed = !!rep.robots?.allAllowed;
+          pt.readiness.hasLlmsTxt = !!rep.hasLlmsTxt;
+          pt.readiness.hasLocalPage = !!(rep.https && rep.hasViewport);
+          if (rep.links?.yandexUrl && !pt.yandexUrl) pt.yandexUrl = rep.links.yandexUrl;
+          if (rep.links?.gisUrl && !pt.gisUrl) pt.gisUrl = rep.links.gisUrl;
+          if (rep.links?.vkUrl && !pt.vkUrl) pt.vkUrl = rep.links.vkUrl;
+          if (rep.links?.tgUrl && !pt.tgUrl) pt.tgUrl = rep.links.tgUrl;
+          if (rep.links?.zoonUrl || rep.links?.otzovikUrl || rep.links?.irecommendUrl) {
+            pt.readiness.hasZoonOtzovik = true;
+          }
+          const robotsMsg = rep.robots?.allAllowed ? 'индексация открыта' : 'есть блок в robots.txt';
+          pt.siteSummary = `Сайт ${rep.url}: Schema.org ${rep.schema?.hasLocalBusiness ? 'есть' : 'нет'} · FAQ ${rep.hasFaq ? 'есть' : 'нет'} · ${robotsMsg}`;
+        }
+      } catch (_) {
+        pt.siteSummary = `Не удалось прочитать ${cleanSite} автоматически — показали разбор по ответам ИИ.`;
+      }
+      doneSteps++;
+      setProgress(true, (doneSteps / totalSteps) * 100, 'Сайт проверен · переходим к нейросетям...', '');
+    }
+
+    // Шаг 2 (автоматически): 5 живых запросов в ИИ
+    let aiErrors = 0;
+    if (api) {
+      for (let i = 0; i < prompts.length; i++) {
+        setProgress(
+          true,
+          Math.max(15, (doneSteps / totalSteps) * 100),
+          `Опрашиваем ИИ: запрос ${i + 1} из ${prompts.length}...`,
+          `«${prompts[i].text.slice(0, 95)}...»`
+        );
+        try {
+          const ctrl = new AbortController();
+          const t = setTimeout(() => ctrl.abort(), 20000);
+          const r = await fetch(`${api}/api/ai/check`, {
+            method: 'POST',
+            signal: ctrl.signal,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: prompts[i].text, businessName: pt.name })
+          });
+          clearTimeout(t);
+          const data = await r.json();
+          if (!r.ok || !data.ok) throw new Error(data.message || data.error || 'server_error');
+          pt.promptResults[prompts[i].id] = {
+            model: data.model || 'ИИ-сервер',
+            responseText: data.responseText || '',
+            quickStatus: ''
+          };
+        } catch (err) {
+          aiErrors++;
+          if (aiErrors >= 2) break; // Не мучаем пользователя, если сеть недоступна
+        }
+        doneSteps++;
+      }
+    }
+
+    state.hasRunCheck = true;
+    saveState();
+    populateFormFromPoint(pt);
+    renderAll();
+
+    setProgress(true, 100, 'Готово! Результаты собраны ниже.', '');
+    setTimeout(() => setProgress(false, 0), 900);
+
+    btn.disabled = false;
+    btn.textContent = 'Проверить бизнес в ИИ бесплатно →';
+    isScanning = false;
+
+    if (aiErrors >= 2) {
+      $('prompts-drawer').open = true;
+      showToast('Автопроверка ИИ временно недоступна — открыли 1-клик кнопки Алисы и GigaChat');
+    } else {
+      showToast('Проверка завершена!');
+    }
+    $('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderFindingsList(items) {
+    if (!items.length) return '<p class="hint">В этой категории пунктов нет.</p>';
+    return items.map(f => {
+      const tag = f.level === 'red' ? 'Критично' : f.level === 'yellow' ? 'Улучшить' : 'Готово';
       return `
-        <div class="point-chip ${isAct ? 'active' : ''}" data-select-pt="${esc(pt.id)}" role="button" tabindex="0">
-          <span>${esc(safe.name)}</span>
-          <span class="chip-score">${a.totalScore}</span>
-          ${state.points.length > 1 ? `<button type="button" class="chip-del" data-del-pt="${esc(pt.id)}" title="Удалить">×</button>` : ''}
+        <div class="finding ${f.level}">
+          <span class="f-tag ${f.level}">${tag}</span>
+          <div>
+            <h4>${esc(f.title)}</h4>
+            <p class="f-why">${esc(f.why)}</p>
+            <div class="f-fix"><b>Что сделать:</b> ${esc(f.fix)}</div>
+          </div>
         </div>
       `;
     }).join('');
-
-    const countNote = state.points.length >= 3
-      ? `<span class="hint">Бесплатно: 3 точки · доп. точки открыты в PRO-тесте</span>`
-      : `<span class="hint">Точек: ${state.points.length} / 3 бесплатно</span>`;
-
-    wrap.innerHTML = `${chips}<button type="button" class="add-point-btn" id="btn-add-point">+ Добавить точку</button>${countNote}`;
-
-    wrap.querySelectorAll('[data-select-pt]').forEach(el => {
-      el.addEventListener('click', (e) => {
-        if (e.target.hasAttribute('data-del-pt')) return;
-        state.activePointId = el.getAttribute('data-select-pt');
-        saveState();
-        populateFormFromPoint(getActivePoint());
-        renderAll();
-      });
-    });
-
-    wrap.querySelectorAll('[data-del-pt]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = btn.getAttribute('data-del-pt');
-        if (state.points.length <= 1) return;
-        state.points = state.points.filter(p => p.id !== id);
-        if (state.activePointId === id) state.activePointId = state.points[0].id;
-        saveState();
-        populateFormFromPoint(getActivePoint());
-        renderAll();
-      });
-    });
-
-    $('btn-add-point').addEventListener('click', () => {
-      const fresh = createBlankPoint();
-      state.points.push(fresh);
-      state.activePointId = fresh.id;
-      saveState();
-      populateFormFromPoint(fresh);
-      renderAll();
-      $('g-name').focus();
-    });
   }
 
   function renderPrompts(pt, audit) {
@@ -347,96 +417,70 @@
       if (an) {
         if (an.hallucinationFlags.length) {
           cardCls = 'warn';
-          badgeHtml = `<span class="res-badge warn">⚠ Мало данных / риск галлюцинации</span>`;
+          badgeHtml = `<span class="res-badge warn">⚠ Мало данных</span>`;
         } else if (an.isDirectBrandCheck) {
           cardCls = an.sentiment === 'negative' ? 'miss' : 'hit';
           badgeHtml = an.sentiment === 'negative'
-            ? `<span class="res-badge bad">Есть негатив / ошибка</span>`
+            ? `<span class="res-badge bad">Есть негатив</span>`
             : `<span class="res-badge good">✓ ИИ знает бренд</span>`;
         } else if (an.mentioned) {
           cardCls = 'hit';
           badgeHtml = `<span class="res-badge good">✓ Упомянуты · #${an.position || 1}</span>`;
         } else {
           cardCls = 'miss';
-          badgeHtml = `<span class="res-badge bad">✕ Не упомянуты</span>`;
+          badgeHtml = `<span class="res-badge bad">✕ Нет в ответе</span>`;
         }
       }
 
       const qs = saved.quickStatus || '';
       const quickButtonsHtml = isBrand ? `
         <div class="quick-verdict-row">
-          <span class="hint">Быстро (1 тап):</span>
+          <span class="hint">Отметить вручную:</span>
           <button type="button" class="qv-btn ${qs === 'brand_ok' ? 'active-good' : ''}" data-qv="${esc(p.id)}" data-val="brand_ok">✓ Знает хорошо</button>
           <button type="button" class="qv-btn ${qs === 'brand_vacuum' ? 'active-warn' : ''}" data-qv="${esc(p.id)}" data-val="brand_vacuum">~ Мало данных</button>
-          <button type="button" class="qv-btn ${qs === 'brand_bad' ? 'active-bad' : ''}" data-qv="${esc(p.id)}" data-val="brand_bad">⚠ Ошибся / негатив</button>
+          <button type="button" class="qv-btn ${qs === 'brand_bad' ? 'active-bad' : ''}" data-qv="${esc(p.id)}" data-val="brand_bad">⚠ Ошибка / негатив</button>
         </div>
       ` : `
         <div class="quick-verdict-row">
-          <span class="hint">Быстро (1 тап):</span>
-          <button type="button" class="qv-btn ${qs === 'top3' ? 'active-good' : ''}" data-qv="${esc(p.id)}" data-val="top3">✓ Мы в топ-3</button>
-          <button type="button" class="qv-btn ${qs === 'low' ? 'active-warn' : ''}" data-qv="${esc(p.id)}" data-val="low">~ В конце списка</button>
+          <span class="hint">Отметить вручную:</span>
+          <button type="button" class="qv-btn ${qs === 'top3' ? 'active-good' : ''}" data-qv="${esc(p.id)}" data-val="top3">✓ В топ-3</button>
+          <button type="button" class="qv-btn ${qs === 'low' ? 'active-warn' : ''}" data-qv="${esc(p.id)}" data-val="low">~ В конце</button>
           <button type="button" class="qv-btn ${qs === 'miss' ? 'active-bad' : ''}" data-qv="${esc(p.id)}" data-val="miss">✕ Нас нет</button>
         </div>
       `;
 
-      const metaTags = [];
-      if (an && an.competitors.length) metaTags.push(`<span class="mini-tag">Конкуренты: ${esc(an.competitors.slice(0, 4).join(', '))}</span>`);
-      if (an && an.domains.length) metaTags.push(`<span class="mini-tag">Источники: ${esc(an.domains.slice(0, 4).join(', '))}</span>`);
-
       const hasText = !!(saved.responseText && saved.responseText.trim());
-
       return `
         <div class="prompt-card ${cardCls}" data-pid="${esc(p.id)}">
           <div class="prompt-top">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <span class="intent-tag ${p.tier === 'pro' ? 'pro' : ''}">${p.tier === 'pro' ? 'PRO · ' : ''}#${idx + 1} · ${esc(p.intent)}</span>
-              <strong style="font-size:14px;">${esc(p.title)}</strong>
+              <span class="intent-tag">#${idx + 1} · ${esc(p.intent)}</span>
+              <strong style="font-size:14.5px;">${esc(p.title)}</strong>
             </div>
             ${badgeHtml}
           </div>
-
           <div class="prompt-q">${esc(p.text)}</div>
-
           <div class="ai-btn-row">
             <button type="button" class="ai-chip ru-main" data-launch-url="${esc(p.links.yandexAi)}" data-copy-q="${esc(p.text)}">Яндекс AI (Алиса) ↗</button>
             <button type="button" class="ai-chip ru-giga" data-launch-url="${esc(p.links.gigachat)}" data-copy-q="${esc(p.text)}">GigaChat ↗</button>
-            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.chatgpt)}" data-copy-q="${esc(p.text)}">ChatGPT <span class="vpn-badge">VPN</span> ↗</button>
-            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.perplexity)}" data-copy-q="${esc(p.text)}">Perplexity <span class="vpn-badge">VPN</span> ↗</button>
-            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.deepseek)}" data-copy-q="${esc(p.text)}">DeepSeek ↗</button>
+            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.chatgpt)}" data-copy-q="${esc(p.text)}">ChatGPT ↗</button>
+            <button type="button" class="ai-chip" data-launch-url="${esc(p.links.perplexity)}" data-copy-q="${esc(p.text)}">Perplexity ↗</button>
             <button type="button" class="ai-chip" data-copy-only="${esc(p.text)}">Копировать</button>
           </div>
-
           ${quickButtonsHtml}
-
           <details class="paste-toggle" ${hasText ? 'open' : ''}>
-            <summary>${hasText ? 'Разобранный ответ ИИ (нажмите, чтобы скрыть)' : '+ Вставить полный текст ответа ИИ (для авторазбора конкурентов и доменов)'}</summary>
+            <summary>${hasText ? 'Текст ответа ИИ (нажмите, чтобы скрыть)' : '+ Вставить ответ из Алисы / ChatGPT вручную'}</summary>
             <div style="margin-top:8px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
-                <select class="btn-xs" data-model-for="${esc(p.id)}" style="padding:4px 8px;border:1px solid var(--line);border-radius:7px;background:#FFF;">
-                  ${models.map(m => `<option value="${esc(m)}" ${saved.model === m ? 'selected' : ''}>${esc(m)}</option>`).join('')}
-                </select>
-                ${(hasText || qs) ? `<button type="button" class="btn btn-outline btn-xs" data-clear-resp="${esc(p.id)}">Сбросить</button>` : ''}
-              </div>
               <div class="field">
-                <textarea rows="3" data-resp-for="${esc(p.id)}" placeholder="Вставьте сюда ответ из Алисы, GigaChat, ChatGPT или Perplexity...">${esc(saved.responseText || '')}</textarea>
+                <textarea rows="3" data-resp-for="${esc(p.id)}" placeholder="Вставьте ответ нейросети...">${esc(saved.responseText || '')}</textarea>
               </div>
             </div>
           </details>
-
-          ${metaTags.length ? `<div class="prompt-meta">${metaTags.join('')}</div>` : ''}
         </div>
       `;
     }).join('');
 
-    const toggleBtn = `
-      <div class="btn-row" style="margin-top:10px;">
-        <button type="button" class="btn btn-outline btn-sm" id="btn-toggle-more-prompts">
-          ${state.showAllPrompts ? 'Свернуть до 5 базовых запросов' : '+ Показать ещё 5 PRO-запросов (открыто на тест)'}
-        </button>
-      </div>
-    `;
-
-    $('prompts-list').innerHTML = html + toggleBtn;
+    $('prompts-list').innerHTML = html;
 
     $('prompts-list').querySelectorAll('[data-launch-url]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -447,8 +491,6 @@
     $('prompts-list').querySelectorAll('[data-copy-only]').forEach(btn => {
       btn.addEventListener('click', () => copyText(btn.getAttribute('data-copy-only'), 'Запрос скопирован!'));
     });
-
-    // 1-тап быстрые вердикты
     $('prompts-list').querySelectorAll('[data-qv]').forEach(btn => {
       btn.addEventListener('click', () => {
         const pid = btn.getAttribute('data-qv');
@@ -459,55 +501,127 @@
           responseText: prev.responseText,
           quickStatus: prev.quickStatus === val ? '' : val
         };
-        pt.isDemo = false;
         saveState();
         renderAll();
       });
     });
-
     $('prompts-list').querySelectorAll('[data-resp-for]').forEach(ta => {
       ta.addEventListener('input', () => {
         const pid = ta.getAttribute('data-resp-for');
         const prev = pt.promptResults[pid] || { model: models[0], responseText: '', quickStatus: '' };
         pt.promptResults[pid] = { model: prev.model, responseText: ta.value, quickStatus: prev.quickStatus };
-        pt.isDemo = false;
         saveState();
         renderDashboardOnly();
       });
-      ta.addEventListener('blur', () => renderAll());
-    });
-
-    $('prompts-list').querySelectorAll('[data-model-for]').forEach(sel => {
-      sel.addEventListener('change', () => {
-        const pid = sel.getAttribute('data-model-for');
-        const prev = pt.promptResults[pid] || { model: sel.value, responseText: '', quickStatus: '' };
-        pt.promptResults[pid] = { model: sel.value, responseText: prev.responseText, quickStatus: prev.quickStatus };
-        saveState();
-        renderDashboardOnly();
-      });
-    });
-
-    $('prompts-list').querySelectorAll('[data-clear-resp]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        delete pt.promptResults[btn.getAttribute('data-clear-resp')];
-        saveState();
-        renderAll();
-      });
-    });
-
-    $('btn-toggle-more-prompts').addEventListener('click', () => {
-      state.showAllPrompts = !state.showAllPrompts;
-      renderAll();
     });
   }
 
-  function renderDashboardOnly() {
-    const pt = getActivePoint();
-    const safePt = Object.assign({}, pt, { name: pt.name || 'Моя компания' });
-    const audit = NeiroEngine.runGeoAudit(safePt);
+  function renderProArtifacts(pt, audit) {
+    const checked = new Set(pt.checkedSources || []);
+    $('sources-checklist').innerHTML = audit.niche.sources.map(src => {
+      const done = checked.has(src.name);
+      const pCls = src.priority === 'Критично' ? 'crit' : src.priority === 'Важно' ? 'imp' : 'opt';
+      return `
+        <div class="src-item ${done ? 'done' : ''}">
+          <label class="src-left" style="cursor:pointer;">
+            <input type="checkbox" data-src-name="${esc(src.name)}" ${done ? 'checked' : ''}>
+            <div>
+              <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+                <strong style="font-size:14.5px;">${esc(src.name)}</strong>
+                <span class="prio-tag ${pCls}">${esc(src.priority)}</span>
+              </div>
+              <p class="hint" style="margin-top:3px;">${esc(src.why)}</p>
+            </div>
+          </label>
+          <a class="btn btn-outline btn-xs" href="${esc(src.url)}" target="_blank" rel="noopener">Открыть ↗</a>
+        </div>
+      `;
+    }).join('');
 
-    $('demo-banner').classList.toggle('hidden', !pt.isDemo);
-    renderPointsBar();
+    $('sources-checklist').querySelectorAll('[data-src-name]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const name = cb.getAttribute('data-src-name');
+        const set = new Set(pt.checkedSources || []);
+        if (cb.checked) set.add(name);
+        else set.delete(name);
+        pt.checkedSources = Array.from(set);
+        saveState();
+        renderDashboardOnly();
+      });
+    });
+
+    $('schema-code').textContent = NeiroEngine.generateSchemaJsonLd(pt);
+    $('llms-code').textContent = NeiroEngine.generateLlmsTxt(pt);
+    $('robots-code').textContent = NeiroEngine.generateRobotsSnippet();
+
+    if (!customFaq) customFaq = NeiroEngine.generateFaqItems(pt);
+    $('faq-editor').innerHTML = customFaq.map((it, i) => `
+      <div style="border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:8px;background:#FAFAF8;">
+        <div class="field" style="margin-bottom:6px;">
+          <label>Вопрос ${i + 1}</label>
+          <input type="text" data-faq-q="${i}" value="${esc(it.q)}">
+        </div>
+        <div class="field">
+          <label>Прямой ответ</label>
+          <textarea rows="2" data-faq-a="${i}">${esc(it.a)}</textarea>
+        </div>
+      </div>
+    `).join('');
+    $('faq-code').textContent = NeiroEngine.buildFaqCode(customFaq);
+
+    $('faq-editor').querySelectorAll('[data-faq-q]').forEach(inp => {
+      inp.addEventListener('input', () => {
+        customFaq[Number(inp.getAttribute('data-faq-q'))].q = inp.value;
+        $('faq-code').textContent = NeiroEngine.buildFaqCode(customFaq);
+      });
+    });
+    $('faq-editor').querySelectorAll('[data-faq-a]').forEach(ta => {
+      ta.addEventListener('input', () => {
+        customFaq[Number(ta.getAttribute('data-faq-a'))].a = ta.value;
+        $('faq-code').textContent = NeiroEngine.buildFaqCode(customFaq);
+      });
+    });
+
+    $('semantics-list').innerHTML = audit.niche.semanticAnchors
+      .map((a, idx) => `<div class="anchor-chip"><b>${idx + 1}.</b> ${esc(a)}</div>`)
+      .join('');
+
+    renderHistoryChart(pt);
+  }
+
+  function renderHistoryChart(pt) {
+    const hist = pt.history || [];
+    const wrap = $('history-chart-wrap');
+    if (!hist.length) {
+      wrap.innerHTML = `<p class="hint" style="padding:12px;background:#FAFAF8;border-radius:10px;border:1px solid var(--line);">Пока нет сохранённых замеров. Нажмите «Сохранить замер», чтобы отслеживать рост видимости.</p>`;
+      return;
+    }
+    const W = 440, H = 155, padL = 34, padR = 16, padT = 18, padB = 28;
+    const innerW = W - padL - padR, innerH = H - padT - padB;
+    const step = hist.length > 1 ? innerW / (hist.length - 1) : 0;
+    const ptX = (i) => hist.length === 1 ? padL + innerW / 2 : padL + i * step;
+    const ptY = (val) => padT + innerH * (1 - Math.max(0, Math.min(100, val)) / 100);
+    const lineMent = hist.map((h, i) => `${ptX(i).toFixed(1)},${ptY(h.mentionRate).toFixed(1)}`).join(' ');
+
+    wrap.innerHTML = `
+      <svg class="history-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Динамика видимости в ИИ">
+        <line x1="${padL}" y1="${ptY(0)}" x2="${W - padR}" y2="${ptY(0)}" stroke="#CBD5E1" stroke-width="1"/>
+        <line x1="${padL}" y1="${ptY(50)}" x2="${W - padR}" y2="${ptY(50)}" stroke="#E2E8F0" stroke-dasharray="3 3"/>
+        <line x1="${padL}" y1="${ptY(100)}" x2="${W - padR}" y2="${ptY(100)}" stroke="#E2E8F0" stroke-dasharray="3 3"/>
+        ${hist.length > 1 ? `<polyline fill="none" stroke="#1D4ED8" stroke-width="2.5" points="${lineMent}"/>` : ''}
+        ${hist.map((h, i) => `<circle cx="${ptX(i)}" cy="${ptY(h.mentionRate)}" r="5" fill="#1D4ED8"/><text x="${ptX(i)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="#475569" font-family="monospace">${esc(h.date)}</text>`).join('')}
+      </svg>
+    `;
+  }
+
+  function renderDashboardOnly() {
+    const ws = $('results-workspace');
+    ws.classList.toggle('hidden', !state.hasRunCheck);
+    if (!state.hasRunCheck) return;
+
+    const pt = getPoint();
+    const safePt = Object.assign({}, pt, { name: pt.name || 'Ваш бизнес', city: pt.city || 'Москва' });
+    const audit = NeiroEngine.runGeoAudit(safePt);
 
     $('res-title').textContent = safePt.name + (safePt.district ? ` · ${safePt.district}` : '');
     $('res-score').textContent = audit.totalScore;
@@ -518,17 +632,17 @@
 
     const arc = $('gauge-arc');
     arc.style.strokeDashoffset = (314.16 * (1 - audit.totalScore / 100)).toFixed(1);
-    arc.style.stroke = audit.status.code === 'good' ? '#059669' : audit.status.code === 'mid' ? '#D97706' : '#DC2626';
+    arc.style.stroke = audit.status.code === 'good' ? '#15803D' : audit.status.code === 'mid' ? '#D97706' : '#B91C1C';
 
     const l = audit.live;
-    const brandText = l.brandCheckStatus === 'vacuum' ? 'Вакуум'
+    const brandText = l.brandCheckStatus === 'vacuum' ? 'Мало данных'
       : l.brandCheckStatus === 'positive' ? 'Знает (+)'
       : l.brandCheckStatus === 'negative' ? 'Негатив'
       : l.brandCheckStatus === 'neutral' ? 'Нейтрально'
-      : 'Не проверен';
+      : '—';
 
     $('res-kpis').innerHTML = `
-      <div class="kpi-box accent"><span class="k">Видимость в запросах</span><span class="v">${l.mentionRate !== null ? l.mentionRate + '%' : '—'}</span></div>
+      <div class="kpi-box accent"><span class="k">Видимость в ИИ</span><span class="v">${l.mentionRate !== null ? l.mentionRate + '%' : '—'}</span></div>
       <div class="kpi-box"><span class="k">В топ-3 ИИ</span><span class="v">${l.top3Rate !== null ? l.top3Rate + '%' : '—'}</span></div>
       <div class="kpi-box"><span class="k">Готовность к ИИ</span><span class="v">${audit.readinessScore}/100</span></div>
       <div class="kpi-box"><span class="k">Прямой бренд-чек</span><span class="v" style="font-size:15px;padding-top:4px;">${brandText}</span></div>
@@ -546,247 +660,75 @@
       `;
     }).join('');
 
+    const sb = $('site-audit-banner');
+    if (pt.siteSummary) {
+      sb.textContent = '✓ ' + pt.siteSummary;
+      sb.classList.remove('hidden');
+    } else {
+      sb.classList.add('hidden');
+    }
+
     $('hallucination-slot').innerHTML = l.hallucinations.length
-      ? `<div class="alert-box"><b>Обнаружены риски в ответах ИИ:</b><ul style="margin:6px 0 0;padding-left:18px;">${l.hallucinations.map(h => `<li><b>${esc(h.promptTitle)} (${esc(h.model)}):</b> ${esc(h.flag)}</li>`).join('')}</ul></div>`
+      ? `<div class="alert-box"><b>Обнаружены риски в ответах ИИ:</b><ul style="margin:6px 0 0;padding-left:18px;">${l.hallucinations.map(h => `<li><b>${esc(h.promptTitle)}:</b> ${esc(h.flag)}</li>`).join('')}</ul></div>`
       : '';
 
     $('comp-rank-list').innerHTML = l.topCompetitors.length
       ? l.topCompetitors.map((c, i) => `<div class="rank-row"><span><b>#${i + 1}</b> ${esc(c.name)}</span><span class="mono" style="font-weight:700;">${c.hits} упом.</span></div>`).join('')
-      : `<p class="hint" style="margin-top:8px;">Вставьте хотя бы 1 полный ответ из Алисы или ChatGPT в Шаге 2 — здесь соберётся рейтинг конкурентов, которые обходят вас в ИИ.</p>`;
+      : `<p class="hint" style="margin-top:8px;">Конкуренты в ответах ИИ пока не определены — откройте блок «5 ответов ИИ» ниже, чтобы посмотреть полные тексты.</p>`;
 
     $('domain-rank-list').innerHTML = l.topDomains.length
       ? l.topDomains.map(d => `
           <div class="rank-row">
-            <div>
-              <span class="mono" style="font-weight:700;">${esc(d.domain)}</span>
-              <span class="hint" style="margin-left:6px;">(${d.hits} упом.)</span>
-            </div>
-            <span class="gap-pill ${d.present ? 'ok' : 'miss'}">${d.present ? '✓ Вы там есть' : '✕ Пробел — вас нет'}</span>
+            <div><span class="mono" style="font-weight:700;">${esc(d.domain)}</span> <span class="hint">(${d.hits})</span></div>
+            <span class="gap-pill ${d.present ? 'ok' : 'miss'}">${d.present ? '✓ Вы есть' : '✕ Пробел'}</span>
           </div>
         `).join('')
-      : `<p class="hint" style="margin-top:8px;">После вставки ответов ИИ здесь появятся сайты, откуда нейросети берут ответы, и сразу подсветится, где вас ещё нет.</p>`;
+      : `<p class="hint" style="margin-top:8px;">Источники цитирования появятся после проверки ответов ИИ.</p>`;
+
+    const topIssues = audit.findings.filter(f => f.level !== 'green').slice(0, 3);
+    $('top-findings').innerHTML = renderFindingsList(topIssues.length ? topIssues : audit.findings.slice(0, 3));
+    $('all-findings-label').textContent = `Показать все ${audit.findings.length} факторов GEO (критично: ${audit.counts.red}, улучшить: ${audit.counts.yellow})`;
 
     const filtered = state.findingFilter === 'all'
       ? audit.findings
       : audit.findings.filter(f => f.level === state.findingFilter);
-
-    $('res-findings').innerHTML = filtered.length
-      ? filtered.map(f => {
-          const tag = f.level === 'red' ? 'Критично' : f.level === 'yellow' ? 'Улучшить' : 'Готово';
-          return `
-            <div class="finding ${f.level}">
-              <span class="f-tag ${f.level}">${tag}</span>
-              <div>
-                <h4>${esc(f.title)}</h4>
-                <p class="f-why">${esc(f.why)}</p>
-                <div class="f-fix"><b>Что сделать:</b> ${esc(f.fix)}</div>
-              </div>
-            </div>
-          `;
-        }).join('')
-      : `<p class="hint">В этой категории пунктов нет.</p>`;
+    $('res-findings').innerHTML = renderFindingsList(filtered);
 
     renderProArtifacts(safePt, audit);
   }
 
-  function renderProArtifacts(pt, audit) {
-    const activeReal = getActivePoint();
-    const checked = new Set(activeReal.checkedSources || []);
-    $('sources-checklist').innerHTML = audit.niche.sources.map(src => {
-      const done = checked.has(src.name);
-      const pCls = src.priority === 'Критично' ? 'crit' : src.priority === 'Важно' ? 'imp' : 'opt';
-      return `
-        <div class="src-item ${done ? 'done' : ''}">
-          <label class="src-left" style="cursor:pointer;">
-            <input type="checkbox" data-src-name="${esc(src.name)}" ${done ? 'checked' : ''}>
-            <div>
-              <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
-                <strong style="font-size:14px;">${esc(src.name)}</strong>
-                <span class="prio-tag ${pCls}">${esc(src.priority)}</span>
-              </div>
-              <p class="hint" style="margin-top:3px;">${esc(src.why)}</p>
-            </div>
-          </label>
-          <a class="btn btn-outline btn-xs" href="${esc(src.url)}" target="_blank" rel="noopener">Открыть ↗</a>
-        </div>
-      `;
-    }).join('');
-
-    $('sources-checklist').querySelectorAll('[data-src-name]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        const name = cb.getAttribute('data-src-name');
-        const set = new Set(activeReal.checkedSources || []);
-        if (cb.checked) set.add(name);
-        else set.delete(name);
-        activeReal.checkedSources = Array.from(set);
-        saveState();
-        renderDashboardOnly();
-      });
-    });
-
-    $('schema-code').textContent = NeiroEngine.generateSchemaJsonLd(pt);
-    $('llms-code').textContent = NeiroEngine.generateLlmsTxt(pt);
-    $('robots-code').textContent = NeiroEngine.generateRobotsSnippet();
-
-    if (!customFaqByPoint[activeReal.id]) {
-      customFaqByPoint[activeReal.id] = NeiroEngine.generateFaqItems(pt);
-    }
-    const faqItems = customFaqByPoint[activeReal.id];
-    $('faq-editor').innerHTML = faqItems.map((it, i) => `
-      <div style="border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:8px;background:#F9FAFD;">
-        <div class="field" style="margin-bottom:6px;">
-          <label>Вопрос ${i + 1}</label>
-          <input type="text" data-faq-q="${i}" value="${esc(it.q)}">
-        </div>
-        <div class="field">
-          <label>Прямой ответ (подставьте ваши точные цифры/условия)</label>
-          <textarea rows="2" data-faq-a="${i}">${esc(it.a)}</textarea>
-        </div>
-      </div>
-    `).join('');
-    $('faq-code').textContent = NeiroEngine.buildFaqCode(faqItems);
-
-    $('faq-editor').querySelectorAll('[data-faq-q]').forEach(inp => {
-      inp.addEventListener('input', () => {
-        faqItems[Number(inp.getAttribute('data-faq-q'))].q = inp.value;
-        $('faq-code').textContent = NeiroEngine.buildFaqCode(faqItems);
-      });
-    });
-    $('faq-editor').querySelectorAll('[data-faq-a]').forEach(ta => {
-      ta.addEventListener('input', () => {
-        faqItems[Number(ta.getAttribute('data-faq-a'))].a = ta.value;
-        $('faq-code').textContent = NeiroEngine.buildFaqCode(faqItems);
-      });
-    });
-
-    $('semantics-list').innerHTML = audit.niche.semanticAnchors
-      .map((a, idx) => `<div class="anchor-chip"><b>${idx + 1}.</b> ${esc(a)}</div>`)
-      .join('');
-
-    renderHistoryChart(activeReal);
-  }
-
-  function renderHistoryChart(pt) {
-    const hist = pt.history || [];
-    const wrap = $('history-chart-wrap');
-    if (!hist.length) {
-      wrap.innerHTML = `<p class="hint" style="padding:14px;background:#F9FAFD;border-radius:10px;border:1px solid var(--line);">Пока нет сохранённых замеров. Нажмите «Сохранить текущий замер», чтобы начать отслеживать рост видимости в ИИ.</p>`;
-      return;
-    }
-
-    const W = 440, H = 160, padL = 34, padR = 16, padT = 18, padB = 28;
-    const innerW = W - padL - padR;
-    const innerH = H - padT - padB;
-    const step = hist.length > 1 ? innerW / (hist.length - 1) : 0;
-
-    const ptX = (i) => hist.length === 1 ? padL + innerW / 2 : padL + i * step;
-    const ptY = (val) => padT + innerH * (1 - Math.max(0, Math.min(100, val)) / 100);
-
-    const lineReady = hist.map((h, i) => `${ptX(i).toFixed(1)},${ptY(h.readiness).toFixed(1)}`).join(' ');
-    const lineMent = hist.map((h, i) => `${ptX(i).toFixed(1)},${ptY(h.mentionRate).toFixed(1)}`).join(' ');
-
-    wrap.innerHTML = `
-      <svg class="history-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Динамика видимости в ИИ">
-        <line x1="${padL}" y1="${ptY(0)}" x2="${W - padR}" y2="${ptY(0)}" stroke="#CBD5E1" stroke-width="1"/>
-        <line x1="${padL}" y1="${ptY(50)}" x2="${W - padR}" y2="${ptY(50)}" stroke="#E2E8F0" stroke-dasharray="3 3"/>
-        <line x1="${padL}" y1="${ptY(100)}" x2="${W - padR}" y2="${ptY(100)}" stroke="#E2E8F0" stroke-dasharray="3 3"/>
-        <text x="6" y="${ptY(100) + 4}" font-size="10" fill="#64748B" font-family="monospace">100</text>
-        <text x="11" y="${ptY(50) + 4}" font-size="10" fill="#64748B" font-family="monospace">50</text>
-        <text x="18" y="${ptY(0) + 4}" font-size="10" fill="#64748B" font-family="monospace">0</text>
-        ${hist.length > 1 ? `<polyline fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 3" points="${lineReady}"/>` : ''}
-        ${hist.length > 1 ? `<polyline fill="none" stroke="#4F46E5" stroke-width="2.5" points="${lineMent}"/>` : ''}
-        ${hist.map((h, i) => `
-          <circle cx="${ptX(i)}" cy="${ptY(h.readiness)}" r="4" fill="#94A3B8"/>
-          <circle cx="${ptX(i)}" cy="${ptY(h.mentionRate)}" r="5" fill="#4F46E5"/>
-          <text x="${ptX(i)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="#475569" font-family="monospace">${esc(h.date)}</text>
-        `).join('')}
-      </svg>
-      <div class="hint" style="margin-top:6px;">
-        <span style="color:#4F46E5;font-weight:700;">● Видимость в ответах ИИ (%)</span> &nbsp;·&nbsp;
-        <span style="color:#64748B;font-weight:700;">● Индекс готовности (/100)</span>
-      </div>
-    `;
-  }
-
   function renderAll() {
-    const pt = getActivePoint();
-    const safePt = Object.assign({}, pt, { name: pt.name || 'Моя компания' });
-    const audit = NeiroEngine.runGeoAudit(safePt);
-    renderPrompts(pt, audit);
     renderDashboardOnly();
-  }
-
-  function saveSnapshotToday() {
-    const pt = getActivePoint();
-    const audit = NeiroEngine.runGeoAudit(Object.assign({}, pt, { name: pt.name || 'Моя компания' }));
-    const now = new Date();
-    const d = String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0');
-    pt.history = pt.history || [];
-    pt.history.push({
-      date: d,
-      mentionRate: audit.live.mentionRate !== null ? audit.live.mentionRate : 0,
-      readiness: audit.readinessScore
-    });
-    if (pt.history.length > 12) pt.history = pt.history.slice(-12);
-    saveState();
-    renderHistoryChart(pt);
-    showToast(`Замер за ${d} сохранён в историю!`);
+    if (state.hasRunCheck) {
+      const pt = getPoint();
+      const safePt = Object.assign({}, pt, { name: pt.name || 'Ваш бизнес', city: pt.city || 'Москва' });
+      const audit = NeiroEngine.runGeoAudit(safePt);
+      renderPrompts(pt, audit);
+    }
   }
 
   function bindEvents() {
-    $('btn-start-own').addEventListener('click', startOwnBlankPoint);
-    $('btn-clear-demo').addEventListener('click', startOwnBlankPoint);
-
-    $('geo-form').addEventListener('input', () => { syncPointFromForm(); renderAll(); });
-    $('geo-form').addEventListener('change', () => { syncPointFromForm(); renderAll(); });
     $('geo-form').addEventListener('submit', (e) => {
       e.preventDefault();
-      syncPointFromForm();
+      runAutomatedCheck();
+    });
+
+    // Синхронизация полей уточнения внутри tune-drawer
+    $('tune-drawer').addEventListener('input', () => { syncPointFromForm(); renderDashboardOnly(); });
+    $('tune-drawer').addEventListener('change', () => { syncPointFromForm(); renderDashboardOnly(); });
+
+    $('btn-new-check').addEventListener('click', () => {
+      state.point = createBlankPoint();
+      state.hasRunCheck = false;
+      customFaq = null;
+      saveState();
+      populateFormFromPoint(state.point);
       renderAll();
-      $('prompts-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      showToast('Запросы обновлены — проверьте 3–5 штук в Алисе или GigaChat');
+      $('g-name').focus();
+      $('check-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
 
-    $('btn-run-api-all').addEventListener('click', async () => {
-      const apiKey = $('api-key').value.trim();
-      const endpoint = $('api-endpoint').value.trim();
-      const model = $('api-model').value;
-      const statusEl = $('api-status');
-      if (!apiKey && endpoint.includes('openrouter.ai')) {
-        showToast('Вставьте OpenRouter API Key или используйте кнопки без ключа ниже');
-        return;
-      }
-      try { if (apiKey) localStorage.setItem(API_KEY_STORAGE, apiKey); } catch (_) {}
-
-      const pt = getActivePoint();
-      const safePt = Object.assign({}, pt, { name: pt.name || 'Моя компания' });
-      const prompts = NeiroEngine.buildPromptMatrix(safePt).slice(0, 5);
-      const btn = $('btn-run-api-all');
-      btn.disabled = true;
-
-      for (let i = 0; i < prompts.length; i++) {
-        statusEl.textContent = `Проверяем запрос ${i + 1} из ${prompts.length} (${model})...`;
-        try {
-          const answer = await NeiroEngine.runLiveApiPrompt({
-            apiKey,
-            endpoint,
-            model,
-            promptText: prompts[i].text
-          });
-          pt.promptResults[prompts[i].id] = { model, responseText: answer, quickStatus: '' };
-          pt.isDemo = false;
-          saveState();
-          renderAll();
-        } catch (err) {
-          statusEl.textContent = `Ошибка на запросе #${i + 1}: ${err.message}`;
-          btn.disabled = false;
-          return;
-        }
-      }
-      statusEl.textContent = `✓ Готово! Проверено ${prompts.length} запросов через ${model}.`;
-      btn.disabled = false;
-      showToast('Автопроверка ИИ завершена!');
-    });
+    $('btn-rerun-ai').addEventListener('click', () => runAutomatedCheck());
 
     $('findings-filters').querySelectorAll('[data-filter]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -805,15 +747,6 @@
       });
     });
 
-    $('paywall-toggle').addEventListener('change', (e) => {
-      $('pro-body').classList.toggle('paywall-locked', e.target.checked);
-    });
-    $('btn-unlock-test').addEventListener('click', () => {
-      $('paywall-toggle').checked = false;
-      $('pro-body').classList.remove('paywall-locked');
-      showToast('PRO GEO-доступ открыт бесплатно на тест');
-    });
-
     $('btn-copy-schema').addEventListener('click', () => copyText($('schema-code').textContent, 'Schema.org JSON-LD скопирован!'));
     $('btn-copy-llms').addEventListener('click', () => copyText($('llms-code').textContent, 'Текст llms.txt скопирован!'));
     $('btn-copy-robots').addEventListener('click', () => copyText($('robots-code').textContent, 'Блок robots.txt скопирован!'));
@@ -829,263 +762,124 @@
       showToast('Файл llms.txt скачан');
     });
 
-    $('btn-save-snapshot').addEventListener('click', saveSnapshotToday);
-    $('btn-save-snapshot-2').addEventListener('click', saveSnapshotToday);
-    const btnCsv = $('btn-export-csv');
-    if (btnCsv) {
-      btnCsv.addEventListener('click', () => {
-        const pt = Object.assign({}, getActivePoint(), { name: getActivePoint().name || 'Точка' });
-        const audit = NeiroEngine.runGeoAudit(pt);
-        const csv = NeiroEngine.exportMatrixCsv(pt, audit);
-        const lines = csv.split(/\r?\n/).filter(Boolean);
-        if (lines.length <= 1) {
-          showToast('Сначала проверьте хотя бы 1 запрос в Шаге 2 — и матрица выгрузится в CSV');
-          return;
-        }
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        const slug = (pt.name || 'llm-matrix').toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-').slice(0, 32);
-        a.download = `neiroscan-matrix-${slug}.csv`;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-        trackEvent('export_csv', { rows: lines.length - 1 });
-        showToast(`Матрица LLM (${lines.length - 1} строк) скачана для Excel / Google Sheets`);
-      });
-    }
-    $('btn-clear-history').addEventListener('click', () => {
-      getActivePoint().history = [];
+    $('btn-export-csv').addEventListener('click', () => {
+      const pt = getPoint();
+      const audit = NeiroEngine.runGeoAudit(Object.assign({}, pt, { name: pt.name || 'Точка' }));
+      const csv = NeiroEngine.exportMatrixCsv(pt, audit);
+      const lines = csv.split(/\r?\n/).filter(Boolean);
+      if (lines.length <= 1) {
+        showToast('Сначала выполните проверку — и матрица выгрузится в CSV');
+        return;
+      }
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const slug = (pt.name || 'llm-matrix').toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '-').slice(0, 32);
+      a.download = `neiroscan-matrix-${slug}.csv`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      trackEvent('export_csv', { rows: lines.length - 1 });
+      showToast(`Матрица LLM (${lines.length - 1} строк) скачана`);
+    });
+
+    $('btn-save-snapshot').addEventListener('click', () => {
+      const pt = getPoint();
+      const audit = NeiroEngine.runGeoAudit(Object.assign({}, pt, { name: pt.name || 'Точка' }));
+      const now = new Date();
+      const d = String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0');
+      pt.history.push({ date: d, mentionRate: audit.live.mentionRate !== null ? audit.live.mentionRate : 0, readiness: audit.readinessScore });
+      if (pt.history.length > 12) pt.history = pt.history.slice(-12);
       saveState();
-      renderHistoryChart(getActivePoint());
-      showToast('История замеров очищена');
+      renderHistoryChart(pt);
+      showToast(`Замер за ${d} сохранён`);
+    });
+
+    $('btn-clear-history').addEventListener('click', () => {
+      getPoint().history = [];
+      saveState();
+      renderHistoryChart(getPoint());
+      showToast('История очищена');
     });
 
     $('btn-share-report').addEventListener('click', () => {
-      const pt = Object.assign({}, getActivePoint());
+      const pt = Object.assign({}, getPoint());
       delete pt.id;
       const base = window.location.origin + window.location.pathname;
-      copyText(`${base}#share=${NeiroEngine.encodePayload(pt)}`, 'Ссылка на GEO-отчёт скопирована!');
+      copyText(`${base}#share=${NeiroEngine.encodePayload(pt)}`, 'Ссылка на отчёт скопирована!');
     });
     $('btn-print-report').addEventListener('click', () => window.print());
-
-    // Подключение к единому geo-api (если задан backendUrl в config.js или ?api=...)
-    const backendUrl = getBackendUrl();
-    if (backendUrl) {
-      $('btn-site-audit').classList.remove('hidden');
-      $('server-auto-box').classList.remove('hidden');
-      const apiDrawer = $('api-drawer');
-      if (apiDrawer) apiDrawer.classList.add('hidden');
-      trackEvent('page_view');
-
-      $('btn-site-audit').addEventListener('click', async () => {
-        const pt = syncPointFromForm();
-        const st = $('site-audit-status');
-        let rawSite = (pt.siteUrl || '').trim();
-        if (!rawSite) {
-          st.textContent = 'Введите адрес сайта в поле «Сайт» выше (например, vash-site.ru).';
-          $('g-site').focus();
-          showToast('Введите адрес сайта в поле «Сайт» выше');
-          return;
-        }
-        if (!/^https?:\/\//i.test(rawSite)) {
-          rawSite = 'https://' + rawSite;
-          pt.siteUrl = rawSite;
-          $('g-site').value = rawSite;
-          saveState();
-        }
-        const btn = $('btn-site-audit');
-        btn.disabled = true;
-        st.textContent = 'Проверяем сайт (Schema.org, robots.txt, llms.txt)...';
-        try {
-          const ctrl = new AbortController();
-          const timer = setTimeout(() => ctrl.abort(), 16000);
-          const r = await fetch(`${backendUrl}/api/site-audit`, {
-            method: 'POST',
-            signal: ctrl.signal,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: rawSite, app: 'neirochek' })
-          });
-          clearTimeout(timer);
-          const data = await r.json();
-          if (!r.ok || !data.ok) throw new Error(data.message || data.error || 'audit_failed');
-          const rep = data.report;
-          pt.readiness.hasSchemaLocal = !!rep.schema?.hasLocalBusiness;
-          pt.readiness.hasFaqOnSite = !!rep.hasFaq;
-          pt.readiness.botsAllowed = !!rep.robots?.allAllowed;
-          pt.readiness.hasLlmsTxt = !!rep.hasLlmsTxt;
-          pt.readiness.hasLocalPage = !!(rep.https && rep.hasViewport);
-          if (rep.links?.yandexUrl && !pt.yandexUrl) pt.yandexUrl = rep.links.yandexUrl;
-          if (rep.links?.gisUrl && !pt.gisUrl) pt.gisUrl = rep.links.gisUrl;
-          if (rep.links?.vkUrl && !pt.vkUrl) pt.vkUrl = rep.links.vkUrl;
-          if (rep.links?.tgUrl && !pt.tgUrl) pt.tgUrl = rep.links.tgUrl;
-          if (rep.links?.zoonUrl || rep.links?.otzovikUrl || rep.links?.irecommendUrl) {
-            pt.readiness.hasZoonOtzovik = true;
-          }
-          pt.isDemo = false;
-          saveState();
-          populateFormFromPoint(pt);
-          renderAll();
-          const robotsMsg = rep.robots?.note || (rep.robots?.allAllowed ? 'индексация корня открыта' : 'блокирует ' + rep.robots.blockedBots.join(','));
-          st.textContent = `✓ Проверено: Schema.org ${rep.schema?.hasLocalBusiness ? 'есть' : 'нет'} · FAQ ${rep.hasFaq ? 'есть' : 'нет'} · ${robotsMsg}`;
-          showToast('Технический GEO-аудит сайта готов!');
-        } catch (err) {
-          const msg = err.name === 'AbortError' ? 'таймаут ответа сервера (попробуйте ещё раз)' : (err.message === 'Failed to fetch' ? 'нет связи с сервером api.checkgeo.ru (попробуйте сменить сеть/Wi-Fi)' : err.message);
-          st.textContent = 'Не удалось проверить сайт: ' + msg;
-        }
-        btn.disabled = false;
-      });
-
-      $('btn-server-ai-all').addEventListener('click', async () => {
-        const pt = syncPointFromForm();
-        const safePt = Object.assign({}, pt, { name: pt.name || 'Моя компания' });
-        const prompts = NeiroEngine.buildPromptMatrix(safePt).slice(0, 5);
-        const btn = $('btn-server-ai-all');
-        const st = $('server-auto-status');
-        btn.disabled = true;
-        for (let i = 0; i < prompts.length; i++) {
-          st.textContent = `Опрашиваем живой ИИ: запрос ${i + 1} из ${prompts.length}...`;
-          try {
-            const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 22000);
-            const r = await fetch(`${backendUrl}/api/ai/check`, {
-              method: 'POST',
-              signal: ctrl.signal,
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ prompt: prompts[i].text, businessName: safePt.name })
-            });
-            clearTimeout(timer);
-            const data = await r.json();
-            if (!r.ok || !data.ok) {
-              throw new Error(data.message || data.error || 'server_error');
-            }
-            pt.promptResults[prompts[i].id] = {
-              model: data.model || 'ИИ-сервер',
-              responseText: data.responseText || '',
-              quickStatus: ''
-            };
-            pt.isDemo = false;
-            saveState();
-            renderAll();
-          } catch (err) {
-            const msg = err.name === 'AbortError' ? 'таймаут ответа ИИ — нажмите кнопку ещё раз' : (err.message === 'Failed to fetch' ? 'нет связи с сервером api.checkgeo.ru — проверьте вручную кнопками «Яндекс AI (Алиса)» ниже' : err.message);
-            st.textContent = `Остановлено на запросе #${i + 1}: ${msg}`;
-            btn.disabled = false;
-            return;
-          }
-        }
-        st.textContent = '✓ Все 5 запросов проверены автоматически! Смотрите дашборд ниже.';
-        btn.disabled = false;
-        showToast('Автопроверка ИИ завершена!');
-        $('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    }
 
     // Order / pricing modal
     const ordBack = $('order-backdrop');
     let selectedPlan = '';
-    if (ordBack) {
-      document.querySelectorAll('[data-order-plan]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          selectedPlan = btn.getAttribute('data-order-plan') || '';
-          const pt = getActivePoint();
-          $('order-plan-label').textContent = selectedPlan;
-          $('ord-point').value = [pt.name, pt.city, pt.yandexUrl || pt.siteUrl].filter(Boolean).join(' · ');
-          $('order-status').textContent = '';
-          ordBack.classList.remove('hidden');
-          trackEvent('order_open', { plan: selectedPlan });
-        });
-      });
-      $('btn-close-order').addEventListener('click', () => ordBack.classList.add('hidden'));
-      ordBack.addEventListener('click', (e) => { if (e.target === ordBack) ordBack.classList.add('hidden'); });
-      $('order-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const pointName = ($('ord-point').value || '').trim();
-        const contact = ($('ord-contact').value || '').trim();
-        const pt = getActivePoint();
-        const planLow = selectedPlan.toLowerCase();
-        const tariffId = planLow.includes('250') ? 'recs_250'
-          : planLow.includes('3 карточ') ? 'pack_3'
-          : planLow.includes('10 карточ') ? 'pack_10'
-          : planLow.includes('vip') || planLow.includes('5 000') ? 'vip_5000'
-          : 'pro_950';
-        const api = getBackendUrl();
-        const stEl = $('order-status');
-        stEl.textContent = 'Сохраняем заявку...';
-        if (api) {
-          try {
-            const r = await fetch(`${api}/api/orders/create`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                app: 'neiroscan',
-                tariffId,
-                contact,
-                input: {
-                  name: pt.name || pointName,
-                  city: pt.city || '',
-                  district: pt.district || '',
-                  niche: pt.niche || 'other',
-                  usp: pt.usp || '',
-                  yandexUrl: pt.yandexUrl || (/yandex\./i.test(pointName) ? pointName : ''),
-                  gisUrl: pt.gisUrl || '',
-                  siteUrl: pt.siteUrl || '',
-                  phone: pt.phone || ''
-                }
-              })
-            });
-            const d = await r.json();
-            if (r.ok && d.ok && d.mode === 'payment' && d.paymentUrl) {
-              stEl.textContent = 'Переходим к оплате...';
-              window.location.href = d.paymentUrl;
-              return;
-            }
-          } catch (_) {}
-        }
-        const txt = `Заявка NeiroScan (${selectedPlan}): ${pointName} | Контакт: ${contact}`;
-        copyText(txt, 'Заявка зафиксирована и скопирована!');
-        stEl.textContent = '✓ Заявка отправлена! Мы свяжемся по указанному контакту (текст также скопирован в буфер).';
-        setTimeout(() => ordBack.classList.add('hidden'), 1800);
-      });
-    }
-
-    // Feedback decision block
-    $('fb-choices').querySelectorAll('[data-fb]').forEach(btn => {
+    document.querySelectorAll('[data-order-plan]').forEach(btn => {
       btn.addEventListener('click', () => {
-        $('fb-choices').querySelectorAll('[data-fb]').forEach(b => b.classList.remove('picked'));
-        btn.classList.add('picked');
-        state.selectedFeedback = btn.getAttribute('data-fb');
+        selectedPlan = btn.getAttribute('data-order-plan') || '';
+        const pt = getPoint();
+        $('order-plan-label').textContent = selectedPlan;
+        $('ord-point').value = [pt.name, pt.district || pt.city, pt.yandexUrl || pt.siteUrl].filter(Boolean).join(' · ');
+        $('order-status').textContent = '';
+        ordBack.classList.remove('hidden');
+        trackEvent('order_open', { plan: selectedPlan });
       });
     });
-    $('btn-copy-feedback').addEventListener('click', () => {
-      const pt = Object.assign({}, getActivePoint(), { name: getActivePoint().name || 'Моя компания' });
-      const a = NeiroEngine.runGeoAudit(pt);
-      const verdict = state.selectedFeedback || 'Протестировал НейроЧек';
-      const comment = ($('fb-comment').value || '').trim();
-      trackEvent('verdict', { verdict, comment, score: a.totalScore });
-      const msg = `Тест НейроЧек (${pt.name}, GEO ${a.totalScore}/100): ${verdict}${comment ? ' | Комментарий: ' + comment : ''}`;
-      copyText(msg, 'Вердикт скопирован — вставьте в Telegram!');
+    $('btn-close-order').addEventListener('click', () => ordBack.classList.add('hidden'));
+    ordBack.addEventListener('click', (e) => { if (e.target === ordBack) ordBack.classList.add('hidden'); });
+    $('order-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pointName = ($('ord-point').value || '').trim();
+      const contact = ($('ord-contact').value || '').trim();
+      const pt = getPoint();
+      const planLow = selectedPlan.toLowerCase();
+      const tariffId = planLow.includes('250') ? 'recs_250'
+        : planLow.includes('3 карточ') ? 'pack_3'
+        : planLow.includes('10 карточ') ? 'pack_10'
+        : planLow.includes('vip') || planLow.includes('5 000') ? 'vip_5000'
+        : 'pro_950';
+      const api = getBackendUrl();
+      const stEl = $('order-status');
+      stEl.textContent = 'Сохраняем заявку...';
+      if (api) {
+        try {
+          const r = await fetch(`${api}/api/orders/create`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              app: 'neiroscan',
+              tariffId,
+              contact,
+              input: {
+                name: pt.name || pointName,
+                city: pt.city || '',
+                district: pt.district || '',
+                niche: pt.niche || 'other',
+                usp: pt.usp || '',
+                yandexUrl: pt.yandexUrl || (/yandex\./i.test(pointName) ? pointName : ''),
+                gisUrl: pt.gisUrl || '',
+                siteUrl: pt.siteUrl || '',
+                phone: pt.phone || ''
+              }
+            })
+          });
+          const d = await r.json();
+          if (r.ok && d.ok && d.mode === 'payment' && d.paymentUrl) {
+            stEl.textContent = 'Переходим к оплате...';
+            window.location.href = d.paymentUrl;
+            return;
+          }
+        } catch (_) {}
+      }
+      const txt = `Заявка NeiroScan (${selectedPlan}): ${pointName} | Контакт: ${contact}`;
+      copyText(txt, 'Заявка отправлена и скопирована!');
+      stEl.textContent = '✓ Заявка принята! Мы свяжемся по указанному контакту.';
+      setTimeout(() => ordBack.classList.add('hidden'), 1800);
     });
-  }
 
-  function getBackendUrl() {
-    return (window.NEIRO_CONFIG && window.NEIRO_CONFIG.backendUrl) ? window.NEIRO_CONFIG.backendUrl.replace(/\/+$/, '') : '';
-  }
-
-  function trackEvent(event, meta) {
-    const api = getBackendUrl();
-    if (!api) return;
-    try {
-      fetch(`${api}/api/telemetry/event`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ app: 'neirochek', event, meta: meta || {} }),
-        keepalive: true
-      }).catch(() => {});
-    } catch (_) {}
+    trackEvent('page_view');
   }
 
   initStaticControls();
-  populateFormFromPoint(getActivePoint());
+  populateFormFromPoint(getPoint());
   bindEvents();
   renderAll();
 })();
