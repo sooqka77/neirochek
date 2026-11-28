@@ -348,7 +348,9 @@ p { margin: 0; }
   box-shadow: var(--shadow);
   padding: 20px;
   margin-bottom: 18px;
+  scroll-margin-top: 78px;
 }
+.check-card, .clean-drawer { scroll-margin-top: 78px; }
 .card-head {
   display: flex;
   justify-content: space-between;
