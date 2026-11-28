@@ -8,9 +8,11 @@
   <meta property="og:title" content="NeiroScan — проверка в ИИ и рекомендации, как обойти конкурентов">
   <meta property="og:description" content="Бесплатная проверка видимости в нейросетях + персональные рекомендации от 250 ₽ и полный PRO-разбор Карты + ИИ за 950 ₽.">
   <meta property="og:type" content="website">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111315'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23fff' stroke-width='2' stroke-dasharray='3 3'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2393C5FD'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -86,7 +88,7 @@
         </div>
       </div>
 
-      <form id="geo-form">
+      <form id="geo-form" novalidate>
         <div class="form-grid">
           <div class="field">
             <label for="g-name">Название бизнеса</label>
@@ -100,9 +102,13 @@
             <label for="g-district">Город и район / метро / ЖК</label>
             <input type="text" id="g-district" placeholder="Москва, ЖК Скандинавия">
           </div>
-          <div class="field span-2">
+          <div class="field">
+            <label for="g-site">Сайт (для техрентгена ИИ)</label>
+            <input type="text" id="g-site" inputmode="url" placeholder="vash-site.ru">
+          </div>
+          <div class="field">
             <label for="g-usp">Главная фишка (по какому запросу хотите выпадать в ИИ)</label>
-            <input type="text" id="g-usp" placeholder="Например: робототехника для детей 6–12 лет, маленькие группы, пробное бесплатно">
+            <input type="text" id="g-usp" placeholder="Робототехника 6–12 лет, маленькие группы, пробное 0 ₽">
           </div>
           <div class="field">
             <label for="g-comp">Главный конкурент рядом (опционально)</label>
@@ -118,7 +124,7 @@
         <!-- Раскрывающийся блок: полный профиль + ссылки для Schema.org + все 14 факторов -->
         <details class="adv-drawer">
           <summary>
-            <span>⚙ Полный профиль: адрес, сайт, ссылки на карты/VK/TG (для Schema.org и llms.txt) и все 14 факторов</span>
+            <span>⚙ Полный профиль: адрес, ссылки на карты/VK/TG (для Schema.org и llms.txt) и все 14 факторов</span>
             <span class="hint">Развернуть ▾</span>
           </summary>
 
@@ -126,13 +132,12 @@
             <div class="field"><label for="g-city">Город</label><input type="text" id="g-city" placeholder="Москва"></div>
             <div class="field"><label for="g-address">Точный адрес</label><input type="text" id="g-address" placeholder="ул. Эдварда Грига, 5"></div>
             <div class="field"><label for="g-aliases">Синонимы / латиница</label><input type="text" id="g-aliases" placeholder="Квант, Kvant"></div>
-            <div class="field"><label for="g-site">Сайт</label><input type="url" id="g-site" placeholder="https://vash-site.ru"></div>
             <div class="field"><label for="g-phone">Телефон</label><input type="text" id="g-phone" placeholder="+7 (495) 000-00-00"></div>
             <div class="field"><label for="g-hours">График работы</label><input type="text" id="g-hours" placeholder="Пн–Вс 10:00–20:00"></div>
-            <div class="field"><label for="g-yandex">Ссылка на Яндекс Карты</label><input type="url" id="g-yandex" placeholder="https://yandex.ru/maps/org/..."></div>
-            <div class="field"><label for="g-gis">Ссылка на 2ГИС</label><input type="url" id="g-gis" placeholder="https://2gis.ru/..."></div>
-            <div class="field"><label for="g-vk">ВКонтакте</label><input type="url" id="g-vk" placeholder="https://vk.com/..."></div>
-            <div class="field span-3"><label for="g-tg">Telegram-канал или бот</label><input type="url" id="g-tg" placeholder="https://t.me/..."></div>
+            <div class="field"><label for="g-yandex">Ссылка на Яндекс Карты</label><input type="text" id="g-yandex" inputmode="url" placeholder="https://yandex.ru/maps/org/..."></div>
+            <div class="field"><label for="g-gis">Ссылка на 2ГИС</label><input type="text" id="g-gis" inputmode="url" placeholder="https://2gis.ru/..."></div>
+            <div class="field"><label for="g-vk">ВКонтакте</label><input type="text" id="g-vk" inputmode="url" placeholder="https://vk.com/..."></div>
+            <div class="field"><label for="g-tg">Telegram-канал или бот</label><input type="text" id="g-tg" inputmode="url" placeholder="https://t.me/..."></div>
           </div>
 
           <p class="hint" style="font-weight:700;color:var(--ink);margin-top:14px;">Дополнительные факторы ИИ-готовности:</p>
@@ -157,7 +162,7 @@
         <span class="pill pill-test">5 базовых бесплатно + 5 PRO открыто</span>
       </div>
 
-      <p class="hint" style="margin-bottom:12px;">Нажмите <b>Яндекс AI (Алиса)</b> или <b>GigaChat</b> (работают в РФ без VPN) — запрос сразу откроется или скопируется. С телефона достаточно нажать 1 кнопку статуса (`Мы в топ-3` / `Нас нет`), а если вставить текст ответа — чекер вытащит конкурентов и сайты-источники.</p>
+      <p class="hint" style="margin-bottom:12px;">Нажмите <b>Яндекс AI (Алиса)</b> или <b>GigaChat</b> (работают в РФ без VPN) — запрос сразу откроется или скопируется. С телефона достаточно нажать 1 кнопку статуса (<b>Мы в топ-3</b> / <b>Нас нет</b>), а если вставить текст ответа — чекер вытащит конкурентов и сайты-источники.</p>
 
       <!-- Панель 1-клик автопроверки через geo-api (появляется автоматически, когда подключён сервер!) -->
       <div class="api-box hidden" id="server-auto-box" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">

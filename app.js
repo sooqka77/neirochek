@@ -216,10 +216,6 @@
       const savedKey = localStorage.getItem(API_KEY_STORAGE);
       if (savedKey) $('api-key').value = savedKey;
     } catch (_) {}
-
-    if (window.NEIRO_CONFIG && window.NEIRO_CONFIG.backendUrl) {
-      $('api-endpoint').value = window.NEIRO_CONFIG.backendUrl;
-    }
   }
 
   function populateFormFromPoint(pt) {
@@ -247,8 +243,11 @@
 
   function syncPointFromForm() {
     const pt = getActivePoint();
+    const wasDemo = !!pt.isDemo;
+    const prevName = pt.name || '';
+    const nextName = $('g-name').value.trim();
     pt.isDemo = false;
-    pt.name = $('g-name').value.trim();
+    pt.name = nextName;
     pt.niche = $('g-niche').value || 'other';
     pt.city = $('g-city').value.trim() || 'Москва';
     pt.district = $('g-district').value.trim();
@@ -263,6 +262,12 @@
     pt.gisUrl = $('g-gis').value.trim();
     pt.vkUrl = $('g-vk').value.trim();
     pt.tgUrl = $('g-tg').value.trim();
+
+    // Если клиент начал вводить свой бизнес поверх демо-примера — сбрасываем демо-ответы ИИ и демо-историю
+    if (wasDemo && nextName !== prevName) {
+      pt.promptResults = {};
+      pt.history = [];
+    }
 
     document.querySelectorAll('[data-readiness]').forEach(cb => {
       pt.readiness[cb.getAttribute('data-readiness')] = cb.checked;
@@ -868,26 +873,41 @@
     if (backendUrl) {
       $('btn-site-audit').classList.remove('hidden');
       $('server-auto-box').classList.remove('hidden');
+      const apiDrawer = $('api-drawer');
+      if (apiDrawer) apiDrawer.classList.add('hidden');
       trackEvent('page_view');
 
       $('btn-site-audit').addEventListener('click', async () => {
-        const pt = getActivePoint();
-        if (!pt.siteUrl) {
-          showToast('Сначала укажите адрес сайта в «Полном профиле» выше');
+        const pt = syncPointFromForm();
+        const st = $('site-audit-status');
+        let rawSite = (pt.siteUrl || '').trim();
+        if (!rawSite) {
+          st.textContent = 'Введите адрес сайта в поле «Сайт» выше (например, vash-site.ru).';
+          $('g-site').focus();
+          showToast('Введите адрес сайта в поле «Сайт» выше');
           return;
         }
+        if (!/^https?:\/\//i.test(rawSite)) {
+          rawSite = 'https://' + rawSite;
+          pt.siteUrl = rawSite;
+          $('g-site').value = rawSite;
+          saveState();
+        }
         const btn = $('btn-site-audit');
-        const st = $('site-audit-status');
         btn.disabled = true;
         st.textContent = 'Проверяем сайт (Schema.org, robots.txt, llms.txt)...';
         try {
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), 16000);
           const r = await fetch(`${backendUrl}/api/site-audit`, {
             method: 'POST',
+            signal: ctrl.signal,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: pt.siteUrl, app: 'neirochek' })
+            body: JSON.stringify({ url: rawSite, app: 'neirochek' })
           });
+          clearTimeout(timer);
           const data = await r.json();
-          if (!r.ok || !data.ok) throw new Error(data.error || 'audit_failed');
+          if (!r.ok || !data.ok) throw new Error(data.message || data.error || 'audit_failed');
           const rep = data.report;
           pt.readiness.hasSchemaLocal = !!rep.schema?.hasLocalBusiness;
           pt.readiness.hasFaqOnSite = !!rep.hasFaq;
@@ -909,13 +929,14 @@
           st.textContent = `✓ Проверено: Schema.org ${rep.schema?.hasLocalBusiness ? 'есть' : 'нет'} · FAQ ${rep.hasFaq ? 'есть' : 'нет'} · ${robotsMsg}`;
           showToast('Технический GEO-аудит сайта готов!');
         } catch (err) {
-          st.textContent = 'Не удалось проверить сайт: ' + err.message;
+          const msg = err.name === 'AbortError' ? 'таймаут ответа сервера (попробуйте ещё раз)' : (err.message === 'Failed to fetch' ? 'нет связи с сервером api.checkgeo.ru (попробуйте сменить сеть/Wi-Fi)' : err.message);
+          st.textContent = 'Не удалось проверить сайт: ' + msg;
         }
         btn.disabled = false;
       });
 
       $('btn-server-ai-all').addEventListener('click', async () => {
-        const pt = getActivePoint();
+        const pt = syncPointFromForm();
         const safePt = Object.assign({}, pt, { name: pt.name || 'Моя компания' });
         const prompts = NeiroEngine.buildPromptMatrix(safePt).slice(0, 5);
         const btn = $('btn-server-ai-all');
@@ -924,11 +945,15 @@
         for (let i = 0; i < prompts.length; i++) {
           st.textContent = `Опрашиваем живой ИИ: запрос ${i + 1} из ${prompts.length}...`;
           try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 22000);
             const r = await fetch(`${backendUrl}/api/ai/check`, {
               method: 'POST',
+              signal: ctrl.signal,
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ prompt: prompts[i].text, businessName: safePt.name })
             });
+            clearTimeout(timer);
             const data = await r.json();
             if (!r.ok || !data.ok) {
               throw new Error(data.message || data.error || 'server_error');
@@ -942,7 +967,8 @@
             saveState();
             renderAll();
           } catch (err) {
-            st.textContent = `Остановлено на запросе #${i + 1}: ${err.message}`;
+            const msg = err.name === 'AbortError' ? 'таймаут ответа ИИ — нажмите кнопку ещё раз' : (err.message === 'Failed to fetch' ? 'нет связи с сервером api.checkgeo.ru — проверьте вручную кнопками «Яндекс AI (Алиса)» ниже' : err.message);
+            st.textContent = `Остановлено на запросе #${i + 1}: ${msg}`;
             btn.disabled = false;
             return;
           }
