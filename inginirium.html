@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>PRO-аудит Карты + ИИ: Инжинириум МГТУ им. Баумана (Коммунарка и Южное Бутово)</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111315'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23fff' stroke-width='2' stroke-dasharray='3 3'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2393C5FD'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .dual-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+    .score-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+    .score-card.maps { border-top: 3px solid #EAB308; }
+    .score-card.ai { border-top: 3px solid #1D4ED8; }
+    .mini-hero { display: flex; align-items: center; gap: 16px; margin: 10px 0 6px; }
+    .big-ring { width: 86px; height: 86px; position: relative; flex-shrink: 0; }
+    .big-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .big-ring .num { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 24px; font-weight: 800; }
+    .exec-box { background: #111315; color: #F8FAFC; border-radius: var(--radius); padding: 18px 20px; margin-bottom: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .exec-item { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 13px 14px; }
+    .exec-item .e-k { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 5px; }
+    .exec-item .e-k.ok { color: #6EE7B7; }
+    .exec-item .e-k.warn { color: #FCD34D; }
+    .exec-item .e-k.bad { color: #FCA5A5; }
+    .exec-item p { font-size: 13.5px; line-height: 1.48; color: #E2E8F0; }
+    .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin-top: 10px; }
+    .audit-tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--paper); min-width: 640px; }
+    .audit-tbl th { text-align: left; padding: 9px 11px; background: var(--soft); font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
+    .audit-tbl td { padding: 10px 11px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .audit-tbl tr:last-child td { border-bottom: 0; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+    .badge.ok { background: #DCFCE7; color: #15803D; }
+    .badge.warn { background: #FEF3C7; color: #B45309; }
+    .badge.bad { background: #FEE2E2; color: #B91C1C; }
+    .badge.info { background: #EFF6FF; color: #1D4ED8; }
+    .sem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+    .sem-row { padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; margin-bottom: 8px; background: #FAFAF8; }
+    .sem-row.gap { background: #FFF8F8; border-color: #FECACA; }
+    .sem-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13.5px; }
+    .sem-track { height: 6px; background: #E2E8F0; border-radius: 999px; margin: 6px 0 2px; overflow: hidden; }
+    .sem-fill { height: 100%; border-radius: 999px; }
+    .sem-fill.good { background: #15803D; }
+    .sem-fill.bad { background: #B91C1C; }
+    .pulse-chart { display: flex; align-items: flex-end; gap: 12px; height: 112px; padding: 14px 6px 0; }
+    .pulse-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+    .pulse-bar { width: 100%; max-width: 44px; background: #111315; border-radius: 6px 6px 2px 2px; }
+    .pulse-bar.peak { background: #1D4ED8; }
+    .tool-tabs { display: flex; gap: 7px; flex-wrap: wrap; margin: 12px 0 16px; }
+    .tool-tab { background: var(--paper); border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 13px; font-size: 13.5px; font-weight: 700; color: var(--muted); }
+    .tool-tab.active { background: var(--ink); color: #FFFFFF; border-color: var(--ink); }
+    .tool-pane { display: none; }
+    .tool-pane.active { display: block; }
+    .qr-inline { display: grid; grid-template-columns: 1fr 220px; gap: 18px; align-items: center; }
+    .qr-box { background: #FFFFFF; border: 2px solid #111315; border-radius: 12px; padding: 14px; text-align: center; }
+    .qr-box svg { display: block; margin: 8px auto; width: 176px; height: 176px; }
+    .script-card { background: #FAFAF8; border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px; margin-bottom: 10px; }
+    .script-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+    .script-text { font-size: 14px; white-space: pre-wrap; line-height: 1.5; }
+    .price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 0 14px; }
+    .price-item { border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; background: #FAFAF8; }
+    .price-top { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; font-size: 14px; }
+    .site-bug-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+    .site-bug { border: 1px solid #FECACA; background: #FFF8F8; border-radius: 10px; padding: 12px 14px; font-size: 13.5px; }
+    .site-bug b { color: #991B1B; display: block; margin-bottom: 4px; }
+    .print-pane-title { display: none; }
+    @media (max-width: 820px) { .dual-scores, .exec-box, .sem-grid, .qr-inline, .price-grid, .site-bug-grid { grid-template-columns: 1fr; } }
+    @media print {
+      .no-print, .tool-tabs { display: none !important; }
+      .tool-pane { display: block !important; margin-bottom: 16px; page-break-inside: avoid; }
+      .print-pane-title { display: block !important; font-size: 15px; margin: 14px 0 6px; border-bottom: 1px solid #CBD5E1; padding-bottom: 4px; }
+      body { background: #FFFFFF; }
+      .card, .score-card { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="./">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="8.5" stroke="#FFFFFF" stroke-width="1.8" stroke-dasharray="3 3"/>
+            <circle cx="12" cy="12" r="4.5" stroke="#FFFFFF" stroke-width="1.8"/>
+            <circle cx="12" cy="12" r="2" fill="#FFFFFF"/>
+          </svg>
+        </span>
+        <span>
+          <span class="brand-name">CheckGeo + NeiroScan · PRO</span>
+          <span class="brand-sub">Эталонный аудит · 28.11.2026</span>
+        </span>
+      </a>
+      <div class="topbar-right no-print">
+        <button type="button" class="btn btn-outline btn-sm" id="btn-export-csv">Матрица LLM (CSV) ↓</button>
+        <button type="button" class="btn btn-dark btn-sm" onclick="window.print()">Сохранить PDF</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-wrap" style="padding:28px 0 24px;margin-bottom:20px;">
+    <div class="wrap">
+      <span class="eyebrow">Москва · Коммунарка (ЖК Скандинавия, ул. Эдварда Грига, 5) + Южное Бутово (ул. Скобелевская, 23к2) · inginirium-butovo.ru</span>
+      <h1 style="max-width:30ch;">Инжинириум МГТУ им. Баумана: <span class="hl">полный PRO-аудит Карты + ИИ</span></h1>
+      <p class="hero-lead">Глубокий разбор на <b>28.11.2026</b> по живой карточке Яндекс Карт (<code>ID 142025828577</code>, все 35 отзывов), коду и текстам сайта <code>inginirium-butovo.ru</code>, 2ГИС/Zoon/Отзовик и 6 реальным запросам в нейросетях.</p>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <!-- ДВА ИНДЕКСА -->
+    <section class="dual-scores">
+      <div class="score-card maps">
+        <span class="eyebrow">CheckGeo · Яндекс Карты и справочники</span>
+        <div class="mini-hero">
+          <div class="big-ring">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#E5E7EB" stroke-width="10"/>
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#D97706" stroke-width="10" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="100.3"/>
+            </svg>
+            <span class="num">62</span>
+          </div>
+          <div>
+            <h2 style="font-size:18px;">Сильный рейтинг 5.0, но течёт воронка</h2>
+            <p class="hint" style="margin-top:4px;">35 отзывов (<b>12 свежих в ноябре — 0 ответов!</b>) · 48 фото · нет онлайн-записи · NAP-конфликт телефонов и <code>http://</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-card ai">
+        <span class="eyebrow">NeiroScan · Видимость в ИИ (Алиса, GigaChat, ChatGPT)</span>
+        <div class="mini-hero">
+          <div class="big-ring">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#E5E7EB" stroke-width="10"/>
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#B91C1C" stroke-width="10" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="200.6"/>
+            </svg>
+            <span class="num">24</span>
+          </div>
+          <div>
+            <h2 style="font-size:18px;">Упоминаемость: 17% (1 из 6 запросов)</h2>
+            <p class="hint" style="margin-top:4px;">По Бутово ИИ путает филиал с Коммунаркой или пишет «филиала нет» · на сайте <b>0 H1, 0 Schema, 0 FAQ</b> и критичные ошибки в ценах.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ВЫВОД ЗА 30 СЕКУНД -->
+    <section class="exec-box">
+      <div class="exec-item">
+        <span class="e-k ok">1 · Сильный продукт и любовь родителей</span>
+        <p>Идеальный рейтинг <b>5.0 (48 оценок, 35 отзывов)</b>, длинные живые тексты (в среднем 311 символов!), 69% хвалят педагогов (особенно Никиту Шабельникова), семьи ходят по 2–4 года. За ноябрь пришёл мощный залп — <b>12 новых отзывов</b>.</p>
+      </div>
+      <div class="exec-item">
+        <span class="e-k bad">2 · Раздвоение сущности и 6 косяков на сайте</span>
+        <p>Карточка в Коммунарке (Эдварда Грига, 5) ведёт на <code>http://inginirium-butovo.ru</code> с <b>другим телефоном</b> (<code>+7 936...</code> вместо <code>+7 968...</code>). На сайте 3 разных цены (1 700 / 2 470 / 2 570 ₽), «WeDo для дошкольников: 9–11 класс» и сломанный блок «Саша Саша Саша».</p>
+      </div>
+      <div class="exec-item">
+        <span class="e-k warn">3 · Главный рычаг роста за 14 дней</span>
+        <p>Ответить с гео-ключами на все <b>12 свежих ноябрьских отзывов</b>, выровнять телефон + <code>https://</code> с UTM, развести посадочные под Коммунарку и Бутово, починить цены/H1/Schema/FAQ и запустить отзывы про <b>зимний интенсив «Щелкунчик»</b> (сейчас 0/35).</p>
+      </div>
+    </section>
+
+    <!-- ЧАСТЬ 1: КАРТОЧКА ЯНДЕКС КАРТ И NAP -->
+    <section class="card">
+      <span class="eyebrow">Часть 1 · Аудит Яндекс Карт (ID 142025828577) и NAP-согласованности</span>
+      <h2 style="font-size:21px;margin-bottom:12px;">6 конкретных утечек на картах и в контактах</h2>
+      <div class="findings-list">
+        <div class="finding red">
+          <span class="f-tag red">Критично</span>
+          <div>
+            <h4>12 из 12 свежих ноябрьских отзывов висят БЕЗ ответа владельца</h4>
+            <p class="f-why">В ноябре 2026 родители написали 12 отличных отзывов (последний 22.11), но компания ответила только на 21 старый отзыв (60% всего, из них 6 шаблонных). Все верхние отзывы, которые видят новые родители, висят без ответа — плюс в 21 старом ответе <b>0 упоминаний района и направлений</b>.</p>
+            <div class="f-fix"><b>Что сделать сегодня (15 минут):</b> Ответьте на все 12 ноябрьских отзывов (готовые шаблоны во вкладке 1 ниже), естественно вплетая «ЖК Скандинавия / Коммунарка», «курс Юного инженера / Python / робототехника» и приглашение на зимний интенсив «Щелкунчик» 4–8 января.</div>
+          </div>
+        </div>
+
+        <div class="finding red">
+          <span class="f-tag red">NAP-конфликт</span>
+          <div>
+            <h4>Раздвоение сущности: разные телефоны, http:// и 1 сайт без адресов на 2 разных района</h4>
+            <p class="f-why">В Яндекс Картах Коммунарки (ул. Эдварда Грига, 5) указан телефон <b>+7 (968) 439-49-90</b> и сайт <code>http://inginirium-butovo.ru/</code> (без HTTPS и без UTM). А на самом сайте стоит другой телефон — <b>+7 (936) 173-66-46</b> — и в видимом тексте вообще не написаны адреса филиалов! Из-за этого нейросети склеивают Бутово с Коммунаркой или заявляют, что филиала в Бутово нет.</p>
+            <div class="f-fix"><b>Что сделать:</b> 1) Поменять ссылку в Я.Картах на <code>https://inginirium-butovo.ru/?utm_source=yandex_maps&amp;utm_medium=geo&amp;utm_campaign=kommunarka</code>. 2) Явно прописать в шапке/подвале сайта оба адреса с их точными телефонами и сделать отдельную страницу <code>/kommunarka</code> и <code>/butovo</code> (в Тильде дублируется за 10 минут). 3) Исправить опечатку в handle Telegram или синхронизировать ссылку <code>t.me/inginiriumbutovo_kommynarka</code> на сайте.</div>
+          </div>
+        </div>
+
+        <div class="finding red">
+          <span class="f-tag red">Конверсия</span>
+          <div>
+            <h4>Нет кнопки «Онлайн-запись / Записаться на пробное» в карточке Яндекса</h4>
+            <p class="f-why">Флаг <code>hasBooking = false</code>. Мамы в ЖК Скандинавия выбирают кружки вечером после 20:00, когда центр закрыт (будни график 17:00–21:00) — без кнопки записи в Telegram/WhatsApp или форму теряется до 15–17% обращений.</p>
+            <div class="f-fix"><b>Что сделать:</b> В Яндекс Бизнесе → Кнопка действия → «Записаться на пробное» → прямая ссылка на WhatsApp/Telegram с предзаполненным текстом «Здравствуйте! Хотим на пробное в Инжинириум (Коммунарка, Эдварда Грига, 5), ребёнку __ лет».</div>
+          </div>
+        </div>
+
+        <div class="finding yellow">
+          <span class="f-tag yellow">Охват</span>
+          <div>
+            <h4>Неполные рубрики карточки: нет «Робототехника / Детский клуб / Центр развития»</h4>
+            <p class="f-why">Сейчас в карточке стоят общие «Курсы и мастер-классы», «компьютерные курсы» и «дополнительное образование». По детским запросам в ЖК Скандинавия Яндекс сильнее ранжирует карточки с рубрикой «Детский клуб / Центр развития ребёнка / Школа программирования».</p>
+            <div class="f-fix"><b>Что сделать:</b> Добавить в Яндекс Бизнесе профильные детские рубрики (не удаляя основную «Дополнительное образование»), сверить с топ-3 соседей по ЖК Скандинавия.</div>
+          </div>
+        </div>
+
+        <div class="finding yellow">
+          <span class="f-tag yellow">2ГИС / Отзовики</span>
+          <div>
+            <h4>На сайте нет ссылок на Яндекс Карты, 2ГИС и отзовики; в 2ГИС/Фламп отзывов мало</h4>
+            <p class="f-why">В коде <code>inginirium-butovo.ru</code> найдена только ссылка на VK и WhatsApp — нет ни одной ссылки на Яндекс Карты, 2ГИС, Zoon или Отзовик.ру. Поисковики и ChatGPT теряют связку <code>sameAs</code>, а 2ГИС и Zoon слабо прокачаны по конкретному адресу.</p>
+            <div class="f-fix"><b>Что сделать:</b> Добавить кликабельные бейджи «Отзывы на Яндекс Картах (5.0 ★)» и «Мы в 2ГИС» в блок отзывов на сайте + перекидывать каждого 3-го довольного родителя в 2ГИС / Zoon.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЧАСТЬ 2: СЕМАНТИКА 35 ОТЗЫВОВ И ПУЛЬС -->
+    <section class="card">
+      <span class="eyebrow">Часть 2 · Разбор всех 35 отзывов и 21 ответа владельца (ID 142025828577)</span>
+      <h2 style="font-size:21px;margin-bottom:6px;">Пульс по месяцам и семантика отзывов</h2>
+      <p class="hint">Последний отзыв: <b>22.11.2026</b> · За 30 дней: <b>12 (все 12 без ответа!)</b> · Всего ответов: <b>60% (21/35)</b> · Средняя длина отзыва: <b>311 символов</b> (сильно выше рынка!) · Шаблонных ответов: <b>6</b>.</p>
+
+      <div class="pulse-chart" aria-label="Пульс отзывов по месяцам">
+        <div class="pulse-col"><span class="mono" style="font-size:12px;font-weight:700;">9</span><div class="pulse-bar" style="height:56px"></div><span class="hint" style="font-size:11.5px;">2025-02</span></div>
+        <div class="pulse-col"><span class="mono" style="font-size:12px;font-weight:700;">1</span><div class="pulse-bar" style="height:14px;opacity:.45"></div><span class="hint" style="font-size:11.5px;">2025-03</span></div>
+        <div class="pulse-col"><span class="mono" style="font-size:12px;font-weight:700;">1</span><div class="pulse-bar" style="height:14px;opacity:.45"></div><span class="hint" style="font-size:11.5px;">2025-07</span></div>
+        <div class="pulse-col"><span class="mono" style="font-size:12px;font-weight:700;">1</span><div class="pulse-bar" style="height:14px;opacity:.45"></div><span class="hint" style="font-size:11.5px;">2025-08</span></div>
+        <div class="pulse-col"><span class="mono" style="font-size:12px;font-weight:700;">1</span><div class="pulse-bar" style="height:14px;opacity:.45"></div><span class="hint" style="font-size:11.5px;">2025-12</span></div>
+        <div class="pulse-col"><span class="mono" style="font-size:12px;font-weight:700;color:#1D4ED8;">12</span><div class="pulse-bar peak" style="height:76px"></div><span class="hint" style="font-size:11.5px;font-weight:700;color:#1D4ED8;">2026-11</span></div>
+      </div>
+      <p class="hint" style="margin-top:6px;"><b>Инсайт по пульсу:</b> После 8-месячного спада (по 1 отзыву) в ноябре 2026 пошёл резкий залп (+12 отзывов). Не допускайте снова паузу — переведите сбор в ровный ритм <b>4–6 отзывов каждый месяц</b> через QR на ресепшене, иначе после залпа алгоритмы Яндекса видят «пилу».</p>
+
+      <div class="sem-grid">
+        <div>
+          <h3 style="font-size:16px;margin-bottom:8px;">Что уже мощно звучит (козыри)</h3>
+          <div class="sem-row"><div class="sem-head"><b>Педагоги и вовлечённость (Никита Шабельников и др.)</b><span class="mono hint">24/35 (69%) · ответы: 0</span></div><div class="sem-track"><div class="sem-fill good" style="width:69%"></div></div></div>
+          <div class="sem-row"><div class="sem-head"><b>Инженерия / 3D / Python / робототехника</b><span class="mono hint">16/35 (46%) · ответы: 0</span></div><div class="sem-track"><div class="sem-fill good" style="width:46%"></div></div></div>
+          <div class="sem-row"><div class="sem-head"><b>Практика, модели ракет/кораблей, фотоотчёты</b><span class="mono hint">5/35 (14%) · ответы: 0</span></div><div class="sem-track"><div class="sem-fill good" style="width:14%"></div></div></div>
+        </div>
+        <div>
+          <h3 style="font-size:16px;margin-bottom:8px;">Семантические пробелы (где теряете деньги и ИИ)</h3>
+          <div class="sem-row gap"><div class="sem-head"><b>Каникулярные смены / зимний интенсив «Щелкунчик»</b><span class="mono" style="font-size:12px;color:#B91C1C;">0/35 (0%) · ответы: 0</span></div><div class="sem-track"><div class="sem-fill bad" style="width:3%"></div></div></div>
+          <div class="sem-row gap"><div class="sem-head"><b>Дни рождения и мастер-классы</b><span class="mono" style="font-size:12px;color:#B91C1C;">0/35 (0%) · ответы: 0</span></div><div class="sem-track"><div class="sem-fill bad" style="width:3%"></div></div></div>
+          <div class="sem-row gap"><div class="sem-head"><b>Пробное занятие / понятный первый шаг</b><span class="mono" style="font-size:12px;color:#B91C1C;">2/35 (6%) · ответы: 0</span></div><div class="sem-track"><div class="sem-fill bad" style="width:6%"></div></div></div>
+          <div class="sem-row gap"><div class="sem-head"><b>Гео-якоря в ответах владельца (Скандинавия / Коммунарка / Москва)</b><span class="mono" style="font-size:12px;color:#B91C1C;">отзывы: 3% · ответы: 0</span></div><div class="sem-track"><div class="sem-fill bad" style="width:3%"></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЧАСТЬ 3: КОНКУРЕНТЫ (ПРИЁМ -> АДАПТАЦИЯ) -->
+    <section class="card">
+      <span class="eyebrow">Часть 3 · Живая конкурентная разведка (Бутово + Коммунарка)</span>
+      <h2 style="font-size:21px;margin-bottom:6px;">Кто забирает ваш спрос и «Приём конкурента → ваша адаптация»</h2>
+      <div class="tbl-wrap">
+        <table class="audit-tbl">
+          <thead><tr><th>Конкурент и локация</th><th>Что работает у них</th><th>Слабое место</th><th>Ваша адаптация</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><b>Школа «Пиксель»</b><br><span class="hint">Южнобутовская, 62 / Бутово Парк, 18 · 4.8–4.9 ★</span></td>
+              <td>Сильные карточки в Яндекс + 2ГИС + Zoon с разбивкой по играм (Roblox, Minecraft, Scratch, Python) и явным пробным уроком.</td>
+              <td>Фокус почти только на экране/коде, мало реального «железа», пайки и лазерного станка.</td>
+              <td><b>Бить в «настоящую инженерию МГТУ им. Баумана»:</b> станок лазерной резки, пайка Arduino, 3D-печать и осязаемый проект домой (шкатулка/часы/ракета).</td>
+            </tr>
+            <tr>
+              <td><b>«Умная Механика»</b><br><span class="hint">Южное Бутово, ул. Поляны, 7 · 5.0 ★</span></td>
+              <td>Рейтинг 5.0 + отзывы на Отзовик.ру и Zoon с чётким позиционированием «инженерное мышление, а не сборка по инструкции».</td>
+              <td>Меньше известность бренда и нет линейки до 11 класса с вузовской подготовкой.</td>
+              <td><b>Вынести 2–4-летний LTV из ваших отзывов на витрину:</b> «дети ходят по 4 года — от WeDo до Python и поступления в МГТУ» + закрыть Zoon и Отзовик.ру.</td>
+            </tr>
+            <tr>
+              <td><b>«Яркие дети» / локальные клубы</b><br><span class="hint">ЖК Скандинавия / Скобелевская</span></td>
+              <td>Огромный объём отзывов с упоминанием ЖК Скандинавия, быстрые ответы на каждый отзыв, отдельные карточки лагерей.</td>
+              <td>«Всё сразу» (от танцев до лепки) — нет глубокой технической базы и вузовских педагогов.</td>
+              <td><b>Зафиксировать узкую нишу №1 в Скандинавии</b> через гео-ответы владельца на все 12 свежих отзывов и карточку «Зимний интенсив Щелкунчик 4–8 янв».</td>
+            </tr>
+            <tr>
+              <td><b>«Моё лето» / «Гуси Лепят» / «Арт Пространство»</b><br><span class="hint">м. Скобелевская, Южное Бутово</span></td>
+              <td>Забирают 100% высокомаржинальных запросов в ИИ по каникулярным лагерям и дням рождения рядом со Скобелевской.</td>
+              <td>Нет технического/инженерного ДР и зимних IT-смен (для мальчиков 7–13 лет выбор слабый).</td>
+              <td><b>Добавить в прайс и отзывы:</b> «Зимняя инженерная смена 4–8 янв» + «Инженерный мастер-класс / День рождения» — 100% свободная ниша в районе!</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ЧАСТЬ 4: МАТРИЦА ИИ И ШОК-АУДИТ САЙТА -->
+    <section class="card">
+      <span class="eyebrow">Часть 4 · Матрица живых запросов в ИИ + Глубокий рентген inginirium-butovo.ru</span>
+      <h2 style="font-size:21px;margin-bottom:8px;">Как ваш бизнес видят нейросети (Бренд + Небренд)</h2>
+      <div class="tbl-wrap" style="margin-bottom:18px;">
+        <table class="audit-tbl">
+          <thead><tr><th>Контур / Интент</th><th>Запрос</th><th>Результат</th><th>Что ответил ИИ и почему</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="badge info">Брендовый</span><br><span class="hint">Прямой чек (Бутово)</span></td>
+              <td>Что ты знаешь про «Инжинириум» в Южном Бутово (Скобелевская)?</td>
+              <td><span class="badge bad">⚠ ГАЛЛЮЦИНАЦИЯ</span></td>
+              <td>ИИ в прямом ответе написал: <i>«в самом Южном Бутове собственного стационарного филиала Инжинириума нет»</i> — а в веб-поиске путает Скобелевскую с Эдварда Грига, 5!</td>
+            </tr>
+            <tr>
+              <td><span class="badge info">Брендовый</span><br><span class="hint">Отзывы (Коммунарка)</span></td>
+              <td>«Инжинириум» Эдварда Грига, 5 — отзывы и рейтинг</td>
+              <td><span class="badge ok">✓ Знает (4.9–5.0)</span></td>
+              <td>Цитирует Яндекс Карты, 2ГИС, Zoon. Но отмечает, что на 2ГИС/Флампе мало отзывов по адресу.</td>
+            </tr>
+            <tr>
+              <td><span class="badge info">Небрендовый</span><br><span class="hint">Робототехника Бутово</span></td>
+              <td>Робототехника и программирование для детей м. Скобелевская</td>
+              <td><span class="badge bad">✕ Нет в топе</span></td>
+              <td>Выше вас: <b>Пиксель</b>, <b>Умная Механика</b>, <b>Академия Роботов</b> (источники: yandex.ru, 2gis.ru, zoon.ru, otzovik.com).</td>
+            </tr>
+            <tr>
+              <td><span class="badge info">Небрендовый</span><br><span class="hint">УТП / Бауманка</span></td>
+              <td>Инженерные курсы и 3D-моделирование для детей 5–17 лет в Бутово</td>
+              <td><span class="badge bad">✕ Нет в топе</span></td>
+              <td>Выше: Роботрек, Алгоритмика, Пиксель. На сайте нет Schema.org, H1 и адресов в тексте.</td>
+            </tr>
+            <tr>
+              <td><span class="badge info">Небрендовый</span><br><span class="hint">Каникулы / Лагерь</span></td>
+              <td>Городской лагерь на зимние каникулы в Южном Бутово / Коммунарке</td>
+              <td><span class="badge bad">✕ Нет в топе</span></td>
+              <td>Выше: «Моё лето», «Городские каникулы», ButovoEnglish. В ваших отзывах <b>0/35</b> про лагерь/смены!</td>
+            </tr>
+            <tr>
+              <td><span class="badge info">Небрендовый</span><br><span class="hint">Мастер-класс / ДР</span></td>
+              <td>Детский мастер-класс или день рождения рядом со Скобелевской</td>
+              <td><span class="badge bad">✕ Нет в топе</span></td>
+              <td>Выше: Арт Пространство, Гуси Лепят, Страна традиций. В ваших отзывах <b>0/35</b> про МК/ДР.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="font-size:18px;margin-bottom:4px;">6 реальных ошибок, найденных прямо на сайте <code>inginirium-butovo.ru</code></h3>
+      <p class="hint">Эти текстовые и технические баги прямо сейчас снижают конверсию родителей в заявку и сбивают поисковики с толку:</p>
+      <div class="site-bug-grid">
+        <div class="site-bug">
+          <b>1. «РОБОТОТЕХНИКА WEDO ДЛЯ ДОШКОЛЬНИКОВ — Для детей: 9−11 класс»</b>
+          В карточке курса на Тильде стоит неверный возраст (9–11 класс у дошкольников!) и цена <code>1 700 руб./занятие</code>.
+        </div>
+        <div class="site-bug">
+          <b>2. Три разных цены на одной странице: 1 700 / 2 470 / 2 570 ₽</b>
+          В карточке курса — <code>1 700 руб.</code>, в блоке «Базовая цена за одно занятие» — <code>2 570 руб.</code>, и сразу рядом — <code>2 470 ₽</code>. Родитель не понимает, сколько реально стоит занятие.
+        </div>
+        <div class="site-bug">
+          <b>3. Сломанный блок отзывов: «КУРС МОЛОДОГО ИНЖЕНЕРА · Саша Саша Саша»</b>
+          Внизу страницы вместо текстов отзывов в HTML выводится повторяющаяся заглушка (6× «КУРС МОЛОДОГО ИНЖЕНЕРА» и 6× «Саша»). Поисковики видят это как спам/брак.
+        </div>
+        <div class="site-bug">
+          <b>4. Дубль текста «О нас» и прошедший осенний интенсив 26–30 октября</b>
+          Два предложения подряд в блоке «О нас» повторяют друг друга слово в слово («Дети обучаются по авторским методикам...»), а в сменах всё ещё висит прошедший октябрьский интенсив.
+        </div>
+        <div class="site-bug">
+          <b>5. 0 тегов &lt;h1&gt;, 0 тегов &lt;h2&gt;, пустой &lt;meta description&gt; и 0 адресов</b>
+          Весь сайт свёрстан <code>&lt;div&gt;</code>-ами, нет главного заголовка H1, нет описания для сниппета Яндекса, и в тексте страницы не указаны ни ул. Эдварда Грига, 5, ни ул. Скобелевская, 23к2!
+        </div>
+        <div class="site-bug">
+          <b>6. 0 Schema.org, 0 FAQ, 0 ссылок на карты и 4 ошибки загрузки в консоли</b>
+          Нет микроразметки <code>EducationalOrganization</code>, нет блока FAQ с ценами/пробным, нет ссылок на Яндекс Карты/2ГИС, а часть ресурсов даёт <code>ERR_CONNECTION_CLOSED</code>.
+        </div>
+      </div>
+    </section>
+
+    <!-- ЧАСТЬ 5: ГОТОВЫЙ 5-ВКЛАДОЧНЫЙ ПАКЕТ ВНЕДРЕНИЯ ЗА 15 МИНУТ -->
+    <section class="card pro-card" id="part-ready">
+      <div class="pro-banner">
+        <div class="pro-banner-left">
+          <span class="pill pill-pro">PRO-ПАКЕТ · ВНЕДРЕНИЕ ЗА 15 МИНУТ</span>
+          <h2>Готовые материалы для администратора и вебмастера Тильды</h2>
+        </div>
+      </div>
+
+      <div class="tool-tabs no-print">
+        <button type="button" class="tool-tab active" data-tab="t-qr">1. QR + 3 скрипта</button>
+        <button type="button" class="tool-tab" data-tab="t-price">2. Прайс + UTM</button>
+        <button type="button" class="tool-tab" data-tab="t-schema">3. Schema + H1/Title</button>
+        <button type="button" class="tool-tab" data-tab="t-faq">4. Блок FAQ (HTML)</button>
+        <button type="button" class="tool-tab" data-tab="t-plan">5. План 14 дней + llms</button>
+      </div>
+
+      <div class="tool-pane active" id="t-qr">
+        <h3 class="print-pane-title">1. Живой QR-помощник отзывов и 3 скрипта</h3>
+        <div class="qr-inline" style="margin-bottom:16px;">
+          <div>
+            <h3 style="font-size:17px;margin-bottom:6px;">Живой QR-помощник для стойки (Коммунарка, ID 142025828577)</h3>
+            <p class="hint" style="margin-bottom:10px;">Настроен под детскую нишу (<code>kids</code>) и перехват замечаний в <code>@inginiriumbutovo_kommynarka</code>. Поставьте на стойку администратора — сканируется любой камерой.</p>
+            <div class="btn-row">
+              <a class="btn btn-dark btn-sm" id="qr-open-link" href="#" target="_blank" rel="noopener">Открыть как клиент ↗</a>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-copy-qr">Копировать ссылку</button>
+            </div>
+          </div>
+          <div class="qr-box">
+            <div style="font-weight:800;font-size:13px;">Инжинириум · Коммунарка</div>
+            <div id="live-qr-slot"></div>
+            <div class="hint" style="font-size:11px;">Наведите камеру · 30 сек</div>
+          </div>
+        </div>
+
+        <div class="script-card">
+          <div class="script-head"><strong>Скрипт 1 · Готовый SEO-ответ на 12 свежих ноябрьских отзывов (ответить сегодня!)</strong><button type="button" class="btn btn-outline btn-xs" data-copy-from="sc1">Копировать</button></div>
+          <div class="script-text" id="sc1">[Имя], спасибо за такой тёплый отзыв и доверие нашему центру «Инжинириум МГТУ им. Баумана» в ЖК Скандинавия (Коммунарка, ул. Эдварда Грига, 5)! Обязательно передадим ваши слова [имя педагога, напр. Никите Шабельникову]. Очень рады, что ребёнок с интересом собирает проекты на [курс: курсе Юного инженера / Python / 3D-моделировании]. Кстати, 4–8 января у нас пройдёт новогодний инженерный интенсив «Щелкунчик» (лазерная резка + 3D + электроника) — будем рады видеть вас!</div>
+        </div>
+
+        <div class="script-card">
+          <div class="script-head"><strong>Скрипт 2 · В WhatsApp / Telegram родителям после удачного занятия или интенсива</strong><button type="button" class="btn btn-outline btn-xs" data-copy-from="sc2">Копировать</button></div>
+          <div class="script-text" id="sc2">Здравствуйте, [Имя]! Отправляем фото с сегодняшнего занятия в «Инжинириум» (ЖК Скандинавия) 📸 Если ребёнку всё понравилось, будем очень благодарны за пару строк на Яндекс Картах — особенно полезно упомянуть направление и возраст, это помогает родителям в Коммунарке нас найти. Удобная ссылка (занимает 20 секунд): https://yandex.ru/maps/org/142025828577/reviews/?add-review=true</div>
+        </div>
+
+        <div class="script-card">
+          <div class="script-head"><strong>Скрипт 3 · Вслух на ресепшене (для выравнивания 2ГИС и Zoon)</strong><button type="button" class="btn btn-outline btn-xs" data-copy-from="sc3">Копировать</button></div>
+          <div class="script-text" id="sc3">«[Имя], так здорово, что [имя ребёнка] сегодня загорелся проектом! Если будет полминутки, пока ждёте — наведите камеру на QR на стойке, там готовые подсказки для отзыва. Для нас в Коммунарке каждый живой отзыв родителей — лучшая рекомендация!»</div>
+        </div>
+      </div>
+
+      <div class="tool-pane" id="t-price">
+        <h3 class="print-pane-title">2. Переписанный прайс для Яндекс Карт и UTM-ссылки</h3>
+        <p class="hint" style="margin-bottom:10px;">Скопируйте в Яндекс Бизнес → Товары и услуги (обязательно вынести пробное и зимний интенсив наверх!):</p>
+        <div class="price-grid">
+          <div class="price-item"><div class="price-top"><span>Пробное занятие по робототехнике / программированию (5–17 лет)</span><span class="mono">0 ₽ / уточнить</span></div><div class="hint" style="margin-top:4px;">Позиция №1 · Знакомство с педагогом МГТУ им. Баумана и первый мини-проект.</div></div>
+          <div class="price-item"><div class="price-top"><span>Зимний интенсив «Щелкунчик» (4–8 янв · 5 дней)</span><span class="mono">Указать точно</span></div><div class="hint" style="margin-top:4px;">3D-моделирование, лазерный станок, электроника — ребёнок забирает шкатулку-ночник домой.</div></div>
+          <div class="price-item"><div class="price-top"><span>Курс Юного инженера и робототехника WeDo (5–8 лет)</span><span class="mono">от 2 470 ₽</span></div><div class="hint" style="margin-top:4px;">Сборка ракет, механизмов, первые алгоритмы. 1 раз/нед, все расходники включены.</div></div>
+          <div class="price-item"><div class="price-top"><span>Программирование Python / Roblox / 3D-моделирование (9–17 лет)</span><span class="mono">от 2 470 ₽</span></div><div class="hint" style="margin-top:4px;">Проектные группы, участие в олимпиадах и подготовка к техническим вузам.</div></div>
+          <div class="price-item"><div class="price-top"><span>Arduino, электроника и пайка (10–17 лет)</span><span class="mono">от 2 470 ₽</span></div><div class="hint" style="margin-top:4px;">Сборка реальных электронных устройств, пайка, программирование микроконтроллеров.</div></div>
+          <div class="price-item"><div class="price-top"><span>Инженерный мастер-класс / День рождения в ЦМИТ</span><span class="mono">Указать точно</span></div><div class="hint" style="margin-top:4px;">Ловит высокомаржинальный спрос в Коммунарке и Южном Бутово.</div></div>
+        </div>
+        <div class="script-card">
+          <div class="script-head"><strong>Исправленные HTTPS + UTM ссылки (заменить http:// в Я.Картах и 2ГИС!)</strong><button type="button" class="btn btn-outline btn-xs" data-copy-from="utm-box">Копировать</button></div>
+          <pre class="code-box" id="utm-box" style="margin-top:6px;">Яндекс Карты (Коммунарка): https://inginirium-butovo.ru/?utm_source=yandex_maps&amp;utm_medium=geo&amp;utm_campaign=kommunarka
+Яндекс Карты (Ю. Бутово):  https://inginirium-butovo.ru/?utm_source=yandex_maps&amp;utm_medium=geo&amp;utm_campaign=butovo
+2ГИС (Коммунарка):         https://inginirium-butovo.ru/?utm_source=2gis&amp;utm_medium=geo&amp;utm_campaign=kommunarka</pre>
+        </div>
+      </div>
+
+      <div class="tool-pane" id="t-schema">
+        <h3 class="print-pane-title">3. Schema.org JSON-LD, H1, Title и Description для Тильды</h3>
+        <div class="script-card">
+          <div class="script-head"><strong>Готовые H1, Title и Meta Description (сейчас на сайте пустые!)</strong><button type="button" class="btn btn-outline btn-xs" data-copy-from="meta-box">Копировать</button></div>
+          <pre class="code-box" id="meta-box">H1 (добавить тегом h1 на главный экран):
+Инженерные курсы, робототехника и программирование МГТУ им. Баумана в Коммунарке и Южном Бутово
+
+Title:
+Инжинириум МГТУ им. Баумана — робототехника, Python и 3D для детей в Коммунарке (ЖК Скандинавия) и Южном Бутово
+
+Description:
+Детский инженерный центр МГТУ им. Баумана в Коммунарке (ул. Эдварда Грига, 5) и Южном Бутово (ул. Скобелевская, 23к2). Робототехника, Python, 3D-моделирование, лазерная резка и зимние смены для детей 5–17 лет. Запись на пробное занятие.</pre>
+        </div>
+        <div class="script-card">
+          <div class="script-head"><strong>Schema.org JSON-LD (в Тильде: Настройки сайта → Ещё → HTML-код для вставки внутрь head)</strong><button type="button" class="btn btn-outline btn-xs" data-copy-from="schema-box">Копировать JSON-LD</button></div>
+          <pre class="code-box" id="schema-box">&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "Инжинириум МГТУ им. Н.Э. Баумана — Коммунарка и Южное Бутово",
+  "url": "https://inginirium-butovo.ru/",
+  "telephone": "+7 (968) 439-49-90",
+  "priceRange": "₽₽",
+  "description": "Центр молодёжного инновационного творчества МГТУ им. Баумана: робототехника, программирование (Python, Roblox), 3D-моделирование, электроника и каникулярные смены для детей 5–17 лет.",
+  "department": [
+    {
+      "@type": "EducationalOrganization",
+      "name": "Инжинириум МГТУ им. Баумана — Коммунарка (ЖК Скандинавия)",
+      "telephone": "+7 (968) 439-49-90",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "RU",
+        "addressLocality": "Москва",
+        "streetAddress": "пос. Коммунарка, ЖК Скандинавия, ул. Эдварда Грига, д. 5"
+      },
+      "openingHours": "Mo-Fr 17:00-21:00, Sa-Su 10:00-20:00",
+      "sameAs": [
+        "https://yandex.ru/maps/org/142025828577/",
+        "https://t.me/inginiriumbutovo_kommynarka",
+        "https://vk.com/inginiriumbutovo"
+      ]
+    },
+    {
+      "@type": "EducationalOrganization",
+      "name": "Инжинириум МГТУ им. Баумана — Южное Бутово (м. Улица Скобелевская)",
+      "telephone": "+7 (936) 173-66-46",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "RU",
+        "addressLocality": "Москва",
+        "streetAddress": "ул. Скобелевская, д. 23, корп. 2"
+      },
+      "sameAs": [
+        "https://vk.com/inginiriumbutovo"
+      ]
+    }
+  ]
+}
+&lt;/script&gt;</pre>
+        </div>
+      </div>
+
+      <div class="tool-pane" id="t-faq">
+        <h3 class="print-pane-title">4. Готовый GEO-блок FAQ + FAQPage JSON-LD</h3>
+        <div class="script-card">
+          <div class="script-head"><strong>HTML + FAQPage JSON-LD (вставить блоком T123 перед подвалом в Тильде)</strong><button type="button" class="btn btn-outline btn-xs" data-copy-from="faq-box">Копировать FAQ</button></div>
+          <pre class="code-box" id="faq-box">&lt;section class="geo-faq"&gt;
+  &lt;h2&gt;Частые вопросы о курсах «Инжинириум МГТУ им. Баумана»&lt;/h2&gt;
+  &lt;details open&gt;&lt;summary&gt;&lt;strong&gt;Где находятся филиалы Инжинириум в Коммунарке и Южном Бутово?&lt;/strong&gt;&lt;/summary&gt;&lt;p&gt;Работают два филиала: в Коммунарке (ЖК Скандинавия, ул. Эдварда Грига, д. 5) и в Южном Бутово (ул. Скобелевская, д. 23, корп. 2, пешком от м. Улица Скобелевская).&lt;/p&gt;&lt;/details&gt;
+  &lt;details&gt;&lt;summary&gt;&lt;strong&gt;С какого возраста принимаете детей и какие направления есть?&lt;/strong&gt;&lt;/summary&gt;&lt;p&gt;Принимаем детей и подростков от 5 до 17 лет. Доступны курс Юного инженера, робототехника WeDo и Arduino, программирование (Python, Roblox, C#), 3D-моделирование и лазерная резка.&lt;/p&gt;&lt;/details&gt;
+  &lt;details&gt;&lt;summary&gt;&lt;strong&gt;Сколько стоят занятия и включены ли расходные материалы?&lt;/strong&gt;&lt;/summary&gt;&lt;p&gt;Базовая стоимость занятия — 2 470 ₽ (уточняйте абонементы и скидки при записи). Все расходные материалы, конструкторы и оборудование уже включены в стоимость.&lt;/p&gt;&lt;/details&gt;
+  &lt;details&gt;&lt;summary&gt;&lt;strong&gt;Есть ли пробное занятие перед покупкой абонемента?&lt;/strong&gt;&lt;/summary&gt;&lt;p&gt;Да, можно записаться на пробное занятие, чтобы ребёнок познакомился с преподавателем и собрал первый мини-проект.&lt;/p&gt;&lt;/details&gt;
+  &lt;details&gt;&lt;summary&gt;&lt;strong&gt;Проводите ли каникулярные смены и зимние интенсивы?&lt;/strong&gt;&lt;/summary&gt;&lt;p&gt;Да, на школьных каникулах проходят 5-дневные проектные смены (например, новогодний интенсив «Щелкунчик» 4–8 января — 3D, лазерная резка, электроника и готовая шкатулка-ночник домой).&lt;/p&gt;&lt;/details&gt;
+  &lt;details&gt;&lt;summary&gt;&lt;strong&gt;Кто преподаёт в центре?&lt;/strong&gt;&lt;/summary&gt;&lt;p&gt;Занятия ведут профильные педагоги, студенты и выпускники МГТУ им. Н.Э. Баумана по авторским программам технопарка с регулярными фотоотчётами для родителей.&lt;/p&gt;&lt;/details&gt;
+&lt;/section&gt;
+&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"Где находятся филиалы Инжинириум в Коммунарке и Южном Бутово?","acceptedAnswer":{"@type":"Answer","text":"Работают два филиала: в Коммунарке (ЖК Скандинавия, ул. Эдварда Грига, д. 5) и в Южном Бутово (ул. Скобелевская, д. 23, корп. 2)."}},
+    {"@type":"Question","name":"С какого возраста принимаете детей?","acceptedAnswer":{"@type":"Answer","text":"От 5 до 17 лет: курс Юного инженера, робототехника, Python, 3D-моделирование, электроника и лазерная резка."}},
+    {"@type":"Question","name":"Сколько стоят занятия и включены ли расходные материалы?","acceptedAnswer":{"@type":"Answer","text":"Базовая стоимость занятия от 2 470 ₽, все расходные материалы и оборудование включены."}},
+    {"@type":"Question","name":"Проводите ли каникулярные смены?","acceptedAnswer":{"@type":"Answer","text":"Да, 5-дневные проектные смены на школьных каникулах, включая зимний интенсив 4–8 января."}}
+  ]
+}
+&lt;/script&gt;</pre>
+        </div>
+      </div>
+
+      <div class="tool-pane" id="t-plan">
+        <h3 class="print-pane-title">5. План внедрения на 14 дней + опциональный llms.txt</h3>
+        <div class="script-card">
+          <ol style="margin:4px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px;">
+            <li><b>День 1 (15 минут):</b> Ответить на все 12 свежих ноябрьских отзывов в Я.Картах (ID 142025828577) по Скрипту №1 с упоминанием ЖК Скандинавия, Коммунарки и зимней смены «Щелкунчик».</li>
+            <li><b>День 2 (15 минут):</b> В Яндекс Бизнесе поменять <code>http://</code> на <code>https://</code> с UTM, включить кнопку «Записаться на пробное», сверить телефон с сайтом и добавить «Зимний интенсив 4–8 янв» + «Пробное занятие» в прайс.</li>
+            <li><b>День 3–4 (30 минут в Тильде):</b> Починить на <code>inginirium-butovo.ru</code> 6 найденных ошибок («дошкольники 9–11 класс», единые цены, убрать октябрьский интенсив и дубль абзаца «О нас», заменить сломанные карточки «Саша Саша Саша» на реальные текстовые отзывы + бейджи Яндекс Карт и 2ГИС).</li>
+            <li><b>День 5–7 (30 минут в Тильде):</b> Добавить тег <code>&lt;h1&gt;</code>, заполнить <code>Title</code>/<code>Description</code>, вставить <code>Schema.org</code> из вкладки 3 и блок <code>FAQ</code> из вкладки 4, явно прописать адреса обоих филиалов (Эдварда Грига, 5 и Скобелевская, 23к2).</li>
+            <li><b>День 8–14:</b> Поставить распечатанный QR-помощник на стойку (цель 4–6 ровных отзывов/мес в Я.Карты + 2ГИС/Zoon) и собрать первые 3 отзыва с упоминанием зимнего интенсива и пробного занятия.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ИСТОЧНИКИ И ГРАНИЦЫ ВЫВОДОВ -->
+    <section class="card" style="background:#FAFAF8;">
+      <span class="eyebrow">Прозрачность аудита</span>
+      <h3 style="font-size:16px;margin-bottom:6px;">Источники данных и границы выводов</h3>
+      <ul style="margin:6px 0 0;padding-left:18px;font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px;">
+        <li>Публичная карточка Яндекс Карт <code>ID 142025828577</code> (Коммунарка, ул. Эдварда Грига, 5) — разобраны все 35 отзывов и 21 ответ владельца на 28.11.2026.</li>
+        <li>Прямой разбор HTML, DOM, заголовков и видимого текста сайта <code>https://inginirium-butovo.ru/</code> (231 КБ, Тильда) на 28.11.2026.</li>
+        <li>Живые веб- и ИИ-запросы по Южному Бутово (м. Скобелевская) и Коммунарке (ЖК Скандинавия), сверка Яндекс/2ГИС/Zoon/Отзовик.ру.</li>
+        <li><b>Ограничение:</b> карточка второго филиала (ул. Скобелевская, 23к2) имеет отдельный ID в Яндекс Картах — по ней при необходимости делается такой же разбор отзывов (тариф «Пакет 3 карточки»).</li>
+      </ul>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="qr.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      const payload = { n: 'Инжинириум · Коммунарка', k: 'kids', y: '142025828577', g: '', c: 'https://t.me/inginiriumbutovo_kommynarka' };
+      const bytes = new TextEncoder().encode(JSON.stringify(payload));
+      let bin = '';
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      const tok = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const qrUrl = 'https://checkgeo.ru/?review=' + tok;
+
+      document.getElementById('qr-open-link').href = qrUrl;
+      if (window.KartaQR) {
+        document.getElementById('live-qr-slot').innerHTML = window.KartaQR.toSVG(qrUrl, { sizePx: 176, quietZone: 3, dark: '#111315', light: '#FFFFFF' });
+      }
+
+      function toast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2300);
+      }
+      function copy(txt, msg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(() => toast(msg));
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+          toast(msg);
+        }
+      }
+
+      document.getElementById('btn-copy-qr').addEventListener('click', () => copy(qrUrl, 'Ссылка QR-помощника скопирована!'));
+      document.querySelectorAll('[data-copy-from]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const el = document.getElementById(btn.getAttribute('data-copy-from'));
+          if (el) copy(el.textContent.trim(), 'Скопировано в буфер!');
+        });
+      });
+      document.querySelectorAll('.tool-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-tab');
+          document.querySelectorAll('.tool-tab').forEach(b => b.classList.toggle('active', b === btn));
+          document.querySelectorAll('.tool-pane').forEach(p => p.classList.toggle('active', p.id === target));
+        });
+      });
+
+      document.getElementById('btn-export-csv').addEventListener('click', () => {
+        const rows = [
+          ['Дата', 'Точка', 'Контур', 'Запрос', 'Результат', 'Конкуренты / Вывод'],
+          ['2026-11-28', 'Инжинириум (Коммунарка/Бутово)', 'Брендовый', 'Что знаешь про Инжинириум в Южном Бутово (Скобелевская)?', 'ГАЛЛЮЦИНАЦИЯ', 'ИИ отрицает наличие стационарного филиала в Бутово и путает с Коммунаркой'],
+          ['2026-11-28', 'Инжинириум (Коммунарка/Бутово)', 'Брендовый', 'Инжинириум Эдварда Грига, 5 отзывы', 'Знает (4.9-5.0)', 'Яндекс Карты, 2ГИС, Zoon'],
+          ['2026-11-28', 'Инжинириум (Коммунарка/Бутово)', 'Небрендовый', 'Робототехника и программирование м. Скобелевская', 'Нет в топе', 'Пиксель, Умная Механика, Академия Роботов'],
+          ['2026-11-28', 'Инжинириум (Коммунарка/Бутово)', 'Небрендовый', 'Инженерные курсы и 3D для детей Бутово', 'Нет в топе', 'Роботрек, Алгоритмика, Пиксель'],
+          ['2026-11-28', 'Инжинириум (Коммунарка/Бутово)', 'Небрендовый', 'Городской лагерь на зимние каникулы Бутово', 'Нет в топе', 'Моё лето, Городские каникулы, ButovoEnglish'],
+          ['2026-11-28', 'Инжинириум (Коммунарка/Бутово)', 'Небрендовый', 'Детский мастер-класс или ДР рядом со Скобелевской', 'Нет в топе', 'Арт Пространство, Гуси Лепят, Страна традиций']
+        ];
+        const csv = '\uFEFF' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'pro-matrix-inginirium-2026-11-28.csv';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        toast('Матрица LLM скачана в CSV!');
+      });
+    })();
+  </script>
+</body>
+</html>
