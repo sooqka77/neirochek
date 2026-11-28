@@ -220,6 +220,8 @@
       [/\bzoon\b|зун/i, 'zoon.ru'],
       [/отзовик/i, 'otzovik.com'],
       [/продокторов/i, 'prodoctorov.ru'],
+      [/банки\.?ру|banki\.ru/i, 'banki.ru'],
+      [/сравни\.?ру|sravni\.ru/i, 'sravni.ru'],
       [/афиша/i, 'afisha.ru'],
       [/kidsreview/i, 'kidsreview.ru'],
       [/restoclub/i, 'restoclub.ru'],
@@ -448,6 +450,8 @@
     if (d.includes('t.me')) return !!point.tgUrl;
     if (d.includes('afisha')) return !!(r.hasNicheCatalogs || checked.includes('афиша'));
     if (d.includes('prodoctorov')) return !!(r.hasNicheCatalogs || checked.includes('продокторов'));
+    if (d.includes('banki.ru')) return !!(r.hasNicheCatalogs || checked.includes('банки.ру'));
+    if (d.includes('sravni.ru')) return !!(r.hasNicheCatalogs || checked.includes('сравни.ру'));
     if (d.includes('kidsreview') || d.includes('restoclub') || d.includes('drive2')) return !!r.hasNicheCatalogs;
     if (point.siteUrl && point.siteUrl.toLowerCase().includes(d)) return true;
     return false;
