@@ -71,14 +71,17 @@
               <input type="text" id="g-site" inputmode="url" placeholder="vash-site.ru">
             </div>
             <div class="field">
+              <label for="g-yandex">Ссылка на Яндекс Карты <span class="hint" style="font-weight:400;">(необязательно)</span></label>
+              <input type="text" id="g-yandex" inputmode="url" placeholder="https://yandex.ru/maps/org/... или /profile/...">
+            </div>
+            <div class="field">
               <label for="g-niche">Ниша</label>
               <select id="g-niche"></select>
             </div>
-          </div>
-
-          <div class="field" style="margin-top:12px;">
-            <label for="g-usp">Главная услуга или фишка <span class="hint" style="font-weight:400;">(необязательно — делает запросы точнее)</span></label>
-            <input type="text" id="g-usp" placeholder="Например: робототехника для детей 6–12 лет, бесплатное пробное занятие">
+            <div class="field">
+              <label for="g-usp">Главная услуга / фишка <span class="hint" style="font-weight:400;">(необязательно)</span></label>
+              <input type="text" id="g-usp" placeholder="Робототехника 6–12 лет, пробное 0 ₽">
+            </div>
           </div>
 
           <div id="form-error" class="form-error hidden"></div>
@@ -227,10 +230,9 @@
           <div class="field"><label for="g-aliases">Синонимы / латиница</label><input type="text" id="g-aliases" placeholder="Квант, Kvant"></div>
           <div class="field"><label for="g-phone">Телефон</label><input type="text" id="g-phone" placeholder="+7 (495) 000-00-00"></div>
           <div class="field"><label for="g-hours">График работы</label><input type="text" id="g-hours" placeholder="Пн–Вс 10:00–20:00"></div>
-          <div class="field"><label for="g-yandex">Ссылка на Яндекс Карты</label><input type="text" id="g-yandex" inputmode="url" placeholder="https://yandex.ru/maps/org/..."></div>
           <div class="field"><label for="g-gis">Ссылка на 2ГИС</label><input type="text" id="g-gis" inputmode="url" placeholder="https://2gis.ru/..."></div>
           <div class="field"><label for="g-vk">ВКонтакте</label><input type="text" id="g-vk" inputmode="url" placeholder="https://vk.com/..."></div>
-          <div class="field span-3"><label for="g-tg">Telegram-канал или бот</label><input type="text" id="g-tg" inputmode="url" placeholder="https://t.me/..."></div>
+          <div class="field"><label for="g-tg">Telegram-канал или бот</label><input type="text" id="g-tg" inputmode="url" placeholder="https://t.me/..."></div>
         </div>
 
         <p class="hint" style="font-weight:700;color:var(--ink);margin-top:14px;">Дополнительные факторы ИИ-готовности:</p>

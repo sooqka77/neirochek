@@ -260,19 +260,25 @@
     errEl.classList.add('hidden');
     const pt = syncPointFromForm();
 
-    if (!pt.name) {
-      errEl.textContent = 'Введите название вашего бизнеса, чтобы мы проверили упоминаемость в ИИ.';
-      errEl.classList.remove('hidden');
-      $('g-name').focus();
-      return;
-    }
-
-    // Нормализуем сайт, если ввели без https://
+    // Нормализуем сайт и ссылку на Яндекс Карты
     let cleanSite = (pt.siteUrl || '').trim();
     if (cleanSite && !/^https?:\/\//i.test(cleanSite)) {
       cleanSite = 'https://' + cleanSite;
       pt.siteUrl = cleanSite;
       $('g-site').value = cleanSite;
+    }
+    let cleanYandex = (pt.yandexUrl || '').trim();
+    if (cleanYandex && !/^https?:\/\//i.test(cleanYandex)) {
+      cleanYandex = 'https://' + cleanYandex;
+      pt.yandexUrl = cleanYandex;
+      $('g-yandex').value = cleanYandex;
+    }
+
+    if (!pt.name && !cleanYandex) {
+      errEl.textContent = 'Введите название вашего бизнеса или вставьте ссылку на Яндекс Карты.';
+      errEl.classList.remove('hidden');
+      $('g-name').focus();
+      return;
     }
 
     isScanning = true;
@@ -286,49 +292,98 @@
     saveState();
 
     const api = getBackendUrl();
-    const prompts = NeiroEngine.buildPromptMatrix(pt).slice(0, 5);
-    const totalSteps = (cleanSite ? 1 : 0) + prompts.length;
+    const hasGeoOrSite = !!(cleanSite || cleanYandex);
+    const totalSteps = (hasGeoOrSite ? 1 : 0) + 5;
     let doneSteps = 0;
 
-    setProgress(true, 6, 'Запускаем проверку...', cleanSite ? 'Сначала проверим ваш сайт, затем зададим 5 вопросов нейросетям.' : 'Задаём 5 реальных покупательских запросов по вашему району.');
+    setProgress(true, 6, 'Запускаем проверку...', hasGeoOrSite ? 'Сначала проверим карточку Яндекса и сайт, затем зададим 5 вопросов нейросетям.' : 'Задаём 5 реальных покупательских запросов по вашему району.');
 
-    // Шаг 1 (автоматически): рентген сайта, если указан
-    if (api && cleanSite) {
-      setProgress(true, 10, 'Проверяем сайт (Schema.org, FAQ, robots.txt)...', cleanSite);
+    // Шаг 1 (автоматически): параллельный рентген карточки Яндекса + 2ГИС + сайта через /api/geo/lookup
+    if (api && hasGeoOrSite) {
+      setProgress(true, 10, cleanYandex && cleanSite ? 'Проверяем карточку Яндекса и сайт...' : (cleanYandex ? 'Читаем карточку на Яндекс Картах...' : 'Проверяем сайт (Schema.org, FAQ, robots.txt)...'), cleanYandex || cleanSite);
       try {
         const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 14000);
-        const r = await fetch(`${api}/api/site-audit`, {
+        const t = setTimeout(() => ctrl.abort(), 16000);
+        const r = await fetch(`${api}/api/geo/lookup`, {
           method: 'POST',
           signal: ctrl.signal,
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: cleanSite, app: 'neirochek' })
+          body: JSON.stringify({
+            yandexUrl: cleanYandex,
+            query: pt.name,
+            city: pt.city,
+            district: pt.district,
+            niche: pt.niche,
+            siteUrl: cleanSite
+          })
         });
         clearTimeout(t);
         const data = await r.json();
-        if (r.ok && data.ok && data.report) {
-          const rep = data.report;
-          pt.readiness.hasSchemaLocal = !!rep.schema?.hasLocalBusiness;
-          pt.readiness.hasFaqOnSite = !!rep.hasFaq;
-          pt.readiness.botsAllowed = !!rep.robots?.allAllowed;
-          pt.readiness.hasLlmsTxt = !!rep.hasLlmsTxt;
-          pt.readiness.hasLocalPage = !!(rep.https && rep.hasViewport);
-          if (rep.links?.yandexUrl && !pt.yandexUrl) pt.yandexUrl = rep.links.yandexUrl;
-          if (rep.links?.gisUrl && !pt.gisUrl) pt.gisUrl = rep.links.gisUrl;
-          if (rep.links?.vkUrl && !pt.vkUrl) pt.vkUrl = rep.links.vkUrl;
-          if (rep.links?.tgUrl && !pt.tgUrl) pt.tgUrl = rep.links.tgUrl;
-          if (rep.links?.zoonUrl || rep.links?.otzovikUrl || rep.links?.irecommendUrl) {
-            pt.readiness.hasZoonOtzovik = true;
+        const summaryParts = [];
+        if (r.ok && data.ok) {
+          if (data.yandexCard && data.yandexCard.ok) {
+            const m = data.yandexCard.meta || {};
+            const sem = data.yandexCard.semantics || {};
+            if (m.title && !pt.name) pt.name = m.title;
+            if (m.address && !pt.district) pt.district = m.address;
+            if (m.address && !pt.address) pt.address = m.address;
+            if (Array.isArray(m.phones) && m.phones[0] && !pt.phone) pt.phone = m.phones[0];
+            if (Array.isArray(m.urls) && m.urls[0] && !pt.siteUrl) pt.siteUrl = m.urls[0];
+            if (Array.isArray(m.socialLinks)) {
+              const tg = m.socialLinks.find(s => /telegram/i.test(s.type || '') && s.href);
+              const vk = m.socialLinks.find(s => /vk/i.test(s.type || '') && s.href);
+              if (tg && !pt.tgUrl) pt.tgUrl = tg.href;
+              if (vk && !pt.vkUrl) pt.vkUrl = vk.href;
+            }
+            if ((m.rating || 0) >= 4.7 && (m.reviewCount || 0) >= 20) pt.readiness.hasYandexStrong = true;
+            if ((sem.recent30d || 0) >= 2) pt.readiness.reviewsFresh = true;
+            if ((sem.replyRate || 0) >= 70) pt.readiness.ownerRepliesFacts = true;
+            if ((sem.strongThemes || []).length >= 2) pt.readiness.reviewsHaveScenarios = true;
+            const unansNote = sem.unansweredRecent30d >= 2 ? ` (⚠ ${sem.unansweredRecent30d} свежих без ответа)` : '';
+            summaryParts.push(`Я.Карты: ${m.rating || '—'} ★ · ${m.reviewCount || 0} отз.${unansNote}`);
           }
-          const robotsMsg = rep.robots?.allAllowed ? 'индексация открыта' : 'есть блок в robots.txt';
-          pt.siteSummary = `Сайт ${rep.url}: Schema.org ${rep.schema?.hasLocalBusiness ? 'есть' : 'нет'} · FAQ ${rep.hasFaq ? 'есть' : 'нет'} · ${robotsMsg}`;
+          if (data.twogis) {
+            pt.readiness.has2gisFull = true;
+            if (data.twogis.gisUrl && !pt.gisUrl) pt.gisUrl = data.twogis.gisUrl;
+            summaryParts.push(`2ГИС: ${data.twogis.rating || '—'} ★`);
+          }
+          if (data.siteReport) {
+            const rep = data.siteReport;
+            pt.readiness.hasSchemaLocal = !!rep.schema?.hasLocalBusiness;
+            pt.readiness.hasFaqOnSite = !!rep.hasFaq;
+            pt.readiness.botsAllowed = !!rep.robots?.allAllowed;
+            pt.readiness.hasLlmsTxt = !!rep.hasLlmsTxt;
+            pt.readiness.hasLocalPage = !!(rep.https && rep.hasViewport);
+            if (rep.links?.yandexUrl && !pt.yandexUrl) pt.yandexUrl = rep.links.yandexUrl;
+            if (rep.links?.gisUrl && !pt.gisUrl) { pt.gisUrl = rep.links.gisUrl; pt.readiness.has2gisFull = true; }
+            if (rep.links?.vkUrl && !pt.vkUrl) pt.vkUrl = rep.links.vkUrl;
+            if (rep.links?.tgUrl && !pt.tgUrl) pt.tgUrl = rep.links.tgUrl;
+            if (rep.links?.zoonUrl || rep.links?.otzovikUrl || rep.links?.irecommendUrl) {
+              pt.readiness.hasZoonOtzovik = true;
+            }
+            const h1Note = rep.h1 ? '' : ' · нет H1';
+            summaryParts.push(`Сайт: Schema ${rep.schema?.hasLocalBusiness ? 'есть' : 'нет'} · FAQ ${rep.hasFaq ? 'есть' : 'нет'}${h1Note}`);
+            // Проверка NAP-конфликта телефонов
+            const yPh = String(data.yandexCard?.meta?.phones?.[0] || '').replace(/\D/g, '').slice(-10);
+            const sPhList = (rep.phones || []).map(x => String(x).replace(/\D/g, '').slice(-10)).filter(Boolean);
+            if (yPh.length === 10 && sPhList.length && !sPhList.includes(yPh)) {
+              pt.readiness.napConsistent = false;
+              summaryParts.push(`⚠ Разные телефоны: Я.Карты (${data.yandexCard.meta.phones[0]}) vs сайт (${rep.phones[0]})`);
+            } else if (yPh.length === 10 && sPhList.includes(yPh)) {
+              pt.readiness.napConsistent = true;
+            }
+          }
+          if (summaryParts.length) pt.siteSummary = summaryParts.join(' · ');
         }
       } catch (_) {
-        pt.siteSummary = `Не удалось прочитать ${cleanSite} автоматически — показали разбор по ответам ИИ.`;
+        pt.siteSummary = `Не удалось прочитать карточку/сайт автоматически — показали разбор по ответам ИИ.`;
       }
       doneSteps++;
-      setProgress(true, (doneSteps / totalSteps) * 100, 'Сайт проверен · переходим к нейросетям...', '');
+      setProgress(true, (doneSteps / totalSteps) * 100, 'Карточка и сайт проверены · переходим к нейросетям...', '');
     }
+
+    if (!pt.name) pt.name = 'Ваш бизнес';
+    const prompts = NeiroEngine.buildPromptMatrix(pt).slice(0, 5);
 
     // Шаг 2 (автоматически): 5 живых запросов в ИИ
     let aiErrors = 0;

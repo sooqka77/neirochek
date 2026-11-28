@@ -364,8 +364,10 @@
           if (an.position && an.position <= 3) top3Count++;
         }
       }
-      for (const c of an.competitors) {
-        competitorCounts[c] = (competitorCounts[c] || 0) + 1;
+      if (!isDirectBrandCheck) {
+        for (const c of an.competitors) {
+          competitorCounts[c] = (competitorCounts[c] || 0) + 1;
+        }
       }
       for (const d of an.domains) {
         domainCounts[d] = (domainCounts[d] || 0) + 1;

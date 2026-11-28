@@ -117,6 +117,7 @@
       const params = new URLSearchParams(window.location.search);
       const reportId = params.get('id');
       const orderId = params.get('order');
+      const sampleSlug = params.get('sample');
 
       let toastTimer = null;
       function toast(msg) {
@@ -478,10 +479,20 @@
         throw new Error('Генерация заняла больше времени — обновите страницу через минуту.');
       }
 
+      async function loadSample(slug) {
+        const clean = String(slug || '').replace(/[^a-z0-9_-]/gi, '');
+        if (!clean) throw new Error('Неверный параметр sample');
+        const res = await fetch(`./samples/${clean}.json`);
+        if (!res.ok) throw new Error('Демо-отчёт не найден');
+        const data = await res.json();
+        renderReport(data.report || data);
+      }
+
       (async function init() {
         try {
           if (reportId) await loadById(reportId);
           else if (orderId) await pollOrder(orderId);
+          else if (sampleSlug) await loadSample(sampleSlug);
           else throw new Error('Не передан идентификатор отчёта (?id=...)');
         } catch (err) {
           document.getElementById('state-title').textContent = 'Не удалось открыть отчёт';
