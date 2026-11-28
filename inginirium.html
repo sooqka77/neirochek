@@ -66,8 +66,16 @@
     .site-bug-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
     .site-bug { border: 1px solid #FECACA; background: #FFF8F8; border-radius: 10px; padding: 12px 14px; font-size: 13.5px; }
     .site-bug b { color: #991B1B; display: block; margin-bottom: 4px; }
+    .pb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+    .pb-col { border: 1px solid var(--line); border-radius: 12px; padding: 15px; background: #FAFAF8; }
+    .pb-col.ai { border-top: 3px solid #1D4ED8; }
+    .pb-col.maps { border-top: 3px solid #EAB308; }
+    .pb-item { background: #FFFFFF; border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; margin-top: 8px; }
+    .pb-item.done { border-color: #BBF7D0; background: #F0FDF4; }
+    .pb-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; font-size: 13.5px; }
+    .pb-item p { font-size: 13px; color: var(--muted); line-height: 1.45; }
     .print-pane-title { display: none; }
-    @media (max-width: 820px) { .dual-scores, .exec-box, .sem-grid, .qr-inline, .price-grid, .site-bug-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 820px) { .dual-scores, .exec-box, .sem-grid, .qr-inline, .price-grid, .site-bug-grid, .pb-grid { grid-template-columns: 1fr; } }
     @media print {
       .no-print, .tool-tabs { display: none !important; }
       .tool-pane { display: block !important; margin-bottom: 16px; page-break-inside: avoid; }
@@ -358,6 +366,37 @@
         <div class="site-bug">
           <b>6. 0 Schema.org, 0 FAQ, 0 ссылок на карты и 4 ошибки загрузки в консоли</b>
           Нет микроразметки <code>EducationalOrganization</code>, нет блока FAQ с ценами/пробным, нет ссылок на Яндекс Карты/2ГИС, а часть ресурсов даёт <code>ERR_CONNECTION_CLOSED</code>.
+        </div>
+      </div>
+    </section>
+
+    <!-- БАЗОВАЯ СИСТЕМА РОСТА: 7 ШАГОВ В ИИ + 7 ШАГОВ В КАРТАХ -->
+    <section class="card" id="part-playbooks">
+      <span class="eyebrow">Базовая система роста · Индивидуальный чек-лист для «Инжинириум»</span>
+      <h2 style="font-size:21px;margin-bottom:4px;">Как попасть в Топ-3 ИИ и Яндекс Карт — 14 обязательных шагов</h2>
+      <p class="hint">База, которая нужна каждому филиалу — статусы проставлены по реальным данным вашей карточки и сайта.</p>
+      <div class="pb-grid">
+        <div class="pb-col ai">
+          <h3 style="font-size:16px;margin-bottom:4px;">Как влезть в ответы ИИ (Алиса, GigaChat, ChatGPT)</h3>
+          <p class="hint" style="margin-bottom:6px;">7 обязательных шагов видимости в нейросетях</p>
+          <div class="pb-item"><div class="pb-head"><b>1. Единые контакты (NAP 1-в-1) везде</b><span class="badge warn">→ В работу</span></div><p>Выровнять телефон (сейчас +7 968 в Яндексе vs +7 936 на сайте), адрес и график на сайте, в Яндекс Картах, 2ГИС, Zoon и Отзовике.</p></div>
+          <div class="pb-item"><div class="pb-head"><b>2. Закрыть сайты-доноры вашей ниши</b><span class="badge warn">→ В работу</span></div><p>Полные карточки с ценами и фото на 2ГИС, Zoon.ru, Отзовик.ру, KidsReview, Афиша Дети и в районных чатах родителей Коммунарки и Бутово.</p></div>
+          <div class="pb-item"><div class="pb-head"><b>3. Семантика отзывов и ответов под запросы</b><span class="badge warn">→ В работу</span></div><p>Вплетать в отзывы и ответы владельца «ЖК Скандинавия / Коммунарка / Южное Бутово», возраст 5–17 лет, «зимняя смена Щелкунчик» и «пробное занятие».</p></div>
+          <div class="pb-item"><div class="pb-head"><b>4. Блок FAQ с цифрами + разметка FAQPage</b><span class="badge warn">→ В работу</span></div><p>6–8 прямых пар «Вопрос родителя → короткий ответ с ценой, адресом и возрастом» (готовый HTML во вкладке 4).</p></div>
+          <div class="pb-item"><div class="pb-head"><b>5. Отдельные страницы филиалов + H1 + Schema.org</b><span class="badge warn">→ В работу</span></div><p>Развести <code>/kommunarka</code> и <code>/butovo</code> в Тильде, добавить тег H1, description и JSON-LD <code>EducationalOrganization</code> со ссылками <code>sameAs</code> (вкладка 3).</p></div>
+          <div class="pb-item done"><div class="pb-head"><b>6. Открытый текстовый прайс на сайте</b><span class="badge ok">✓ Есть (сверить цены)</span></div><p>Цены есть текстом, но нужно устранить конфликт «1 700 / 2 470 / 2 570 ₽» и явно выделить «пробное занятие».</p></div>
+          <div class="pb-item"><div class="pb-head"><b>7. Внешние упоминания в подборках района</b><span class="badge warn">→ В работу</span></div><p>2–3 публикации/подборки «Лучшие инженерные кружки в Коммунарке и Бутово» в локальных медиа и ТГ-каналах ЖК Скандинавия.</p></div>
+        </div>
+        <div class="pb-col maps">
+          <h3 style="font-size:16px;margin-bottom:4px;">База роста в Яндекс Картах и 2ГИС</h3>
+          <p class="hint" style="margin-bottom:6px;">7 обязательных точек контроля карточки</p>
+          <div class="pb-item"><div class="pb-head"><b>1. Первые 4 фото + обложка и Истории</b><span class="badge warn">→ В работу</span></div><p>48 фото есть — проверьте, чтобы первые 4 кадра показывали детей с проектами, педагога, пробное и фасад на Эдварда Грига, 5; добавьте 1–2 Истории.</p></div>
+          <div class="pb-item"><div class="pb-head"><b>2. Профильные рубрики как у топ-3 района</b><span class="badge warn">→ В работу</span></div><p>К «Дополнительному образованию» добавить «Детский клуб / Центр развития / Школа программирования» — сверить с соседями в Скандинавии.</p></div>
+          <div class="pb-item"><div class="pb-head"><b>3. Прайс в Яндекс Бизнесе (8–12 позиций)</b><span class="badge warn">→ В работу</span></div><p>№1 — «Пробное занятие», №2 — «Зимний интенсив Щелкунчик 4–8 янв», далее WeDo, Python, Arduino, 3D-печать и инженерный ДР (вкладка 2).</p></div>
+          <div class="pb-item"><div class="pb-head"><b>4. Кнопка онлайн-записи / мессенджера</b><span class="badge warn">→ В работу</span></div><p>Подключить кнопку «Записаться на пробное» на WhatsApp/Telegram — ловит до 17% вечерних обращений родителей.</p></div>
+          <div class="pb-item"><div class="pb-head"><b>5. Ровный пульс 4–6 отзывов/мес + ответы за 48 ч</b><span class="badge warn">→ В работу</span></div><p>Ответить на все 12 свежих ноябрьских отзывов сегодня и перевести сбор на ровный ритм через QR-помощник без полугодовых пауз.</p></div>
+          <div class="pb-item"><div class="pb-head"><b>6. Ссылка HTTPS + UTM и зеркало в 2ГИС</b><span class="badge warn">→ В работу</span></div><p>Заменить <code>http://inginirium-butovo.ru/</code> на <code>https://</code> с UTM-меткой и синхронизировать карточку 2ГИС.</p></div>
+          <div class="pb-item done"><div class="pb-head"><b>7. Чистая карточка без рекламы конкурентов</b><span class="badge ok">✓ Чисто</span></div><p>Блока «Ещё может подойти» сейчас нет — поддерживайте активность Новостями раз в 2 недели (анонсы смен и открытых уроков).</p></div>
         </div>
       </div>
     </section>
